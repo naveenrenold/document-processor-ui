@@ -7,6 +7,7 @@ import { useLoginContext } from '../contexts/LoginContextProvider';
 import { loginRequest } from '../helper/authConfig';
 import MSALAuth from './MSALAuth';
 import { AccountInfo, EndSessionPopupRequest, PopupRequest } from '@azure/msal-browser';
+import { Typography } from '@mui/material';
 
 function Header()
 {
@@ -85,7 +86,7 @@ function Header()
     setInterval(() => {updatecurrentDate(new Date())}, 1000)
     return <>
     <Stack direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>}>
-          <img alt= "Image" ></img>
+          <img alt= "Image failed to load" src='/favicon.svg' className=".w-5 .h-5"></img>
           <div>GenuineSoft</div>          
         {isLoggedIn ? 
         (<>

@@ -4,7 +4,6 @@ import Header from "./component/Header";
 import { BrowserRouter, Route, Routes } from "react-router"
 import { use, useEffect, useState } from "react";
 import MSALAuth from "./component/MSALAuth";
-import { msalConfig } from "./helper/authConfig";
 import LoginContextProvider from "./contexts/LoginContextProvider";
 
 function Main() {
@@ -20,7 +19,7 @@ function Main() {
     <LoginContextProvider login={{isLoggedIn, updateIsLoggedIn}}>
       <Header></Header>   
       </LoginContextProvider>                      
-        {<BrowserRouter>
+        {isLoggedIn ?? <BrowserRouter>
         <Routes>
           <Route path="/" element={App()}></Route>
         </Routes>
