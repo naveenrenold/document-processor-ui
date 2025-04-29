@@ -1,14 +1,15 @@
 import * as msal from "@azure/msal-browser";
+
 const msalConfig: msal.Configuration = {
   auth: {
-    clientId: "4111b2ad-a184-4ad5-b8b0-5830a7047e2d",
+    clientId: import.meta.env.VITE_AppId,
     authority:
-      "https://login.microsoftonline.com/24d2489e-7bb3-4339-94a2-207bb2a75abc",
-    redirectUri: "http://localhost:5173/",
+      "https://login.microsoftonline.com/" + import.meta.env.VITE_TenantId,
+    redirectUri: import.meta.env.VITE_BaseURL,
   },
   cache: {
-    cacheLocation: "localStorage",
-    storeAuthStateInCookie: true,
+    cacheLocation: "sessionStorage",
+    storeAuthStateInCookie: false,
   },
   system: {
     loggerOptions: {
@@ -36,7 +37,7 @@ const msalConfig: msal.Configuration = {
 };
 
 const loginRequest = {
-  scopes: ["vso.code.full"],
+  scopes: ["Directory.ReadWrite.All", "GroupMember.ReadWrite.All", "User.ReadWrite.All"],
 };
 
 export { msalConfig, loginRequest };
