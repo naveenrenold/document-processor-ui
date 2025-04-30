@@ -85,15 +85,15 @@ function Header()
 
     setInterval(() => {updatecurrentDate(new Date())}, 1000)
     return <>
-    <Stack direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>}>
-          <img alt= "Image failed to load" src='/favicon.svg' className=".w-5 .h-5"></img>
+    <Stack className='w-full' useFlexGap direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>} justifyContent={'space-between'} alignItems={'center'}>
+          <img alt= "Image failed to load" src='/favicon.svg' className="w-10 h-10"></img>
           <div>GenuineSoft</div>          
         {isLoggedIn ? 
         (<>
           <div>
             {accountInfo?.name}
             </div>
-            <Button variant='contained' onClick={() => {signOut()}}>
+            <Button  color={"primary"} variant='contained' onClick={() => {signOut()}}>
               Sign Out
             </Button>
           </>)
