@@ -1,5 +1,5 @@
 import * as msal from "@azure/msal-browser";
-import { msalConfig } from "../helper/authConfig";
+import { msalConfig } from "./authConfig";
 
 
 export default class MSALAuth{

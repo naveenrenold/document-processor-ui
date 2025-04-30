@@ -3,11 +3,13 @@ import Divider from '@mui/material/Divider';
 import {format} from "date-fns";
 import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
-import { useLoginContext } from '../contexts/LoginContextProvider';
-import { loginRequest } from '../helper/authConfig';
-import MSALAuth from './MSALAuth';
+import { useLoginContext } from '../../context/LoginContextProvider';
+import { loginRequest } from '../../helper/authConfig';
+import MSALAuth from '../../helper/MSALAuth';
 import { AccountInfo, EndSessionPopupRequest, PopupRequest } from '@azure/msal-browser';
-import { Typography } from '@mui/material';
+import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, useMediaQuery} from '@mui/material';
+import style from './Header.module.css'
+import headings from '../../data/headings.json'
 
 function Header()
 {
@@ -45,6 +47,7 @@ function Header()
     let [currentDate, updatecurrentDate] = useState(new Date());
     let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
     let {isLoggedIn, updateIsLoggedIn} = useLoginContext();
+    const isMobile = useMediaQuery('(max-width:639px)');
 
     const signIn = () => {
       let request : PopupRequest = loginRequest
@@ -85,21 +88,50 @@ function Header()
 
     setInterval(() => {updatecurrentDate(new Date())}, 1000)
     return <>
-    <Stack className='w-full' useFlexGap direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>} justifyContent={'space-between'} alignItems={'center'}>
-          <img alt= "Image failed to load" src='/favicon.svg' className="w-10 h-10"></img>
-          <div>GenuineSoft</div>          
+    <Box>
+    <AppBar>            
+    <Stack className='w-full' useFlexGap direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>} justifyContent={'space-between'} alignItems={'center'}>    
+    <IconButton><img alt= "Image failed to load" src='/favicon.svg' className="w-7 h-7 sm:w-10 sm:h-10"></img></IconButton>
+          <Typography variant='h5'>Genuine Soft</Typography>
+          <Stack direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>} justifyContent={'space-between'} alignItems={'center'}>          
         {isLoggedIn ? 
         (<>
-          <div>
+          <div className={style.hm}>
             {accountInfo?.name}
             </div>
-            <Button  color={"primary"} variant='contained' onClick={() => {signOut()}}>
+            {/* <Divider orientation="vertical" flexItem></Divider> */}
+            <Button size='small' color={"secondary"} variant='contained' onClick={() => {signOut()}}>
               Sign Out
             </Button>
           </>)
-         : (<Button variant='contained' onClick={() => {signIn()}}>Sign In</Button>)}        
-        <div>{format(currentDate, "dd/MM/yyyy h:mm aa")}</div>
+         : (<Button size='small' color={"secondary"} variant='contained' onClick={() => {signIn()}}>Sign In</Button>)}        
+        <div className={style.hm}>{format(currentDate, "dd/MM/yy h:mm aa")}</div>
+        </Stack>
           </Stack> 
+          </AppBar>
+          <Drawer variant='permanent' open={true} onClose={() => {}}>
+      <List>
+        <ListItem>
+          <ListItemIcon>
+          <IconButton><img alt= "Image failed to load" src='/favicon.svg' className="w-7 h-7 sm:w-10 sm:h-10"></img></IconButton>
+          </ListItemIcon>          
+        </ListItem>        
+        <Divider orientation='horizontal'  flexItem></Divider>
+        {headings.map((heading, id) => {
+          return(
+            <>          
+          <ListItem key={id}>
+          <ListItemButton>
+            <ListItemText>{heading.name}</ListItemText>
+          </ListItemButton>
+        </ListItem>
+        <Divider orientation='horizontal'  flexItem></Divider>
+            </>
+          )
+        })}                
+      </List>
+    </Drawer>
+    </Box>
     </>
 }
 export default Header;

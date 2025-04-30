@@ -7,3 +7,10 @@
 
 30/4/25
 1. start with mobile first design
+2. finished a decent header
+
+1/4/25
+1. Figure out how to use responsive drawer
+2. Makae admin module
+3. decide on admin module
+
