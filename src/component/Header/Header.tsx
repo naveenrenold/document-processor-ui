@@ -48,6 +48,7 @@ function Header()
     let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
     let {isLoggedIn, updateIsLoggedIn} = useLoginContext();
     const isMobile = useMediaQuery('(max-width:639px)');
+    let [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(!isMobile);
 
     const signIn = () => {
       let request : PopupRequest = loginRequest
@@ -87,11 +88,10 @@ function Header()
 
 
     setInterval(() => {updatecurrentDate(new Date())}, 1000)
-    return <>
-    <Box>
+    return <>    
     <AppBar>            
     <Stack className='w-full' useFlexGap direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>} justifyContent={'space-between'} alignItems={'center'}>    
-    <IconButton><img alt= "Image failed to load" src='/favicon.svg' className="w-7 h-7 sm:w-10 sm:h-10"></img></IconButton>
+    <IconButton onClick={() => {setIsDrawerOpen(!isDrawerOpen)}}><img alt= "Image failed to load" src='/favicon.svg' className="w-7 h-7 sm:w-10 sm:h-10"></img></IconButton>
           <Typography variant='h5'>Genuine Soft</Typography>
           <Stack direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>} justifyContent={'space-between'} alignItems={'center'}>          
         {isLoggedIn ? 
@@ -109,29 +109,46 @@ function Header()
         </Stack>
           </Stack> 
           </AppBar>
-          <Drawer variant='permanent' open={true} onClose={() => {}}>
+          <Drawer variant={isMobile ? 'temporary' : 'persistent'} open={isDrawerOpen} onClose={() => {setIsDrawerOpen(false)}}>
       <List>
         <ListItem>
           <ListItemIcon>
-          <IconButton><img alt= "Image failed to load" src='/favicon.svg' className="w-7 h-7 sm:w-10 sm:h-10"></img></IconButton>
+          <IconButton onClick={() => {setIsDrawerOpen(!isDrawerOpen)}}><img alt= "Image failed to load" src='/favicon.svg' className="w-7 h-7 sm:w-10 sm:h-10"></img></IconButton>
           </ListItemIcon>          
         </ListItem>        
         <Divider orientation='horizontal'  flexItem></Divider>
         {headings.map((heading, id) => {
           return(
-            <>          
+            <div key={id}>          
           <ListItem key={id}>
           <ListItemButton>
             <ListItemText>{heading.name}</ListItemText>
           </ListItemButton>
         </ListItem>
         <Divider orientation='horizontal'  flexItem></Divider>
-            </>
+            </div>
           )
-        })}                
+        })}
+        {
+          isMobile ?
+           (
+            <>
+            { isLoggedIn ?
+            <>
+          <ListItem>          
+            <ListItemText>{(accountInfo?.name && accountInfo?.name.length < 20) ? accountInfo?.name : accountInfo?.name?.substring(0,20) + "..."}</ListItemText>                      
+        </ListItem>
+        <Divider orientation='horizontal'  flexItem></Divider></> : <></>}
+        <ListItem>          
+            <ListItemText>{format(currentDate, "dd/MM/yy h:mm aa")}</ListItemText>                      
+        </ListItem>
+        <Divider orientation='horizontal'  flexItem></Divider>
+            </>
+           ) :
+            <></>
+        }                
       </List>
-    </Drawer>
-    </Box>
+    </Drawer>    
     </>
 }
 export default Header;
