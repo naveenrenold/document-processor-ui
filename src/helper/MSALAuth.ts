@@ -12,6 +12,22 @@ export default class MSALAuth{
     }    
   }
 }
+export const getBearerToken = (scopes : string[] ) : Promise<string | null>  => {
+  const token = MSALAuth.myMSALObj.acquireTokenSilent({scopes}).then((tokenResponse) => {    
+    return tokenResponse?.accessToken ?? null;
+  }).catch(
+    (err) => {
+      console.log("Failed to acquire silent token with error: " + err)
+      const newToken = MSALAuth.myMSALObj.acquireTokenPopup({scopes}).then((tokenResponse) => {
+              return tokenResponse?.accessToken ?? null;
+            }).catch((err) => {
+              console.log("Failed to acquire token with popup with error: " + err)
+              return null;
+            })          
+          return newToken;
+    })
+    return token;  
+}
 
   // selectAccount = (myMSALObj : msal.PublicClientApplication) => {
   //   const currentAccounts = myMSALObj.getAllAccounts();

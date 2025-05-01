@@ -84,9 +84,8 @@ function Header()
             console.log("Error at Sign in ", err)
           }
         )
-      }    
-
-
+      }
+      
     setInterval(() => {updatecurrentDate(new Date())}, 1000)
     return <>    
     <AppBar>            
