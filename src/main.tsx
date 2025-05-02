@@ -6,6 +6,7 @@ import MSALAuth from "./helper/MSALAuth";
 import LoginContextProvider from "./context/LoginContextProvider";
 import { ThemeProvider } from "@emotion/react";
 import { theme } from "./helper/material-ui-config";
+import Admin from "./component/Admin/Admin";
 
 function Main() {
   useEffect(() => {
@@ -17,18 +18,20 @@ function Main() {
   
 
   return (
-    <>
-    <ThemeProvider theme={theme}>
-    <LoginContextProvider login={{isLoggedIn, updateIsLoggedIn}}>
-      <Header></Header>   
-      </LoginContextProvider>                      
-        {isLoggedIn ?? <BrowserRouter>
-        <Routes>
-          {/* <Route path="/" element={}></Route> */}
-        </Routes>
-        </BrowserRouter>        
-        }      
-        </ThemeProvider>
+    <>    
+     <ThemeProvider theme={theme}>     
+     <LoginContextProvider login={{isLoggedIn, updateIsLoggedIn}}>
+     <Header/>  
+     </LoginContextProvider>
+     { isLoggedIn &&
+      <BrowserRouter basename="/">                               
+      <Routes>            
+        <Route path="admin" element={<Admin/>}/>
+      </Routes>        
+      </BrowserRouter>                
+    }
+      </ThemeProvider> 
+        
     </>
   );
 }

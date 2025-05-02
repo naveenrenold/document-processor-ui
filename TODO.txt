@@ -10,7 +10,15 @@
 2. finished a decent header
 
 1/4/25
-1. Figure out how to use responsive drawer
+1. Figure out how to use responsive drawer - done bitch
 2. Makae admin module
 3. decide on admin module
-4. drawer might not be perfect first make it close and out based on button
+4. drawer might not be perfect first make it close and out based on button - done
+5. for admin module use tab list 
+
+2/4/25
+1. Need to add users
+2. Then need to remove users
+3. Clean up users and see if all modules working properly
+4. write function to handle errors in http client
+

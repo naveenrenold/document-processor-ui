@@ -7,7 +7,7 @@ import { useLoginContext } from '../../context/LoginContextProvider';
 import { loginRequest } from '../../helper/authConfig';
 import MSALAuth from '../../helper/MSALAuth';
 import { AccountInfo, EndSessionPopupRequest, PopupRequest } from '@azure/msal-browser';
-import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, useMediaQuery} from '@mui/material';
+import { AppBar, Box, Drawer, IconButton, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, useMediaQuery} from '@mui/material';
 import style from './Header.module.css'
 import headings from '../../data/headings.json'
 
@@ -48,7 +48,8 @@ function Header()
     let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
     let {isLoggedIn, updateIsLoggedIn} = useLoginContext();
     const isMobile = useMediaQuery('(max-width:639px)');
-    let [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(!isMobile);
+    let [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+    const baseURL = import.meta.env.VITE_BaseURL;
 
     const signIn = () => {
       let request : PopupRequest = loginRequest
@@ -88,7 +89,7 @@ function Header()
       
     setInterval(() => {updatecurrentDate(new Date())}, 1000)
     return <>    
-    <AppBar>            
+    <AppBar position='sticky'>            
     <Stack className='w-full' useFlexGap direction={"row"} spacing={1} divider= {<Divider orientation="vertical" flexItem></Divider>} justifyContent={'space-between'} alignItems={'center'}>    
     <IconButton onClick={() => {setIsDrawerOpen(!isDrawerOpen)}}><img alt= "Image failed to load" src='/favicon.svg' className="w-7 h-7 sm:w-10 sm:h-10"></img></IconButton>
           <Typography variant='h5'>Genuine Soft</Typography>
@@ -107,7 +108,7 @@ function Header()
         <div className={style.hm}>{format(currentDate, "dd/MM/yy h:mm aa")}</div>
         </Stack>
           </Stack> 
-          </AppBar>
+          </AppBar>              
           <Drawer variant={isMobile ? 'temporary' : 'persistent'} open={isDrawerOpen} onClose={() => {setIsDrawerOpen(false)}}>
       <List>
         <ListItem>
@@ -121,7 +122,7 @@ function Header()
             <div key={id}>          
           <ListItem key={id}>
           <ListItemButton>
-            <ListItemText>{heading.name}</ListItemText>
+            <ListItemText><Link href={ baseURL + heading.href}>{heading.name}</Link></ListItemText>
           </ListItemButton>
         </ListItem>
         <Divider orientation='horizontal'  flexItem></Divider>
@@ -147,7 +148,7 @@ function Header()
             <></>
         }                
       </List>
-    </Drawer>    
+    </Drawer>           
     </>
 }
 export default Header;
