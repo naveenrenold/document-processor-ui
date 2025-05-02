@@ -1,10 +1,11 @@
-import { Autocomplete, Box, Button, Stack, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, TextField, Typography, useMediaQuery } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, CircularProgress, Stack, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, TextField, Typography, useMediaQuery } from "@mui/material";
 import { useEffect, useState } from "react";
 import TabContext from '@mui/lab/TabContext';
 import TabPanel from '@mui/lab/TabPanel';
 import httpClient from "../../helper/httpClient";
 import data from "../../data/UserTable.json"
 import generator from "generate-password-browser"
+import styles from "./Admin.module.css"
 
 function Admin()
 {    
@@ -22,7 +23,7 @@ function Admin()
                     console.log("Get users call failed")
                     return;
                 }
-                updateUsers(response);
+                updateUsers(response.filter((value) => {return value.officeLocation}));
             });
         },[]        
     )
@@ -30,7 +31,9 @@ function Admin()
     let [displayName, updatedisplayName] = useState<stringTextField>({value : null ,error : false, helperText : null});
     let [emailAlias, updateEmailAlias] = useState<stringTextField>({value : null ,error : false, helperText : null});
     let [phoneNumber, updatePhoneNumber] = useState<stringTextField>({value : null ,error : false, helperText : null});
-    let [location, updateLocation] = useState<stringTextField>({value : null ,error : false, helperText : null});
+    let [location, updateLocation] = useState<stringTextField>({value : null ,error : false, helperText : null}); 
+    let [alertProps, updateAlertProps] = useState<AlertProps>({show: false, message: "", severity : "info"});    
+    let [loading, isLoading] = useState<boolean>(false);
     
     const indiaPhoneRegex  = new RegExp("^(\\+91|\\+91\-|0)?[789]\\d{9}$")
     const domain = "@navigatorxdd.onmicrosoft.com" ; 
@@ -49,11 +52,16 @@ function Admin()
                 forceChangePasswordNextSignIn : true,
                 password : generatePassword()
               },
-              userPrincipalName : emailAlias! + domain
+              userPrincipalName : emailAlias! + domain,
+              userType : "Guest"
         }
         console.log("login request:");
         console.log(addUserrequest);
-        return httpClient.postGraphAsync('users', addUserrequest)
+        httpClient.postGraphAsync<any>('users', addUserrequest).then(
+        (value) => {
+            console.log(value);
+        }
+        )
     }
 
     const validateAddUsers = (displayName : string | null, emailAlias: string | null, phoneNumber : string | null, location : string | null) : boolean =>    {
@@ -110,15 +118,20 @@ function Admin()
     }
 
     return(
-        <>
+        <>        
+        <div className={styles.loader}></div>
         <TabContext value={currentTab}>
         <Tabs value={currentTab} onChange={(_, newTab) => updateCurrentTab(newTab)}>
             <Tab label = "List User" value={1}></Tab>
-            <Tab label = "Add User" value={2}></Tab>
-            <Tab label = "Remove User" value={3}></Tab>            
+            <Tab label = "Add User" value={2}></Tab>                     
         </Tabs>
         <TabPanel value={1}>
             <Box>
+            { alertProps.show &&
+            <Alert variant="filled" severity={alertProps.severity}>
+              {alertProps.message}
+            </Alert>
+            }
             <Stack><Typography variant="h6">List Users:</Typography></Stack>
             <Table>
                 <TableHead>
@@ -138,7 +151,7 @@ function Admin()
                                 (user, id) =>{
                                     return(                                        
                                         <TableRow key={id}>
-                                        <TableCell>{user.givenName}</TableCell>
+                                        <TableCell>{user.displayName}</TableCell>
                                         {/* <TableCell>{user.mail}</TableCell> */}
                                         <TableCell>{user.mobilePhone}</TableCell>
                                         <TableCell>{user.officeLocation}</TableCell>
@@ -153,17 +166,25 @@ function Admin()
             </TabPanel>  
             
         <TabPanel value={2}>
+            <Box>
+        { alertProps.show &&
+            <Alert variant="filled" severity={alertProps.severity}>
+              {alertProps.message}
+            </Alert>
+            }
             <Stack><Typography variant="h6">Add Users:</Typography></Stack>
             <Stack direction={"column"}>
                 <Stack><TextField required={true} error={displayName.error} helperText={displayName.helperText} variant="filled" label="Name:" value={displayName?.value} onChange={(e) => {updatedisplayName({ value : e.target.value, error : false, helperText : null})}}></TextField> </Stack>
-                <Stack><TextField required={true} error={emailAlias.error} helperText={emailAlias.helperText} variant="filled" label="Email Alias:" value={emailAlias?.value} onChange={(e) => {updateEmailAlias({ value : e.target.value, error : false, helperText : null})}}></TextField> </Stack>
+                <Stack direction="row"><TextField className="w-1/2" required={true} error={emailAlias.error} helperText={emailAlias.helperText} variant="filled" label="Email Alias:" value={emailAlias?.value} onChange={(e) => {updateEmailAlias({ value : e.target.value, error : false, helperText : null})}}></TextField>
+                <TextField className="w-1/2" disabled={true} value="@navigatorxdd.onmicrosoft.com"></TextField>
+                 </Stack>
                 <Stack><TextField required={true} error={phoneNumber.error} helperText={phoneNumber.helperText} variant="filled" label="Phone No:" value={phoneNumber?.value} onChange={(e) => {updatePhoneNumber({ value : e.target.value, error : false, helperText : null})}}></TextField> </Stack>
                 <Stack><Autocomplete value={location?.value} onChange={(_, value) => updateLocation({ value : value, error : false, helperText : null})} autoHighlight={true} freeSolo = {false} options={["Nagercoil", "Tutucorin"]} renderInput={(params) => <TextField required={true} error={location.error} helperText={location.helperText} {...params} variant="filled" label="Location"></TextField>}></Autocomplete> </Stack>
                 <Stack><Button onClick={() => addUser(displayName.value, emailAlias.value, phoneNumber.value, location.value)} variant="contained">Add User</Button></Stack>
             </Stack>
-            </TabPanel>  
-        <TabPanel value={3}>Remove Users:</TabPanel>  
-        </TabContext>                            
+            </Box>
+            </TabPanel>            
+        </TabContext>                                    
         </>
     )
 }
@@ -194,6 +215,7 @@ export interface UserDetails{
         mail? : string,
         mobilePhone? : string,
         officeLocation? : string,
+        userType : "Member" | "Guest"
     }
 
     export interface stringTextField
@@ -201,5 +223,11 @@ export interface UserDetails{
         value : string | null,
         error : boolean,
         helperText : string | null
+    }
+    export interface AlertProps
+    {
+        show : boolean,
+        severity : "error" | "info" | "success" | "warning",
+        message : string
     }    
     export const emailRegex  = new RegExp("^\S+@\S+\.\S+$")
