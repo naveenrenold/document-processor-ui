@@ -22,5 +22,8 @@
 3. Clean up users and see if all modules working properly
 4. write function to handle errors in http client
 5. need to add update user? -later
-6. recheck list user. only list ogalvi mama users
+6. recheck list user. only list ogalvi mama users - done
 
+3/4/25
+1. Add spinner and alert component
+2.

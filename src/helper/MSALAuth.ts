@@ -13,7 +13,8 @@ export default class MSALAuth{
   }
 }
 export const getBearerToken = (scopes : string[] ) : Promise<string | null>  => {
-  const token = MSALAuth.myMSALObj.acquireTokenSilent({scopes}).then((tokenResponse) => {    
+  const token = MSALAuth.myMSALObj.acquireTokenSilent({scopes}).then((tokenResponse) => { 
+    console.log("Bearer token:",tokenResponse.accessToken);   
     return tokenResponse?.accessToken ?? null;
   }).catch(
     (err) => {
