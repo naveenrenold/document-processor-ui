@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Dialog,
   DialogActions,
+  DialogContent,
   DialogContentText,
   DialogTitle,
   IconButton,
@@ -112,28 +113,47 @@ function Admin() {
       userPrincipalName: emailAlias! + domain,
       userType: "Guest",
     };
-    httpClient.postAsync<any>(
-      "users",
-      addUserrequest,
-      undefined,
-      updateAlertProps,
-      "User added successfully!",
-      setIsLoading,
-    );
+    httpClient
+      .postAsync<any>(
+        "users",
+        addUserrequest,
+        undefined,
+        updateAlertProps,
+        "User added successfully!",
+        setIsLoading,
+      )
+      .then((result) => {
+        if (result) {
+          let user: UserDetails = {
+            displayName: addUserrequest.displayName,
+            mobilePhone: Number(addUserrequest.mobilePhone),
+            officeLocation: addUserrequest.officeLocation,
+            userPrincipalName: addUserrequest.mailNickname + domain,
+          };
+          updateUsers((prevUsers) => {
+            return [...prevUsers, user];
+          });
+        }
+      });
   };
   const deleteUser = (user: UserDetails) => {
-    httpClient.deleteAsync<any>(
-      `users/${user.userPrincipalName}`,
-      undefined,
-      updateAlertProps,
-      "User deleted",
-      setIsLoading,
-    ).then((result)=>{
-        if(result)
-        {
-        updateUsers((prevUsers) => {return prevUsers.filter((user) =>{user.userPrincipalName != selectedUser?.userPrincipalName})});
+    httpClient
+      .deleteAsync<any>(
+        `users/${user.userPrincipalName}`,
+        undefined,
+        updateAlertProps,
+        "User deleted",
+        setIsLoading,
+      )
+      .then((result) => {
+        if (result) {
+          updateUsers((prevUsers) => {
+            return prevUsers.filter((user) => {
+              return user.userPrincipalName != selectedUser?.userPrincipalName;
+            });
+          });
         }
-    })
+      });
   };
 
   const validateAddUsers = (
@@ -227,22 +247,29 @@ function Admin() {
           setDialogOpen(false);
         }}
       >
-        <DialogTitle>
-          <Typography>Confirmation:</Typography>
-        </DialogTitle>
-        <DialogContentText>
-          Are you sure you want to delete user?
-        </DialogContentText>
+        <DialogTitle>Delete User:</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete user?
+          </DialogContentText>
+        </DialogContent>
         <DialogActions>
-          <Button onClick={() => {deleteUser(selectedUser!);setDialogOpen(false)}}>
-            <Typography>Yes</Typography>
+          <Button
+            variant="contained"
+            onClick={() => {
+              deleteUser(selectedUser!);
+              setDialogOpen(false);
+            }}
+          >
+            Yes
           </Button>
           <Button
+            variant="outlined"
             onClick={() => {
               setDialogOpen(false);
             }}
           >
-            <Typography>Cancel</Typography>
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>
