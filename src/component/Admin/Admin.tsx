@@ -31,7 +31,7 @@ function Admin() {
   const isMobile = useMediaQuery("(max-width:639px)");
   useEffect(() => {
     const getUsers = () => {
-      return httpClient.getGraphAsync<UserDetails[]>(
+      return httpClient.getAsync<UserDetails[]>(
         "users",
         undefined,
         updateAlertProps,
@@ -39,7 +39,7 @@ function Admin() {
       );
     };
     getUsers().then((response) => {
-      if (!response) {
+      if (!response || response.length === 0) {
         console.log("Get users call failed");
         return;
       }
@@ -52,22 +52,22 @@ function Admin() {
   }, []);
 
   let [displayName, updatedisplayName] = useState<stringTextField>({
-    value: null,
+    value: "",
     error: false,
     helperText: null,
   });
   let [emailAlias, updateEmailAlias] = useState<stringTextField>({
-    value: null,
+    value: "",
     error: false,
     helperText: null,
   });
   let [phoneNumber, updatePhoneNumber] = useState<stringTextField>({
-    value: null,
+    value: "",
     error: false,
     helperText: null,
   });
   let [location, updateLocation] = useState<stringTextField>({
-    value: null,
+    value: "",
     error: false,
     helperText: null,
   });
@@ -105,7 +105,7 @@ function Admin() {
     console.log("login request:");
     console.log(addUserrequest);
     httpClient
-      .postGraphAsync<any>(
+      .postAsync<any>(
         "users",
         addUserrequest,
         undefined,
@@ -204,7 +204,7 @@ function Admin() {
         </Tabs>
         <TabPanel value={1}>
           <Box>
-            {isLoading ?? <LinearProgress></LinearProgress>}
+            {isLoading && <LinearProgress></LinearProgress>}
             {alertProps.show && (
               <Alert variant="filled" severity={alertProps.severity}>
                 {alertProps.message}
@@ -243,7 +243,7 @@ function Admin() {
 
         <TabPanel value={2}>
           <Box>
-            {isLoading ?? <LinearProgress></LinearProgress>}
+            {isLoading && <LinearProgress></LinearProgress>}
             {alertProps.show && (
               <Alert variant="filled" severity={alertProps.severity}>
                 {alertProps.message}

@@ -7,7 +7,7 @@ class httpClient {
   static baseUrl = import.meta.env.VITE_BaseURL;
   static graphApiUrl = "https://graph.microsoft.com/v1.0/";
 
-  public static async getAsync<T extends axiosTypes<T>>(
+  public static async getAsync<T>(
     url: string,
     scopes: string[] = loginRequest.scopes,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
@@ -18,7 +18,7 @@ class httpClient {
     if (!header) {
       return;
     }
-    let response = axios.get(
+    let response = axios.get<T>(
       `${isGraph ? httpClient.baseUrl : this.graphApiUrl}${url}`,
       header,
     );
@@ -32,7 +32,7 @@ class httpClient {
     return result;
   }
 
-  public static async postAsync<T extends axiosTypes<T>>(
+  public static async postAsync<T>(
     url: string,
     request: any,
     scopes: string[] = loginRequest.scopes,
@@ -44,7 +44,7 @@ class httpClient {
     if (!header) {
       return;
     }
-    let response = axios.post(
+    let response = axios.post<T>(
       `${isGraph ? httpClient.baseUrl : this.graphApiUrl}${url}`,
       request,
       header,
@@ -59,7 +59,7 @@ class httpClient {
     return result;
   }
 
-  public static async handleHttpResponse<T extends axiosTypes<T>>(
+  public static async handleHttpResponse<T>(
     result: Promise<AxiosResponse<any, any>>,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
   ): Promise<T | undefined> {
@@ -85,18 +85,15 @@ class httpClient {
     return { headers: { Authorization: `Bearer ${bearerToken}` } };
   }
 
-  static async setAlerts<T extends axiosTypes<T>>(
-    response?: T,
+  static async setAlerts<T>(
+    result?: T,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
   ) {
-    let graphMessage;
-    if (response?.error?.message && response?.error?.message.length > 0) {
-      graphMessage = response?.error?.message[0];
-    }
+    let response: any = result;
     if (setAlert) {
       let alert: AlertProps = {
         message:
-          graphMessage ||
+          response?.error?.message ||
           response?.message ||
           (response ? response.toString() : "Error occured"),
         severity: "error",
