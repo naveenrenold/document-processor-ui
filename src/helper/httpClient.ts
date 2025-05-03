@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getBearerToken } from "./MSALAuth";
 import { loginRequest } from "./authConfig";
-import { AlertProps } from "../component/Admin/Admin";
+import { AlertProps, severity } from "../component/Admin/Admin";
 
 class httpClient {
   static baseUrl = import.meta.env.VITE_BaseURL;
@@ -11,6 +11,7 @@ class httpClient {
     url: string,
     scopes: string[] = loginRequest.scopes,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
     isGraph = false,
   ) {
@@ -25,7 +26,11 @@ class httpClient {
     if (setIsLoading) {
       setIsLoading(true);
     }
-    let result = await httpClient.handleHttpResponse<T>(response, setAlert);
+    let result = await httpClient.handleHttpResponse<T>(
+      response,
+      setAlert,
+      successAlertMessage,
+    );
     if (setIsLoading) {
       setIsLoading(false);
     }
@@ -36,8 +41,9 @@ class httpClient {
     url: string,
     request: any,
     scopes: string[] = loginRequest.scopes,
-    setAlert: React.Dispatch<React.SetStateAction<AlertProps>>,
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    successAlertMessage?: string,
+    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
     isGraph = false,
   ) {
     let header = await this.getAuthHeader(scopes);
@@ -52,7 +58,41 @@ class httpClient {
     if (setIsLoading) {
       setIsLoading(true);
     }
-    let result = await httpClient.handleHttpResponse<T>(response, setAlert);
+    let result = await httpClient.handleHttpResponse<T>(
+      response,
+      setAlert,
+      successAlertMessage,
+    );
+    if (setIsLoading) {
+      setIsLoading(false);
+    }
+    return result;
+  }
+
+  public static async deleteAsync<T>(
+    url: string,
+    scopes: string[] = loginRequest.scopes,
+    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    successAlertMessage?: string,
+    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+    isGraph = false,
+  ) {
+    let header = await this.getAuthHeader(scopes);
+    if (!header) {
+      return;
+    }
+    let response = axios.delete<T>(
+      `${isGraph ? httpClient.baseUrl : this.graphApiUrl}${url}`,
+      header,
+    );
+    if (setIsLoading) {
+      setIsLoading(true);
+    }
+    let result = await httpClient.handleHttpResponse<T>(
+      response,
+      setAlert,
+      successAlertMessage,
+    );
     if (setIsLoading) {
       setIsLoading(false);
     }
@@ -62,10 +102,14 @@ class httpClient {
   public static async handleHttpResponse<T>(
     result: Promise<AxiosResponse<any, any>>,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    successAlertMessage?: string,
   ): Promise<T | undefined> {
     let response: T | undefined = await result
       .then((response) => {
-        return response.data.value || (response.data as T);
+        if (successAlertMessage) {
+          this.setAlerts(successAlertMessage, setAlert, "success");
+        }
+        return response.data.value || (response.data as T) || true;
       })
       .catch((err: AxiosError<T>) => {
         let response = err.response?.data;
@@ -82,12 +126,18 @@ class httpClient {
     if (!bearerToken) {
       return null;
     }
-    return { headers: { Authorization: `Bearer ${bearerToken}` } };
+    return {
+      headers: {
+        Authorization: `Bearer ${bearerToken}`,
+        ConsistencyLevel: "eventual",
+      },
+    };
   }
 
   static async setAlerts<T>(
     result?: T,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    severity: severity = "error",
   ) {
     let response: any = result;
     if (setAlert) {
@@ -96,7 +146,7 @@ class httpClient {
           response?.error?.message ||
           response?.message ||
           (response ? response.toString() : "Error occured"),
-        severity: "error",
+        severity: severity,
         show: true,
       };
       setAlert(alert);

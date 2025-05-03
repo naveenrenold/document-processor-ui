@@ -4,6 +4,11 @@ import {
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
   LinearProgress,
   Stack,
   Tab,
@@ -24,6 +29,7 @@ import httpClient from "../../helper/httpClient";
 import data from "../../data/UserTable.json";
 import generator from "generate-password-browser";
 import styles from "./Admin.module.css";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 function Admin() {
   let [currentTab, updateCurrentTab] = useState<number>(1);
@@ -32,9 +38,10 @@ function Admin() {
   useEffect(() => {
     const getUsers = () => {
       return httpClient.getAsync<UserDetails[]>(
-        "users",
+        "users?$filter=userType eq 'Guest'",
         undefined,
         updateAlertProps,
+        undefined,
         setIsLoading,
       );
     };
@@ -77,8 +84,11 @@ function Admin() {
     severity: "info",
   });
   let [isLoading, setIsLoading] = useState<boolean>(false);
+  let [isDialogOpen, setDialogOpen] = useState<boolean>(false);
+  let [selectedUser, updateSelectedUser] = useState<UserDetails>();
 
   const indiaPhoneRegex = new RegExp("^(\\+91|\\+91\-|0)?[789]\\d{9}$");
+  const emailRegex = new RegExp("^[a-zA-Z0-9._%+-]+$");
   const domain = "@navigatorxdd.onmicrosoft.com";
   const addUser = (
     displayName: string | null,
@@ -102,19 +112,28 @@ function Admin() {
       userPrincipalName: emailAlias! + domain,
       userType: "Guest",
     };
-    console.log("login request:");
-    console.log(addUserrequest);
-    httpClient
-      .postAsync<any>(
-        "users",
-        addUserrequest,
-        undefined,
-        updateAlertProps,
-        setIsLoading,
-      )
-      .then((value) => {
-        console.log(value);
-      });
+    httpClient.postAsync<any>(
+      "users",
+      addUserrequest,
+      undefined,
+      updateAlertProps,
+      "User added successfully!",
+      setIsLoading,
+    );
+  };
+  const deleteUser = (user: UserDetails) => {
+    httpClient.deleteAsync<any>(
+      `users/${user.userPrincipalName}`,
+      undefined,
+      updateAlertProps,
+      "User deleted",
+      setIsLoading,
+    ).then((result)=>{
+        if(result)
+        {
+        updateUsers((prevUsers) => {return prevUsers.filter((user) =>{user.userPrincipalName != selectedUser?.userPrincipalName})});
+        }
+    })
   };
 
   const validateAddUsers = (
@@ -164,10 +183,18 @@ function Admin() {
       return false;
     }
     if (emailAlias.length < 1 || emailAlias.length > 50) {
-      updatedisplayName((lastValue) => ({
+      updateEmailAlias((lastValue) => ({
         ...lastValue,
         error: true,
         helperText: "User length should be > 1 and < 50",
+      }));
+      return false;
+    }
+    if (emailAlias.search(emailRegex)) {
+      updateEmailAlias((lastValue) => ({
+        ...lastValue,
+        error: true,
+        helperText: "Email alias is not valid",
       }));
       return false;
     }
@@ -194,6 +221,31 @@ function Admin() {
 
   return (
     <>
+      <Dialog
+        open={isDialogOpen}
+        onClose={() => {
+          setDialogOpen(false);
+        }}
+      >
+        <DialogTitle>
+          <Typography>Confirmation:</Typography>
+        </DialogTitle>
+        <DialogContentText>
+          Are you sure you want to delete user?
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => {deleteUser(selectedUser!);setDialogOpen(false)}}>
+            <Typography>Yes</Typography>
+          </Button>
+          <Button
+            onClick={() => {
+              setDialogOpen(false);
+            }}
+          >
+            <Typography>Cancel</Typography>
+          </Button>
+        </DialogActions>
+      </Dialog>
       <TabContext value={currentTab}>
         <Tabs
           value={currentTab}
@@ -230,6 +282,16 @@ function Admin() {
                         {/* <TableCell>{user.mail}</TableCell> */}
                         <TableCell>{user.mobilePhone}</TableCell>
                         <TableCell>{user.officeLocation}</TableCell>
+                        <TableCell>
+                          <IconButton
+                            onClick={() => {
+                              updateSelectedUser(user);
+                              setDialogOpen(true);
+                            }}
+                          >
+                            <DeleteIcon></DeleteIcon>
+                          </IconButton>
+                        </TableCell>
                       </TableRow>
                     );
                   })
@@ -394,7 +456,9 @@ export interface stringTextField {
 }
 export interface AlertProps {
   show: boolean;
-  severity: "error" | "info" | "success" | "warning";
+  severity: severity;
   message: string;
 }
+export type severity = "error" | "info" | "success" | "warning";
+
 export const emailRegex = new RegExp("^\S+@\S+\.\S+$");
