@@ -29,17 +29,17 @@ import TabContext from "@mui/lab/TabContext";
 import TabPanel from "@mui/lab/TabPanel";
 import httpClient from "../../helper/httpClient";
 import data from "../../data/UserTable.json";
-import generator from "generate-password-browser";̥
+import generator from "generate-password-browser";
 import styles from "./Admin.module.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 function Admin() {
-  //constants  
+  //constants
   const indiaPhoneRegex = new RegExp("^(\\+91|\\+91\-|0)?[789]\\d{9}$");
   const emailRegex = new RegExp("^[a-zA-Z0-9._%+-]+$");
   const domain = "@navigatorxdd.onmicrosoft.com";
-  const isMobile = useMediaQuery("(max-width:639px)");  
-//state variable  
+  const isMobile = useMediaQuery("(max-width:639px)");
+  //state variable
   let [currentTab, updateCurrentTab] = useState<number>(1);
   let [users, updateUsers] = useState<UserDetails[]>([]);
   let [displayName, updatedisplayName] = useState<stringTextField>({
@@ -68,22 +68,22 @@ function Admin() {
     severity: "info",
   });
   let [isLoading, setIsLoading] = useState<boolean>(false);
-  let [selectedUser, updateSelectedUser] = useState<UserDetails>();        
+  let [selectedUser, updateSelectedUser] = useState<UserDetails>();
   let [currentDialog, updateCurrentDialog] = useState({
     showAddUserDialog: false,
     showDeleteUserDialog: false,
   });
   let [addUserDialogProps, updateAddUserDialogProps] = useState({
-    username : "",
-    password : ""
-  })
+    username: "",
+    password: "",
+  });
   let [SnackBarProps, updateSnackBarProps] = useState<SnackBarProps>({
-    isOpen : false,
-    message : ""    
-  })
-  // let [deleteUserDialogProps, updateDeleteUserDialogProps] = useState("")  
+    isOpen: false,
+    message: "",
+  });
+  // let [deleteUserDialogProps, updateDeleteUserDialogProps] = useState("")
 
-//useEffect
+  //useEffect
   useEffect(() => {
     const getUsers = () => {
       return httpClient.getAsync<UserDetails[]>(
@@ -106,8 +106,8 @@ function Admin() {
       );
     });
   }, []);
-  
-//render functions
+
+  //render functions
   const deleteUserDialog = () => {
     return (
       <>
@@ -123,9 +123,9 @@ function Admin() {
             onClick={() => {
               deleteUser(selectedUser!);
               updateCurrentDialog({
-                showAddUserDialog : false,
-                showDeleteUserDialog : false
-              });              
+                showAddUserDialog: false,
+                showDeleteUserDialog: false,
+              });
             }}
           >
             Yes
@@ -134,8 +134,8 @@ function Admin() {
             variant="outlined"
             onClick={() => {
               updateCurrentDialog({
-                showAddUserDialog : false,
-                showDeleteUserDialog : false
+                showAddUserDialog: false,
+                showDeleteUserDialog: false,
               });
             }}
           >
@@ -147,13 +147,19 @@ function Admin() {
   };
 
   const addUserDialog = () => {
-    return (      
+    return (
       <>
         <DialogTitle>Added User:</DialogTitle>
         <DialogContent>
-          <DialogContentText>{`User has been created with`}</DialogContentText>
-          <DialogContentText>{`UserName : ${addUserDialogProps.username}`}</DialogContentText>
-          <DialogContentText>{`Password : ${addUserDialogProps.password}`}</DialogContentText>
+          <DialogContentText>
+            <Typography>{`User has been created with:`}</Typography>
+          </DialogContentText>
+          <DialogContentText>
+            <Typography>{`UserName : ${addUserDialogProps.username}`}</Typography>
+          </DialogContentText>
+          <DialogContentText>
+            <Typography>{`Password : ${addUserDialogProps.password}`}</Typography>
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
@@ -161,18 +167,33 @@ function Admin() {
             onClick={() => {
               copyToClipboard(
                 `Your login details for GenuineSoft are as follows : \nUserName : ${addUserDialogProps.username}\nPassword : ${addUserDialogProps.password}`,
-                SnackBarProps,
-                updateSnackBarProps
+                updateSnackBarProps,
               );
             }}
           >
             Copy to Clipboard
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              updateCurrentDialog({
+                showAddUserDialog: false,
+                showDeleteUserDialog: false,
+              });
+            }}
+          >
+            Cancel
           </Button>
         </DialogActions>
       </>
     );
   };
 
+  const isDialogOpen = () => {
+    return (
+      currentDialog.showAddUserDialog || currentDialog.showDeleteUserDialog
+    );
+  };
 
   const setDialog = () => {
     if (!isDialogOpen) {
@@ -185,7 +206,7 @@ function Admin() {
       return deleteUserDialog();
     }
   };
-  
+
   const addUser = (
     displayName: string | null,
     emailAlias: string | null,
@@ -229,15 +250,13 @@ function Admin() {
             return [...prevUsers, user];
           });
           updateAddUserDialogProps({
-            username : addUserrequest.mailNickname + domain,
-            password : addUserrequest.passwordProfile.password
-          })
-          updateCurrentDialog(
-            {
-              showAddUserDialog : true,
-              showDeleteUserDialog : false
-            }            
-          )
+            username: addUserrequest.mailNickname + domain,
+            password: addUserrequest.passwordProfile.password,
+          });
+          updateCurrentDialog({
+            showAddUserDialog: true,
+            showDeleteUserDialog: false,
+          });
         }
       });
   };
@@ -261,9 +280,7 @@ function Admin() {
       });
   };
 
-  const isDialogOpen = currentDialog.showAddUserDialog && currentDialog.showDeleteUserDialog;
-
-//helper functions
+  //helper functions
   const validateAddUsers = (
     displayName: string | null,
     emailAlias: string | null,
@@ -337,19 +354,6 @@ function Admin() {
     return true;
   };
 
-  export const copyToClipboard = (message: string, SnackBarProps : SnackBarProps, updateSnackBar : React.Dispatch<React.SetStateAction<SnackBarProps>>) => {
-    navigator.clipboard.writeText(message).then(
-      () => {
-        updateSnackBarProps(SnackBarProps);
-      }
-    ).catch(
-      () =>{
-        SnackBarProps.message = "Failed to copy text"
-        updateSnackBarProps(SnackBarProps);
-      }
-    )    
-  };
-
   const generatePassword = (): string => {
     return generator.generate({
       length: 8,
@@ -361,15 +365,22 @@ function Admin() {
     });
   };
 
-̥return (
+  return (
     <>
-    <Snackbar open={SnackBarProps.isOpen} autoHideDuration={5000} onClose={() => {updateSnackBarProps({isOpen : false, message : ""})}} message = {SnackBarProps.message}></Snackbar>
+      <Snackbar
+        open={SnackBarProps.isOpen}
+        autoHideDuration={5000}
+        onClose={() => {
+          updateSnackBarProps({ isOpen: false, message: "" });
+        }}
+        message={SnackBarProps.message}
+      ></Snackbar>
       <Dialog
-        open={isDialogOpen}
+        open={isDialogOpen()}
         onClose={() => {
           updateCurrentDialog({
-            showAddUserDialog : false,
-            showDeleteUserDialog : false
+            showAddUserDialog: false,
+            showDeleteUserDialog: false,
           });
         }}
       >
@@ -416,8 +427,8 @@ function Admin() {
                             onClick={() => {
                               updateSelectedUser(user);
                               updateCurrentDialog({
-                                showAddUserDialog : false,
-                                showDeleteUserDialog : true
+                                showAddUserDialog: false,
+                                showDeleteUserDialog: true,
                               });
                             }}
                           >
@@ -540,7 +551,7 @@ function Admin() {
                     )
                   }
                   variant="contained"
-                >̥
+                >
                   Add User
                 </Button>
               </Stack>
@@ -553,7 +564,7 @@ function Admin() {
 }
 export default Admin;
 
-̥export interface UserDetails {
+export interface UserDetails {
   businessPhones?: number[];
   displayName?: string;
   givenName?: string;
@@ -593,7 +604,26 @@ export interface AlertProps {
 }
 export type severity = "error" | "info" | "success" | "warning";
 
-export interface SnackBarProps {  
-    isOpen : boolean,
-    message : string      
+export interface SnackBarProps {
+  isOpen: boolean;
+  message: string;
 }
+export const copyToClipboard = (
+  message: string,
+  updateSnackBarProps: React.Dispatch<React.SetStateAction<SnackBarProps>>,
+) => {
+  navigator.clipboard
+    .writeText(message)
+    .then(() => {
+      updateSnackBarProps({
+        isOpen: true,
+        message: "Copied to clipboard",
+      });
+    })
+    .catch(() => {
+      updateSnackBarProps({
+        isOpen: true,
+        message: "Failed to copy to clipboard",
+      });
+    });
+};
