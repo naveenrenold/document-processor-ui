@@ -24,7 +24,10 @@
 5. need to add update user? -later
 6. recheck list user. only list ogalvi mama users - done
 
-3/4/25
+3/5/25
 1. Add spinner and alert component - done
-2. Check password error
-3. Add password and login
+2. Check password error - done
+3. Add password and login to dialog and copy to clipboard and copied notification
+
+4/5/25
+1.

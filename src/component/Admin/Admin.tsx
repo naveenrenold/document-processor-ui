@@ -11,6 +11,7 @@ import {
   DialogTitle,
   IconButton,
   LinearProgress,
+  Snackbar,
   Stack,
   Tab,
   Table,
@@ -28,37 +29,19 @@ import TabContext from "@mui/lab/TabContext";
 import TabPanel from "@mui/lab/TabPanel";
 import httpClient from "../../helper/httpClient";
 import data from "../../data/UserTable.json";
-import generator from "generate-password-browser";
+import generator from "generate-password-browser";̥
 import styles from "./Admin.module.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 function Admin() {
+  //constants  
+  const indiaPhoneRegex = new RegExp("^(\\+91|\\+91\-|0)?[789]\\d{9}$");
+  const emailRegex = new RegExp("^[a-zA-Z0-9._%+-]+$");
+  const domain = "@navigatorxdd.onmicrosoft.com";
+  const isMobile = useMediaQuery("(max-width:639px)");  
+//state variable  
   let [currentTab, updateCurrentTab] = useState<number>(1);
   let [users, updateUsers] = useState<UserDetails[]>([]);
-  const isMobile = useMediaQuery("(max-width:639px)");
-  useEffect(() => {
-    const getUsers = () => {
-      return httpClient.getAsync<UserDetails[]>(
-        "users?$filter=userType eq 'Guest'",
-        undefined,
-        updateAlertProps,
-        undefined,
-        setIsLoading,
-      );
-    };
-    getUsers().then((response) => {
-      if (!response || response.length === 0) {
-        console.log("Get users call failed");
-        return;
-      }
-      updateUsers(
-        response.filter((value) => {
-          return value.officeLocation;
-        }),
-      );
-    });
-  }, []);
-
   let [displayName, updatedisplayName] = useState<stringTextField>({
     value: "",
     error: false,
@@ -85,12 +68,124 @@ function Admin() {
     severity: "info",
   });
   let [isLoading, setIsLoading] = useState<boolean>(false);
-  let [isDialogOpen, setDialogOpen] = useState<boolean>(false);
-  let [selectedUser, updateSelectedUser] = useState<UserDetails>();
+  let [selectedUser, updateSelectedUser] = useState<UserDetails>();        
+  let [currentDialog, updateCurrentDialog] = useState({
+    showAddUserDialog: false,
+    showDeleteUserDialog: false,
+  });
+  let [addUserDialogProps, updateAddUserDialogProps] = useState({
+    username : "",
+    password : ""
+  })
+  let [SnackBarProps, updateSnackBarProps] = useState<SnackBarProps>({
+    isOpen : false,
+    message : ""    
+  })
+  // let [deleteUserDialogProps, updateDeleteUserDialogProps] = useState("")  
 
-  const indiaPhoneRegex = new RegExp("^(\\+91|\\+91\-|0)?[789]\\d{9}$");
-  const emailRegex = new RegExp("^[a-zA-Z0-9._%+-]+$");
-  const domain = "@navigatorxdd.onmicrosoft.com";
+//useEffect
+  useEffect(() => {
+    const getUsers = () => {
+      return httpClient.getAsync<UserDetails[]>(
+        "users?$filter=userType eq 'Guest'",
+        undefined,
+        updateAlertProps,
+        undefined,
+        setIsLoading,
+      );
+    };
+    getUsers().then((response) => {
+      if (!response || response.length === 0) {
+        console.log("Get users call failed");
+        return;
+      }
+      updateUsers(
+        response.filter((value) => {
+          return value.officeLocation;
+        }),
+      );
+    });
+  }, []);
+  
+//render functions
+  const deleteUserDialog = () => {
+    return (
+      <>
+        <DialogTitle>Delete User:</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete user?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => {
+              deleteUser(selectedUser!);
+              updateCurrentDialog({
+                showAddUserDialog : false,
+                showDeleteUserDialog : false
+              });              
+            }}
+          >
+            Yes
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              updateCurrentDialog({
+                showAddUserDialog : false,
+                showDeleteUserDialog : false
+              });
+            }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </>
+    );
+  };
+
+  const addUserDialog = () => {
+    return (      
+      <>
+        <DialogTitle>Added User:</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{`User has been created with`}</DialogContentText>
+          <DialogContentText>{`UserName : ${addUserDialogProps.username}`}</DialogContentText>
+          <DialogContentText>{`Password : ${addUserDialogProps.password}`}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => {
+              copyToClipboard(
+                `Your login details for GenuineSoft are as follows : \nUserName : ${addUserDialogProps.username}\nPassword : ${addUserDialogProps.password}`,
+                SnackBarProps,
+                updateSnackBarProps
+              );
+            }}
+          >
+            Copy to Clipboard
+          </Button>
+        </DialogActions>
+      </>
+    );
+  };
+
+
+  const setDialog = () => {
+    if (!isDialogOpen) {
+      return <></>;
+    }
+    if (currentDialog.showAddUserDialog) {
+      return addUserDialog();
+    }
+    if (currentDialog.showDeleteUserDialog) {
+      return deleteUserDialog();
+    }
+  };
+  
   const addUser = (
     displayName: string | null,
     emailAlias: string | null,
@@ -119,7 +214,7 @@ function Admin() {
         addUserrequest,
         undefined,
         updateAlertProps,
-        "User added successfully!",
+        undefined,
         setIsLoading,
       )
       .then((result) => {
@@ -133,6 +228,16 @@ function Admin() {
           updateUsers((prevUsers) => {
             return [...prevUsers, user];
           });
+          updateAddUserDialogProps({
+            username : addUserrequest.mailNickname + domain,
+            password : addUserrequest.passwordProfile.password
+          })
+          updateCurrentDialog(
+            {
+              showAddUserDialog : true,
+              showDeleteUserDialog : false
+            }            
+          )
         }
       });
   };
@@ -156,6 +261,9 @@ function Admin() {
       });
   };
 
+  const isDialogOpen = currentDialog.showAddUserDialog && currentDialog.showDeleteUserDialog;
+
+//helper functions
   const validateAddUsers = (
     displayName: string | null,
     emailAlias: string | null,
@@ -229,6 +337,19 @@ function Admin() {
     return true;
   };
 
+  export const copyToClipboard = (message: string, SnackBarProps : SnackBarProps, updateSnackBar : React.Dispatch<React.SetStateAction<SnackBarProps>>) => {
+    navigator.clipboard.writeText(message).then(
+      () => {
+        updateSnackBarProps(SnackBarProps);
+      }
+    ).catch(
+      () =>{
+        SnackBarProps.message = "Failed to copy text"
+        updateSnackBarProps(SnackBarProps);
+      }
+    )    
+  };
+
   const generatePassword = (): string => {
     return generator.generate({
       length: 8,
@@ -236,42 +357,23 @@ function Admin() {
       numbers: true,
       uppercase: true,
       lowercase: true,
+      strict: true,
     });
   };
 
-  return (
+̥return (
     <>
+    <Snackbar open={SnackBarProps.isOpen} autoHideDuration={5000} onClose={() => {updateSnackBarProps({isOpen : false, message : ""})}} message = {SnackBarProps.message}></Snackbar>
       <Dialog
         open={isDialogOpen}
         onClose={() => {
-          setDialogOpen(false);
+          updateCurrentDialog({
+            showAddUserDialog : false,
+            showDeleteUserDialog : false
+          });
         }}
       >
-        <DialogTitle>Delete User:</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete user?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            variant="contained"
-            onClick={() => {
-              deleteUser(selectedUser!);
-              setDialogOpen(false);
-            }}
-          >
-            Yes
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setDialogOpen(false);
-            }}
-          >
-            Cancel
-          </Button>
-        </DialogActions>
+        {setDialog()}
       </Dialog>
       <TabContext value={currentTab}>
         <Tabs
@@ -313,7 +415,10 @@ function Admin() {
                           <IconButton
                             onClick={() => {
                               updateSelectedUser(user);
-                              setDialogOpen(true);
+                              updateCurrentDialog({
+                                showAddUserDialog : false,
+                                showDeleteUserDialog : true
+                              });
                             }}
                           >
                             <DeleteIcon></DeleteIcon>
@@ -435,7 +540,7 @@ function Admin() {
                     )
                   }
                   variant="contained"
-                >
+                >̥
                   Add User
                 </Button>
               </Stack>
@@ -448,7 +553,7 @@ function Admin() {
 }
 export default Admin;
 
-export interface UserDetails {
+̥export interface UserDetails {
   businessPhones?: number[];
   displayName?: string;
   givenName?: string;
@@ -488,4 +593,7 @@ export interface AlertProps {
 }
 export type severity = "error" | "info" | "success" | "warning";
 
-export const emailRegex = new RegExp("^\S+@\S+\.\S+$");
+export interface SnackBarProps {  
+    isOpen : boolean,
+    message : string      
+}
