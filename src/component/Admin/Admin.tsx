@@ -32,6 +32,8 @@ import data from "../../data/UserTable.json";
 import generator from "generate-password-browser";
 import styles from "./Admin.module.css";
 import DeleteIcon from "@mui/icons-material/Delete";
+import BlockIcon from "@mui/icons-material/Block";
+import LockResetIcon from "@mui/icons-material/LockReset";
 
 function Admin() {
   //constants
@@ -72,6 +74,8 @@ function Admin() {
   let [currentDialog, updateCurrentDialog] = useState({
     showAddUserDialog: false,
     showDeleteUserDialog: false,
+    showBlockUserDialog: false,
+    showResetUserDialog: false,
   });
   let [addUserDialogProps, updateAddUserDialogProps] = useState({
     username: "",
@@ -125,6 +129,8 @@ function Admin() {
               updateCurrentDialog({
                 showAddUserDialog: false,
                 showDeleteUserDialog: false,
+                showBlockUserDialog: false,
+                showResetUserDialog: false,
               });
             }}
           >
@@ -136,6 +142,8 @@ function Admin() {
               updateCurrentDialog({
                 showAddUserDialog: false,
                 showDeleteUserDialog: false,
+                showBlockUserDialog: false,
+                showResetUserDialog: false,
               });
             }}
           >
@@ -179,6 +187,8 @@ function Admin() {
               updateCurrentDialog({
                 showAddUserDialog: false,
                 showDeleteUserDialog: false,
+                showBlockUserDialog: false,
+                showResetUserDialog: false,
               });
             }}
           >
@@ -256,6 +266,8 @@ function Admin() {
           updateCurrentDialog({
             showAddUserDialog: true,
             showDeleteUserDialog: false,
+            showBlockUserDialog: false,
+            showResetUserDialog: false,
           });
         }
       });
@@ -381,6 +393,8 @@ function Admin() {
           updateCurrentDialog({
             showAddUserDialog: false,
             showDeleteUserDialog: false,
+            showBlockUserDialog: false,
+            showResetUserDialog: false,
           });
         }}
       >
@@ -393,6 +407,8 @@ function Admin() {
         >
           <Tab label="List User" value={1}></Tab>
           <Tab label="Add User" value={2}></Tab>
+          <Tab label="Restore User" value={3}></Tab>
+          <Tab label="User Logs" value={4}></Tab>
         </Tabs>
         <TabPanel value={1}>
           <Box>
@@ -428,7 +444,35 @@ function Admin() {
                               updateSelectedUser(user);
                               updateCurrentDialog({
                                 showAddUserDialog: false,
+                                showDeleteUserDialog: false,
+                                showBlockUserDialog: false,
+                                showResetUserDialog: true,
+                              });
+                            }}
+                          >
+                            <LockResetIcon></LockResetIcon>
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              updateSelectedUser(user);
+                              updateCurrentDialog({
+                                showAddUserDialog: false,
+                                showDeleteUserDialog: false,
+                                showBlockUserDialog: true,
+                                showResetUserDialog: false,
+                              });
+                            }}
+                          >
+                            <BlockIcon></BlockIcon>
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              updateSelectedUser(user);
+                              updateCurrentDialog({
+                                showAddUserDialog: false,
                                 showDeleteUserDialog: true,
+                                showBlockUserDialog: false,
+                                showResetUserDialog: false,
                               });
                             }}
                           >

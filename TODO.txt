@@ -29,5 +29,9 @@
 2. Check password error - done
 3. Add password and login to dialog and copy to clipboard and copied notification
 
-4/5/25
-1.
+5/5/25
+1.Fix drawer
+2.Add reset password 
+3.Add deactivate user
+4.Restore deleted user
+5.fix navigation links, remove under line and add hover color
