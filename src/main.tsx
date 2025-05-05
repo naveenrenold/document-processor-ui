@@ -24,20 +24,20 @@ function Main() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <DrawerContextProvider drawer={{ isDrawerOpen, updateIsDrawerOpen }}>
-          <LoginContextProvider login={{ isLoggedIn, updateIsLoggedIn }}>
-            <Header />
-          </LoginContextProvider>
-          <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
-            {isLoggedIn && (
-              <BrowserRouter basename="/">
+        <BrowserRouter basename="/">
+          <DrawerContextProvider drawer={{ isDrawerOpen, updateIsDrawerOpen }}>
+            <LoginContextProvider login={{ isLoggedIn, updateIsLoggedIn }}>
+              <Header />
+            </LoginContextProvider>
+            <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
+              {isLoggedIn && (
                 <Routes>
                   <Route path="admin" element={<Admin />} />
                 </Routes>
-              </BrowserRouter>
-            )}
-          </Box>
-        </DrawerContextProvider>
+              )}
+            </Box>
+          </DrawerContextProvider>
+        </BrowserRouter>
       </ThemeProvider>
     </>
   );

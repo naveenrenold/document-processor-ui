@@ -29,10 +29,20 @@ import {
 import style from "./Header.module.css";
 import headings from "../../data/headings.json";
 import { useDrawerContext } from "../../context/MainContextProvider";
+import { Navigate, useNavigate } from "react-router";
 
 function Header() {
   //constants
   const drawerWidth = 240;
+  const baseURL = import.meta.env.VITE_BaseURL;
+  const navigate = useNavigate();
+  //useState
+  let [currentDate, updatecurrentDate] = useState(new Date());
+  let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
+  let { isLoggedIn, updateIsLoggedIn } = useLoginContext();
+  const isMobile = useMediaQuery("(max-width:639px)");
+  let { isDrawerOpen, updateIsDrawerOpen } = useDrawerContext();
+  //useEffect
   useEffect(() => {
     new MSALAuth();
     MSALAuth.myMSALObj
@@ -61,13 +71,8 @@ function Header() {
       }
     };
   }, []);
-  let [currentDate, updatecurrentDate] = useState(new Date());
-  let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
-  let { isLoggedIn, updateIsLoggedIn } = useLoginContext();
-  const isMobile = useMediaQuery("(max-width:639px)");
-  let { isDrawerOpen, updateIsDrawerOpen } = useDrawerContext();
-  const baseURL = import.meta.env.VITE_BaseURL;
-
+  //render function
+  // helper functions
   const signIn = () => {
     let request: PopupRequest = loginRequest;
     MSALAuth.myMSALObj
@@ -125,9 +130,21 @@ function Header() {
             return (
               <div key={id}>
                 <ListItem key={id}>
-                  <ListItemButton>
+                  <ListItemButton
+                    sx={{
+                      // color: (theme) => theme.palette.primary.main,
+                      // textDecoration: "underline",
+                      "&:hover": {
+                        backgroundColor: (theme) => theme.palette.primary.main,
+                        color: (theme) => theme.palette.primary.contrastText,
+                      },
+                    }}
+                    onClick={() => {
+                      navigate(heading.href);
+                    }}
+                  >
                     <ListItemText>
-                      <Link href={baseURL + heading.href}>{heading.name}</Link>
+                      <Typography variant="h6">{heading.name}</Typography>
                     </ListItemText>
                   </ListItemButton>
                 </ListItem>

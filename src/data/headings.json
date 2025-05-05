@@ -1,10 +1,10 @@
 [
-{
-"name" : "Submit form",
-"href" : "form"    
-},
-{
-"name" : "Admin modules",
-"href" : "admin"
-}  
+  {
+    "name": "Submit form",
+    "href": "/form"
+  },
+  {
+    "name": "Admin modules",
+    "href": "/admin"
+  }
 ]

@@ -436,7 +436,7 @@ function Admin() {
                       <TableRow key={id}>
                         <TableCell>{user.displayName}</TableCell>
                         {/* <TableCell>{user.mail}</TableCell> */}
-                        <TableCell>{user.mobilePhone}</TableCell>
+                        {/* <TableCell>{user.mobilePhone}</TableCell> */}
                         <TableCell>{user.officeLocation}</TableCell>
                         <TableCell>
                           <IconButton
