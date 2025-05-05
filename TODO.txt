@@ -30,7 +30,7 @@
 3. Add password and login to dialog and copy to clipboard and copied notification
 
 5/5/25
-1.Fix drawer
+1.Fix drawer -done yay
 2.Add reset password 
 3.Add deactivate user
 4.Restore deleted user
