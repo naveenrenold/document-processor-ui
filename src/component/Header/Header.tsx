@@ -146,7 +146,7 @@ function Header() {
                     }}
                   >
                     <ListItemText>
-                      <Typography variant="h6">{heading.name}</Typography>
+                      <Typography>{heading.name}</Typography>
                     </ListItemText>
                   </ListItemButton>
                 </ListItem>

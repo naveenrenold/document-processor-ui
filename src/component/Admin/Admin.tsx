@@ -754,6 +754,20 @@ function Admin() {
             </Stack>
           </Box>
         </TabPanel>
+        <TabPanel value={3}>
+          <Box>
+            {isLoading && <LinearProgress></LinearProgress>}
+            {alertProps.show && (
+              <Alert variant="filled" severity={alertProps.severity}>
+                {alertProps.message}
+              </Alert>
+            )}
+            <Stack>
+              <Typography variant="h6">Restore/UnBlock Users:</Typography>
+            </Stack>
+            <Stack direction={"column"}></Stack>
+          </Box>
+        </TabPanel>
       </TabContext>
     </>
   );
