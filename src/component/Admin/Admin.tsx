@@ -21,6 +21,7 @@ import {
   TableRow,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -76,7 +77,7 @@ function Admin() {
     showDeleteUserDialog: false,
     showBlockUserDialog: false,
     showResetUserDialog: false,
-    showResetSuccessUserDialog: false,
+    //showResetSuccessUserDialog: false,
   });
   let [userDialogProps, updateUserDialogProps] = useState({
     username: "",
@@ -124,7 +125,7 @@ function Admin() {
           showDeleteUserDialog: false,
           showBlockUserDialog: false,
           showResetUserDialog: false,
-          showResetSuccessUserDialog: false,
+          //showResetSuccessUserDialog: false,
         });
       },
       onButton2: () => {
@@ -133,7 +134,7 @@ function Admin() {
           showDeleteUserDialog: false,
           showBlockUserDialog: false,
           showResetUserDialog: false,
-          showResetSuccessUserDialog: false,
+          //showResetSuccessUserDialog: false,
         });
       },
     };
@@ -162,7 +163,7 @@ function Admin() {
           showDeleteUserDialog: false,
           showBlockUserDialog: false,
           showResetUserDialog: false,
-          showResetSuccessUserDialog: false,
+          // showResetSuccessUserDialog: false,
         });
       },
       onButton2: () => {
@@ -171,7 +172,7 @@ function Admin() {
           showDeleteUserDialog: false,
           showBlockUserDialog: false,
           showResetUserDialog: false,
-          showResetSuccessUserDialog: false,
+          // showResetSuccessUserDialog: false,
         });
       },
       Button1: "Copy to ClipBoard",
@@ -195,7 +196,7 @@ function Admin() {
           showDeleteUserDialog: false,
           showBlockUserDialog: false,
           showResetUserDialog: false,
-          showResetSuccessUserDialog: false,
+          // showResetSuccessUserDialog: false,
         });
       },
       onButton2: () => {
@@ -204,7 +205,7 @@ function Admin() {
           showDeleteUserDialog: false,
           showBlockUserDialog: false,
           showResetUserDialog: false,
-          showResetSuccessUserDialog: false,
+          // showResetSuccessUserDialog: false,
         });
       },
     };
@@ -215,19 +216,43 @@ function Admin() {
     );
   };
 
-  const resetSuccessUserDialog = () => {
-    const resetSuccessUserDialogProps: ConfirmationDialogProps = {
-      title: "Password Reset!",
-      content: [
-        "Password reset for:",
-        `UserName : ${userDialogProps.username}`,
-        `Password : ${userDialogProps.password}`,
-      ],
+  // const resetSuccessUserDialog = () => {
+  //   const resetSuccessUserDialogProps: ConfirmationDialogProps = {
+  //     title: "Password Reset!",
+  //     content: ["Password reset for:", `MailId : ${selectedUser?.mail}`],
+  //     onButton1: () => {
+  //       updateCurrentDialog({
+  //         showAddUserDialog: false,
+  //         showDeleteUserDialog: false,
+  //         showBlockUserDialog: false,
+  //         showResetUserDialog: false,
+  //         // showResetSuccessUserDialog: false,
+  //       });
+  //     },
+  //     Button1: "Ok",
+  //   };
+
+  //   return (
+  //     <>
+  //       <ConfirmationDialog
+  //         {...resetSuccessUserDialogProps}
+  //       ></ConfirmationDialog>
+  //     </>
+  //   );
+  // };
+
+  const blockUserDialog = () => {
+    const blockUserDialogProps: ConfirmationDialogProps = {
+      title: "Block User",
+      content: `Are you sure you want to block user ${selectedUser?.displayName}`,
       onButton1: () => {
-        copyToClipboard(
-          `Your new login details for GenuineSoft are as follows : \nUserName : ${userDialogProps.username}\nPassword : ${userDialogProps.password}`,
-          updateSnackBarProps,
-        );
+        blockUser(selectedUser!);
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: true,
+          showResetUserDialog: false,
+        });
       },
       onButton2: () => {
         updateCurrentDialog({
@@ -235,18 +260,12 @@ function Admin() {
           showDeleteUserDialog: false,
           showBlockUserDialog: false,
           showResetUserDialog: false,
-          showResetSuccessUserDialog: false,
         });
       },
-      Button1: "Copy to Clipboard",
-      Button2: "Cancel",
     };
-
     return (
       <>
-        <ConfirmationDialog
-          {...resetSuccessUserDialogProps}
-        ></ConfirmationDialog>
+        <ConfirmationDialog {...blockUserDialogProps}></ConfirmationDialog>
       </>
     );
   };
@@ -256,7 +275,8 @@ function Admin() {
       currentDialog.showAddUserDialog ||
       currentDialog.showDeleteUserDialog ||
       currentDialog.showResetUserDialog ||
-      currentDialog.showResetSuccessUserDialog
+      // currentDialog.showResetSuccessUserDialog ||
+      currentDialog.showBlockUserDialog
     );
   };
 
@@ -273,8 +293,11 @@ function Admin() {
     if (currentDialog.showResetUserDialog) {
       return resetUserDialog();
     }
-    if (currentDialog.showResetSuccessUserDialog) {
-      return resetSuccessUserDialog();
+    // if (currentDialog.showResetSuccessUserDialog) {
+    //   return resetSuccessUserDialog();
+    // }
+    if (currentDialog.showBlockUserDialog) {
+      return blockUserDialog();
     }
   };
   // api calls
@@ -330,7 +353,7 @@ function Admin() {
             showDeleteUserDialog: false,
             showBlockUserDialog: false,
             showResetUserDialog: false,
-            showResetSuccessUserDialog: false,
+            //showResetSuccessUserDialog: false,
           });
         }
       });
@@ -359,8 +382,7 @@ function Admin() {
   const resetUserPassword = (user: UserDetails) => {
     const resetPasswordRequest = {
       passwordProfile: {
-        forceChangePasswordNextSignIn: false,
-        password: generatePassword(),
+        forceChangePasswordNextSignIn: true,
       },
     };
     httpClient
@@ -375,16 +397,37 @@ function Admin() {
       )
       .then((result) => {
         if (result) {
-          updateUserDialogProps({
-            username: user.mail ?? "",
-            password: resetPasswordRequest.passwordProfile.password,
-          });
           updateCurrentDialog({
             showAddUserDialog: false,
             showDeleteUserDialog: false,
             showBlockUserDialog: false,
             showResetUserDialog: false,
-            showResetSuccessUserDialog: true,
+            //showResetSuccessUserDialog: true,
+          });
+        }
+      });
+  };
+
+  const blockUser = (user: UserDetails) => {
+    const blockUserRequest = {
+      accountEnabled: false,
+    };
+    httpClient
+      .patchAsync<any>(
+        `users/${user.userPrincipalName}`,
+        blockUserRequest,
+        undefined,
+        updateAlertProps,
+        "User blocked",
+        setIsLoading,
+        true,
+      )
+      .then((result) => {
+        if (result) {
+          updateUsers((prevUsers) => {
+            return prevUsers.filter((user) => {
+              return user.userPrincipalName != selectedUser?.userPrincipalName;
+            });
           });
         }
       });
@@ -492,7 +535,7 @@ function Admin() {
             showDeleteUserDialog: false,
             showBlockUserDialog: false,
             showResetUserDialog: false,
-            showResetSuccessUserDialog: false,
+            //showResetSuccessUserDialog: false,
           });
         }}
       >
@@ -538,48 +581,54 @@ function Admin() {
                         <TableCell>{user.officeLocation}</TableCell>
                         <TableCell>
                           <Stack direction={isMobile ? "column" : "row"}>
-                            <IconButton
-                              onClick={() => {
-                                updateSelectedUser(user);
-                                updateCurrentDialog({
-                                  showAddUserDialog: false,
-                                  showDeleteUserDialog: false,
-                                  showBlockUserDialog: false,
-                                  showResetUserDialog: true,
-                                  showResetSuccessUserDialog: false,
-                                });
-                              }}
-                            >
-                              <LockResetIcon></LockResetIcon>
-                            </IconButton>
-                            <IconButton
-                              onClick={() => {
-                                updateSelectedUser(user);
-                                updateCurrentDialog({
-                                  showAddUserDialog: false,
-                                  showDeleteUserDialog: false,
-                                  showBlockUserDialog: true,
-                                  showResetUserDialog: false,
-                                  showResetSuccessUserDialog: false,
-                                });
-                              }}
-                            >
-                              <BlockIcon></BlockIcon>
-                            </IconButton>
-                            <IconButton
-                              onClick={() => {
-                                updateSelectedUser(user);
-                                updateCurrentDialog({
-                                  showAddUserDialog: false,
-                                  showDeleteUserDialog: true,
-                                  showBlockUserDialog: false,
-                                  showResetUserDialog: false,
-                                  showResetSuccessUserDialog: false,
-                                });
-                              }}
-                            >
-                              <DeleteIcon></DeleteIcon>
-                            </IconButton>
+                            <Tooltip title="Reset">
+                              <IconButton
+                                onClick={() => {
+                                  updateSelectedUser(user);
+                                  updateCurrentDialog({
+                                    showAddUserDialog: false,
+                                    showDeleteUserDialog: false,
+                                    showBlockUserDialog: false,
+                                    showResetUserDialog: true,
+                                    //showResetSuccessUserDialog: false,
+                                  });
+                                }}
+                              >
+                                <LockResetIcon></LockResetIcon>
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Block">
+                              <IconButton
+                                onClick={() => {
+                                  updateSelectedUser(user);
+                                  updateCurrentDialog({
+                                    showAddUserDialog: false,
+                                    showDeleteUserDialog: false,
+                                    showBlockUserDialog: true,
+                                    showResetUserDialog: false,
+                                    //showResetSuccessUserDialog: false,
+                                  });
+                                }}
+                              >
+                                <BlockIcon></BlockIcon>
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton
+                                onClick={() => {
+                                  updateSelectedUser(user);
+                                  updateCurrentDialog({
+                                    showAddUserDialog: false,
+                                    showDeleteUserDialog: true,
+                                    showBlockUserDialog: false,
+                                    showResetUserDialog: false,
+                                    //showResetSuccessUserDialog: false,
+                                  });
+                                }}
+                              >
+                                <DeleteIcon></DeleteIcon>
+                              </IconButton>
+                            </Tooltip>
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -759,8 +808,8 @@ export interface SnackBarProps {
 export type ConfirmationDialogProps = {
   title: string;
   content: string | string[];
-  onButton1: () => void;
-  onButton2: () => void;
+  onButton1?: () => void;
+  onButton2?: () => void;
   Button1?: string;
   Button2?: string;
 };
@@ -809,14 +858,16 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="contained"
-          onClick={() => {
-            onButton1();
-          }}
-        >
-          {Button1}
-        </Button>
+        {onButton1 && (
+          <Button
+            variant="contained"
+            onClick={() => {
+              onButton1();
+            }}
+          >
+            {Button1}
+          </Button>
+        )}
         {onButton2 && (
           <Button
             variant="outlined"

@@ -39,8 +39,8 @@
 
 6/5/25
 1. box shading - done
-1.2.Add reset password 
-2.Add deactivate user
+1.2.Add reset password -done
+2.Add deactivate user 
 3.Restore deleted user
 4.Add admin user hide buttons
 
