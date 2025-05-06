@@ -76,8 +76,9 @@ function Admin() {
     showDeleteUserDialog: false,
     showBlockUserDialog: false,
     showResetUserDialog: false,
+    showResetSuccessUserDialog: false,
   });
-  let [addUserDialogProps, updateAddUserDialogProps] = useState({
+  let [userDialogProps, updateUserDialogProps] = useState({
     username: "",
     password: "",
   });
@@ -85,7 +86,6 @@ function Admin() {
     isOpen: false,
     message: "",
   });
-  // let [deleteUserDialogProps, updateDeleteUserDialogProps] = useState("")
 
   //useEffect
   useEffect(() => {
@@ -96,6 +96,7 @@ function Admin() {
         updateAlertProps,
         undefined,
         setIsLoading,
+        true,
       );
     };
     getUsers().then((response) => {
@@ -113,95 +114,149 @@ function Admin() {
 
   //render functions
   const deleteUserDialog = () => {
+    const deleteUserDialogProps: ConfirmationDialogProps = {
+      title: "Delete User",
+      content: `Are you sure you want to delete user: ${selectedUser?.displayName}?`,
+      onButton1: () => {
+        deleteUser(selectedUser!);
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: false,
+          showResetUserDialog: false,
+          showResetSuccessUserDialog: false,
+        });
+      },
+      onButton2: () => {
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: false,
+          showResetUserDialog: false,
+          showResetSuccessUserDialog: false,
+        });
+      },
+    };
     return (
       <>
-        <DialogTitle>Delete User:</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete user?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            variant="contained"
-            onClick={() => {
-              deleteUser(selectedUser!);
-              updateCurrentDialog({
-                showAddUserDialog: false,
-                showDeleteUserDialog: false,
-                showBlockUserDialog: false,
-                showResetUserDialog: false,
-              });
-            }}
-          >
-            Yes
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              updateCurrentDialog({
-                showAddUserDialog: false,
-                showDeleteUserDialog: false,
-                showBlockUserDialog: false,
-                showResetUserDialog: false,
-              });
-            }}
-          >
-            Cancel
-          </Button>
-        </DialogActions>
+        <ConfirmationDialog {...deleteUserDialogProps}></ConfirmationDialog>
       </>
     );
   };
 
   const addUserDialog = () => {
+    const addUserDialogProps: ConfirmationDialogProps = {
+      title: "Added User",
+      content: [
+        "User has been created with:",
+        `UserName : ${userDialogProps.username}`,
+        `Password : ${userDialogProps.password}`,
+      ],
+      onButton1: () => {
+        copyToClipboard(
+          `Your login details for GenuineSoft are as follows : \nUserName : ${userDialogProps.username}\nPassword : ${userDialogProps.password}`,
+          updateSnackBarProps,
+        );
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: false,
+          showResetUserDialog: false,
+          showResetSuccessUserDialog: false,
+        });
+      },
+      onButton2: () => {
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: false,
+          showResetUserDialog: false,
+          showResetSuccessUserDialog: false,
+        });
+      },
+      Button1: "Copy to ClipBoard",
+      Button2: "Cancel",
+    };
     return (
       <>
-        <DialogTitle>Added User:</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            <Typography>{`User has been created with:`}</Typography>
-          </DialogContentText>
-          <DialogContentText>
-            <Typography>{`UserName : ${addUserDialogProps.username}`}</Typography>
-          </DialogContentText>
-          <DialogContentText>
-            <Typography>{`Password : ${addUserDialogProps.password}`}</Typography>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            variant="contained"
-            onClick={() => {
-              copyToClipboard(
-                `Your login details for GenuineSoft are as follows : \nUserName : ${addUserDialogProps.username}\nPassword : ${addUserDialogProps.password}`,
-                updateSnackBarProps,
-              );
-            }}
-          >
-            Copy to Clipboard
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              updateCurrentDialog({
-                showAddUserDialog: false,
-                showDeleteUserDialog: false,
-                showBlockUserDialog: false,
-                showResetUserDialog: false,
-              });
-            }}
-          >
-            Cancel
-          </Button>
-        </DialogActions>
+        <ConfirmationDialog {...addUserDialogProps}></ConfirmationDialog>
+      </>
+    );
+  };
+
+  const resetUserDialog = () => {
+    const resetUserDialogProps: ConfirmationDialogProps = {
+      title: "Reset User",
+      content: `Are you sure you want to reset password for ${selectedUser?.displayName}?`,
+      onButton1: () => {
+        resetUserPassword(selectedUser!);
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: false,
+          showResetUserDialog: false,
+          showResetSuccessUserDialog: false,
+        });
+      },
+      onButton2: () => {
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: false,
+          showResetUserDialog: false,
+          showResetSuccessUserDialog: false,
+        });
+      },
+    };
+    return (
+      <>
+        <ConfirmationDialog {...resetUserDialogProps}></ConfirmationDialog>
+      </>
+    );
+  };
+
+  const resetSuccessUserDialog = () => {
+    const resetSuccessUserDialogProps: ConfirmationDialogProps = {
+      title: "Password Reset!",
+      content: [
+        "Password reset for:",
+        `UserName : ${userDialogProps.username}`,
+        `Password : ${userDialogProps.password}`,
+      ],
+      onButton1: () => {
+        copyToClipboard(
+          `Your new login details for GenuineSoft are as follows : \nUserName : ${userDialogProps.username}\nPassword : ${userDialogProps.password}`,
+          updateSnackBarProps,
+        );
+      },
+      onButton2: () => {
+        updateCurrentDialog({
+          showAddUserDialog: false,
+          showDeleteUserDialog: false,
+          showBlockUserDialog: false,
+          showResetUserDialog: false,
+          showResetSuccessUserDialog: false,
+        });
+      },
+      Button1: "Copy to Clipboard",
+      Button2: "Cancel",
+    };
+
+    return (
+      <>
+        <ConfirmationDialog
+          {...resetSuccessUserDialogProps}
+        ></ConfirmationDialog>
       </>
     );
   };
 
   const isDialogOpen = () => {
     return (
-      currentDialog.showAddUserDialog || currentDialog.showDeleteUserDialog
+      currentDialog.showAddUserDialog ||
+      currentDialog.showDeleteUserDialog ||
+      currentDialog.showResetUserDialog ||
+      currentDialog.showResetSuccessUserDialog
     );
   };
 
@@ -215,8 +270,14 @@ function Admin() {
     if (currentDialog.showDeleteUserDialog) {
       return deleteUserDialog();
     }
+    if (currentDialog.showResetUserDialog) {
+      return resetUserDialog();
+    }
+    if (currentDialog.showResetSuccessUserDialog) {
+      return resetSuccessUserDialog();
+    }
   };
-
+  // api calls
   const addUser = (
     displayName: string | null,
     emailAlias: string | null,
@@ -247,6 +308,7 @@ function Admin() {
         updateAlertProps,
         undefined,
         setIsLoading,
+        true,
       )
       .then((result) => {
         if (result) {
@@ -259,7 +321,7 @@ function Admin() {
           updateUsers((prevUsers) => {
             return [...prevUsers, user];
           });
-          updateAddUserDialogProps({
+          updateUserDialogProps({
             username: addUserrequest.mailNickname + domain,
             password: addUserrequest.passwordProfile.password,
           });
@@ -268,6 +330,7 @@ function Admin() {
             showDeleteUserDialog: false,
             showBlockUserDialog: false,
             showResetUserDialog: false,
+            showResetSuccessUserDialog: false,
           });
         }
       });
@@ -280,6 +343,7 @@ function Admin() {
         updateAlertProps,
         "User deleted",
         setIsLoading,
+        true,
       )
       .then((result) => {
         if (result) {
@@ -292,6 +356,39 @@ function Admin() {
       });
   };
 
+  const resetUserPassword = (user: UserDetails) => {
+    const resetPasswordRequest = {
+      passwordProfile: {
+        forceChangePasswordNextSignIn: false,
+        password: generatePassword(),
+      },
+    };
+    httpClient
+      .patchAsync<any>(
+        `users/${user.userPrincipalName}`,
+        resetPasswordRequest,
+        undefined,
+        updateAlertProps,
+        "Password reset successfully",
+        setIsLoading,
+        true,
+      )
+      .then((result) => {
+        if (result) {
+          updateUserDialogProps({
+            username: user.mail ?? "",
+            password: resetPasswordRequest.passwordProfile.password,
+          });
+          updateCurrentDialog({
+            showAddUserDialog: false,
+            showDeleteUserDialog: false,
+            showBlockUserDialog: false,
+            showResetUserDialog: false,
+            showResetSuccessUserDialog: true,
+          });
+        }
+      });
+  };
   //helper functions
   const validateAddUsers = (
     displayName: string | null,
@@ -395,6 +492,7 @@ function Admin() {
             showDeleteUserDialog: false,
             showBlockUserDialog: false,
             showResetUserDialog: false,
+            showResetSuccessUserDialog: false,
           });
         }}
       >
@@ -439,45 +537,50 @@ function Admin() {
                         {/* <TableCell>{user.mobilePhone}</TableCell> */}
                         <TableCell>{user.officeLocation}</TableCell>
                         <TableCell>
-                          <IconButton
-                            onClick={() => {
-                              updateSelectedUser(user);
-                              updateCurrentDialog({
-                                showAddUserDialog: false,
-                                showDeleteUserDialog: false,
-                                showBlockUserDialog: false,
-                                showResetUserDialog: true,
-                              });
-                            }}
-                          >
-                            <LockResetIcon></LockResetIcon>
-                          </IconButton>
-                          <IconButton
-                            onClick={() => {
-                              updateSelectedUser(user);
-                              updateCurrentDialog({
-                                showAddUserDialog: false,
-                                showDeleteUserDialog: false,
-                                showBlockUserDialog: true,
-                                showResetUserDialog: false,
-                              });
-                            }}
-                          >
-                            <BlockIcon></BlockIcon>
-                          </IconButton>
-                          <IconButton
-                            onClick={() => {
-                              updateSelectedUser(user);
-                              updateCurrentDialog({
-                                showAddUserDialog: false,
-                                showDeleteUserDialog: true,
-                                showBlockUserDialog: false,
-                                showResetUserDialog: false,
-                              });
-                            }}
-                          >
-                            <DeleteIcon></DeleteIcon>
-                          </IconButton>
+                          <Stack direction={isMobile ? "column" : "row"}>
+                            <IconButton
+                              onClick={() => {
+                                updateSelectedUser(user);
+                                updateCurrentDialog({
+                                  showAddUserDialog: false,
+                                  showDeleteUserDialog: false,
+                                  showBlockUserDialog: false,
+                                  showResetUserDialog: true,
+                                  showResetSuccessUserDialog: false,
+                                });
+                              }}
+                            >
+                              <LockResetIcon></LockResetIcon>
+                            </IconButton>
+                            <IconButton
+                              onClick={() => {
+                                updateSelectedUser(user);
+                                updateCurrentDialog({
+                                  showAddUserDialog: false,
+                                  showDeleteUserDialog: false,
+                                  showBlockUserDialog: true,
+                                  showResetUserDialog: false,
+                                  showResetSuccessUserDialog: false,
+                                });
+                              }}
+                            >
+                              <BlockIcon></BlockIcon>
+                            </IconButton>
+                            <IconButton
+                              onClick={() => {
+                                updateSelectedUser(user);
+                                updateCurrentDialog({
+                                  showAddUserDialog: false,
+                                  showDeleteUserDialog: true,
+                                  showBlockUserDialog: false,
+                                  showResetUserDialog: false,
+                                  showResetSuccessUserDialog: false,
+                                });
+                              }}
+                            >
+                              <DeleteIcon></DeleteIcon>
+                            </IconButton>
+                          </Stack>
                         </TableCell>
                       </TableRow>
                     );
@@ -652,6 +755,16 @@ export interface SnackBarProps {
   isOpen: boolean;
   message: string;
 }
+
+export type ConfirmationDialogProps = {
+  title: string;
+  content: string | string[];
+  onButton1: () => void;
+  onButton2: () => void;
+  Button1?: string;
+  Button2?: string;
+};
+
 export const copyToClipboard = (
   message: string,
   updateSnackBarProps: React.Dispatch<React.SetStateAction<SnackBarProps>>,
@@ -671,3 +784,50 @@ export const copyToClipboard = (
       });
     });
 };
+
+export function ConfirmationDialog(props: ConfirmationDialogProps) {
+  const {
+    title,
+    content,
+    onButton1,
+    onButton2,
+    Button1 = "Yes",
+    Button2 = "Cancel",
+  } = props;
+  return (
+    <>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        {content && typeof content === "object" ? (
+          content.map((value, id) => {
+            return <DialogContentText key={id}>{value}</DialogContentText>;
+          })
+        ) : (
+          <>
+            <DialogContentText>{content}</DialogContentText>
+          </>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
+          onClick={() => {
+            onButton1();
+          }}
+        >
+          {Button1}
+        </Button>
+        {onButton2 && (
+          <Button
+            variant="outlined"
+            onClick={() => {
+              onButton2();
+            }}
+          >
+            {Button2}
+          </Button>
+        )}
+      </DialogActions>
+    </>
+  );
+}

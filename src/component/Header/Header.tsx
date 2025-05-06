@@ -137,6 +137,8 @@ function Header() {
                       "&:hover": {
                         backgroundColor: (theme) => theme.palette.primary.main,
                         color: (theme) => theme.palette.primary.contrastText,
+                        boxShadow: (theme) =>
+                          `0px 0px 5px 2px ${theme.palette.primary.main}`,
                       },
                     }}
                     onClick={() => {

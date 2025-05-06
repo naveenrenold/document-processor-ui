@@ -20,7 +20,7 @@ class httpClient {
       return;
     }
     let response = axios.get<T>(
-      `${isGraph ? httpClient.baseUrl : this.graphApiUrl}${url}`,
+      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
       header,
     );
     if (setIsLoading) {
@@ -51,7 +51,7 @@ class httpClient {
       return;
     }
     let response = axios.post<T>(
-      `${isGraph ? httpClient.baseUrl : this.graphApiUrl}${url}`,
+      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
       request,
       header,
     );
@@ -82,7 +82,39 @@ class httpClient {
       return;
     }
     let response = axios.delete<T>(
-      `${isGraph ? httpClient.baseUrl : this.graphApiUrl}${url}`,
+      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
+      header,
+    );
+    if (setIsLoading) {
+      setIsLoading(true);
+    }
+    let result = await httpClient.handleHttpResponse<T>(
+      response,
+      setAlert,
+      successAlertMessage,
+    );
+    if (setIsLoading) {
+      setIsLoading(false);
+    }
+    return result;
+  }
+
+  public static async patchAsync<T>(
+    url: string,
+    request: any,
+    scopes: string[] = loginRequest.scopes,
+    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    successAlertMessage?: string,
+    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+    isGraph = false,
+  ) {
+    let header = await this.getAuthHeader(scopes);
+    if (!header) {
+      return;
+    }
+    let response = axios.patch<T>(
+      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
+      request,
       header,
     );
     if (setIsLoading) {
