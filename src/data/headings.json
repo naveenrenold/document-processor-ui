@@ -1,10 +1,12 @@
 [
   {
     "name": "Submit form",
-    "href": "/form"
+    "href": "/form",
+    "adminModule": false
   },
   {
     "name": "Admin modules",
-    "href": "/admin"
+    "href": "/admin",
+    "adminModule": true
   }
 ]

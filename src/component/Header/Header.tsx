@@ -1,7 +1,7 @@
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import { format } from "date-fns";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import { useLoginContext } from "../../context/LoginContextProvider";
 import { loginRequest } from "../../helper/authConfig";
@@ -13,14 +13,11 @@ import {
 } from "@azure/msal-browser";
 import {
   AppBar,
-  Box,
   Drawer,
   IconButton,
-  Link,
   List,
   ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Toolbar,
   Typography,
@@ -29,12 +26,13 @@ import {
 import style from "./Header.module.css";
 import headings from "../../data/headings.json";
 import { useDrawerContext } from "../../context/MainContextProvider";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
+import { useAdminContext } from "../../context/AdminContextProvider";
+import admins from "../../data/admin.json";
 
 function Header() {
   //constants
   const drawerWidth = 240;
-  const baseURL = import.meta.env.VITE_BaseURL;
   const navigate = useNavigate();
   //useState
   let [currentDate, updatecurrentDate] = useState(new Date());
@@ -42,6 +40,7 @@ function Header() {
   let { isLoggedIn, updateIsLoggedIn } = useLoginContext();
   const isMobile = useMediaQuery("(max-width:639px)");
   let { isDrawerOpen, updateIsDrawerOpen } = useDrawerContext();
+  let { isAdmin, updateIsAdmin } = useAdminContext();
   //useEffect
   useEffect(() => {
     new MSALAuth();
@@ -62,16 +61,21 @@ function Header() {
         return;
       } else if (accounts.length > 1) {
         console.log("Warning, more than 1 active account");
+        updateIsAdmin(admins.includes(accounts[0].username));
         updateAccountInfo(accounts[0]);
         updateIsLoggedIn(true);
       } else {
         console.log("Default sign in", accounts[0]);
+        updateIsAdmin(admins.includes(accounts[0].username));
         updateAccountInfo(accounts[0]);
         updateIsLoggedIn(true);
       }
     };
   }, []);
   //render function
+  const headerHeadings = isAdmin
+    ? headings
+    : headings.filter((heading) => heading.adminModule === false);
   // helper functions
   const signIn = () => {
     let request: PopupRequest = loginRequest;
@@ -80,6 +84,7 @@ function Header() {
       .then((authResult) => {
         MSALAuth.myMSALObj.setActiveAccount(authResult.account);
         updateAccountInfo(authResult.account);
+        updateIsAdmin(admins.includes(authResult.account.username));
         updateIsLoggedIn(true);
       })
       .catch((err) => {
@@ -97,6 +102,7 @@ function Header() {
       .then(() => {
         console.log("logoutsuccess");
         updateAccountInfo(null);
+        updateIsAdmin(false);
         updateIsLoggedIn(false);
       })
       .catch((err) => {
@@ -126,7 +132,7 @@ function Header() {
       >
         <Toolbar />
         <List>
-          {headings.map((heading, id) => {
+          {headerHeadings.map((heading, id) => {
             return (
               <div key={id}>
                 <ListItem key={id}>

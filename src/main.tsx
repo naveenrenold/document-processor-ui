@@ -10,6 +10,7 @@ import Admin from "./component/Admin/Admin";
 import Box from "@mui/material/Box";
 import DrawerContextProvider from "./context/MainContextProvider";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import AdminContextProvider from "./context/AdminContextProvider";
 
 function Main() {
   useEffect(() => {
@@ -19,6 +20,7 @@ function Main() {
 
   let [isLoggedIn, updateIsLoggedIn] = useState(false);
   let [isDrawerOpen, updateIsDrawerOpen] = useState(false);
+  let [isAdmin, updateIsAdmin] = useState(false);
   const isMobile = useMediaQuery("(max-width:639px)");
 
   return (
@@ -27,12 +29,14 @@ function Main() {
         <BrowserRouter basename="/">
           <DrawerContextProvider drawer={{ isDrawerOpen, updateIsDrawerOpen }}>
             <LoginContextProvider login={{ isLoggedIn, updateIsLoggedIn }}>
-              <Header />
+              <AdminContextProvider admin={{ isAdmin, updateIsAdmin }}>
+                <Header />
+              </AdminContextProvider>
             </LoginContextProvider>
             <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
               {isLoggedIn && (
                 <Routes>
-                  <Route path="admin" element={<Admin />} />
+                  {isAdmin && <Route path="admin" element={<Admin />} />}
                 </Routes>
               )}
             </Box>

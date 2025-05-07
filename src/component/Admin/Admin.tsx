@@ -3,7 +3,6 @@ import {
   Autocomplete,
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -31,10 +30,11 @@ import TabPanel from "@mui/lab/TabPanel";
 import httpClient from "../../helper/httpClient";
 import data from "../../data/UserTable.json";
 import generator from "generate-password-browser";
-import styles from "./Admin.module.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BlockIcon from "@mui/icons-material/Block";
 import LockResetIcon from "@mui/icons-material/LockReset";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import RestoreIcon from "@mui/icons-material/Restore";
 
 function Admin() {
   //constants
@@ -42,9 +42,19 @@ function Admin() {
   const emailRegex = new RegExp("^[a-zA-Z0-9._%+-]+$");
   const domain = "@navigatorxdd.onmicrosoft.com";
   const isMobile = useMediaQuery("(max-width:639px)");
+  const defaultDialog = {
+    showAddUserDialog: false,
+    showDeleteUserDialog: false,
+    showBlockUserDialog: false,
+    showResetUserDialog: false,
+    ShowUnBlockUserDialog: false,
+    ShowRestoreUserDialog: false,
+  };
   //state variable
   let [currentTab, updateCurrentTab] = useState<number>(1);
   let [users, updateUsers] = useState<UserDetails[]>([]);
+  let [blockedUsers, updateBlockedUsers] = useState<UserDetails[]>([]);
+  let [deletedUsers, updateDeletedUsers] = useState<UserDetails[]>([]);
   let [displayName, updatedisplayName] = useState<stringTextField>({
     value: "",
     error: false,
@@ -72,13 +82,7 @@ function Admin() {
   });
   let [isLoading, setIsLoading] = useState<boolean>(false);
   let [selectedUser, updateSelectedUser] = useState<UserDetails>();
-  let [currentDialog, updateCurrentDialog] = useState({
-    showAddUserDialog: false,
-    showDeleteUserDialog: false,
-    showBlockUserDialog: false,
-    showResetUserDialog: false,
-    //showResetSuccessUserDialog: false,
-  });
+  let [currentDialog, updateCurrentDialog] = useState(defaultDialog);
   let [userDialogProps, updateUserDialogProps] = useState({
     username: "",
     password: "",
@@ -111,6 +115,50 @@ function Admin() {
         }),
       );
     });
+
+    const getBlockedUsers = () => {
+      return httpClient.getAsync<UserDetails[]>(
+        "users?$filter=userType eq 'Guest' and accountEnabled eq false",
+        undefined,
+        updateAlertProps,
+        undefined,
+        setIsLoading,
+        true,
+      );
+    };
+    getBlockedUsers().then((response) => {
+      if (!response || response.length === 0) {
+        console.log("Get blocked users call failed");
+        return;
+      }
+      updateBlockedUsers(
+        response.filter((value) => {
+          return value.officeLocation;
+        }),
+      );
+    });
+
+    const getDeletedUsers = () => {
+      return httpClient.getAsync<UserDetails[]>(
+        "/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
+        undefined,
+        updateAlertProps,
+        undefined,
+        setIsLoading,
+        true,
+      );
+    };
+    getDeletedUsers().then((response) => {
+      if (!response || response.length === 0) {
+        console.log("Get deleted users call failed");
+        return;
+      }
+      updateDeletedUsers(
+        response.filter((value) => {
+          return value.officeLocation;
+        }),
+      );
+    });
   }, []);
 
   //render functions
@@ -120,22 +168,10 @@ function Admin() {
       content: `Are you sure you want to delete user: ${selectedUser?.displayName}?`,
       onButton1: () => {
         deleteUser(selectedUser!);
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: false,
-          showResetUserDialog: false,
-          //showResetSuccessUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
       onButton2: () => {
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: false,
-          showResetUserDialog: false,
-          //showResetSuccessUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
     };
     return (
@@ -158,22 +194,10 @@ function Admin() {
           `Your login details for GenuineSoft are as follows : \nUserName : ${userDialogProps.username}\nPassword : ${userDialogProps.password}`,
           updateSnackBarProps,
         );
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: false,
-          showResetUserDialog: false,
-          // showResetSuccessUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
       onButton2: () => {
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: false,
-          showResetUserDialog: false,
-          // showResetSuccessUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
       Button1: "Copy to ClipBoard",
       Button2: "Cancel",
@@ -191,22 +215,10 @@ function Admin() {
       content: `Are you sure you want to reset password for ${selectedUser?.displayName}?`,
       onButton1: () => {
         resetUserPassword(selectedUser!);
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: false,
-          showResetUserDialog: false,
-          // showResetSuccessUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
       onButton2: () => {
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: false,
-          showResetUserDialog: false,
-          // showResetSuccessUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
     };
     return (
@@ -247,20 +259,10 @@ function Admin() {
       content: `Are you sure you want to block user ${selectedUser?.displayName}`,
       onButton1: () => {
         blockUser(selectedUser!);
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: true,
-          showResetUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
       onButton2: () => {
-        updateCurrentDialog({
-          showAddUserDialog: false,
-          showDeleteUserDialog: false,
-          showBlockUserDialog: false,
-          showResetUserDialog: false,
-        });
+        updateCurrentDialog(defaultDialog);
       },
     };
     return (
@@ -270,13 +272,52 @@ function Admin() {
     );
   };
 
+  const unBlockUserDialog = () => {
+    const unblockUserDialogProps: ConfirmationDialogProps = {
+      title: "Unblock User",
+      content: `Are you sure you want to unblock user ${selectedUser?.displayName}`,
+      onButton1: () => {
+        unblockUser(selectedUser!);
+        updateCurrentDialog(defaultDialog);
+      },
+      onButton2: () => {
+        updateCurrentDialog(defaultDialog);
+      },
+    };
+    return (
+      <>
+        <ConfirmationDialog {...unblockUserDialogProps}></ConfirmationDialog>
+      </>
+    );
+  };
+
+  const restoreUserDialog = () => {
+    const restoreUserDialogProps: ConfirmationDialogProps = {
+      title: "Restore User",
+      content: `Are you sure you want to restore user ${selectedUser?.displayName}`,
+      onButton1: () => {
+        restoreUser(selectedUser!);
+        updateCurrentDialog(defaultDialog);
+      },
+      onButton2: () => {
+        updateCurrentDialog(defaultDialog);
+      },
+    };
+    return (
+      <>
+        <ConfirmationDialog {...restoreUserDialogProps}></ConfirmationDialog>
+      </>
+    );
+  };
+
   const isDialogOpen = () => {
     return (
       currentDialog.showAddUserDialog ||
       currentDialog.showDeleteUserDialog ||
       currentDialog.showResetUserDialog ||
-      // currentDialog.showResetSuccessUserDialog ||
-      currentDialog.showBlockUserDialog
+      currentDialog.showBlockUserDialog ||
+      currentDialog.ShowUnBlockUserDialog ||
+      currentDialog.ShowRestoreUserDialog
     );
   };
 
@@ -293,11 +334,14 @@ function Admin() {
     if (currentDialog.showResetUserDialog) {
       return resetUserDialog();
     }
-    // if (currentDialog.showResetSuccessUserDialog) {
-    //   return resetSuccessUserDialog();
-    // }
     if (currentDialog.showBlockUserDialog) {
       return blockUserDialog();
+    }
+    if (currentDialog.ShowUnBlockUserDialog) {
+      return unBlockUserDialog();
+    }
+    if (currentDialog.ShowRestoreUserDialog) {
+      return restoreUserDialog();
     }
   };
   // api calls
@@ -349,11 +393,8 @@ function Admin() {
             password: addUserrequest.passwordProfile.password,
           });
           updateCurrentDialog({
+            ...defaultDialog,
             showAddUserDialog: true,
-            showDeleteUserDialog: false,
-            showBlockUserDialog: false,
-            showResetUserDialog: false,
-            //showResetSuccessUserDialog: false,
           });
         }
       });
@@ -375,6 +416,10 @@ function Admin() {
               return user.userPrincipalName != selectedUser?.userPrincipalName;
             });
           });
+
+          updateDeletedUsers((prevUsers) => {
+            return [...prevUsers, user];
+          });
         }
       });
   };
@@ -385,27 +430,15 @@ function Admin() {
         forceChangePasswordNextSignIn: true,
       },
     };
-    httpClient
-      .patchAsync<any>(
-        `users/${user.userPrincipalName}`,
-        resetPasswordRequest,
-        undefined,
-        updateAlertProps,
-        "Password reset successfully",
-        setIsLoading,
-        true,
-      )
-      .then((result) => {
-        if (result) {
-          updateCurrentDialog({
-            showAddUserDialog: false,
-            showDeleteUserDialog: false,
-            showBlockUserDialog: false,
-            showResetUserDialog: false,
-            //showResetSuccessUserDialog: true,
-          });
-        }
-      });
+    httpClient.patchAsync<any>(
+      `users/${user.userPrincipalName}`,
+      resetPasswordRequest,
+      undefined,
+      updateAlertProps,
+      "Password reset successfully",
+      setIsLoading,
+      true,
+    );
   };
 
   const blockUser = (user: UserDetails) => {
@@ -429,9 +462,67 @@ function Admin() {
               return user.userPrincipalName != selectedUser?.userPrincipalName;
             });
           });
+          updateBlockedUsers((prevUsers) => {
+            return [...prevUsers, user];
+          });
         }
       });
   };
+
+  const unblockUser = (user: UserDetails) => {
+    const unblockUserRequest = {
+      accountEnabled: true,
+    };
+    httpClient
+      .patchAsync<any>(
+        `users/${user.userPrincipalName}`,
+        unblockUserRequest,
+        undefined,
+        updateAlertProps,
+        "User Unblocked",
+        setIsLoading,
+        true,
+      )
+      .then((result) => {
+        if (result) {
+          updateBlockedUsers((prevUsers) => {
+            return prevUsers.filter((user) => {
+              return user.userPrincipalName != selectedUser?.userPrincipalName;
+            });
+          });
+          updateUsers((prevUsers) => {
+            return [...prevUsers, user];
+          });
+        }
+      });
+  };
+
+  const restoreUser = (user: UserDetails) => {
+    const restoreUserRequest = { autoReconcileProxyConflict: "true" };
+    httpClient
+      .postAsync<any>(
+        `/directory/deletedItems/${user.id}/restore`,
+        restoreUserRequest,
+        undefined,
+        updateAlertProps,
+        "User restored",
+        setIsLoading,
+        true,
+      )
+      .then((result) => {
+        if (result) {
+          updateDeletedUsers((prevUsers) => {
+            return prevUsers.filter((user) => {
+              return user.userPrincipalName != selectedUser?.userPrincipalName;
+            });
+          });
+          updateUsers((prevUsers) => {
+            return [...prevUsers, user];
+          });
+        }
+      });
+  };
+
   //helper functions
   const validateAddUsers = (
     displayName: string | null,
@@ -530,13 +621,7 @@ function Admin() {
       <Dialog
         open={isDialogOpen()}
         onClose={() => {
-          updateCurrentDialog({
-            showAddUserDialog: false,
-            showDeleteUserDialog: false,
-            showBlockUserDialog: false,
-            showResetUserDialog: false,
-            //showResetSuccessUserDialog: false,
-          });
+          updateCurrentDialog(defaultDialog);
         }}
       >
         {setDialog()}
@@ -548,8 +633,9 @@ function Admin() {
         >
           <Tab label="List User" value={1}></Tab>
           <Tab label="Add User" value={2}></Tab>
-          <Tab label="Restore User" value={3}></Tab>
-          <Tab label="User Logs" value={4}></Tab>
+          <Tab label="UnBlock User" value={3}></Tab>
+          <Tab label="Restore User" value={4}></Tab>
+          <Tab label="User Logs" value={5}></Tab>
         </Tabs>
         <TabPanel value={1}>
           <Box>
@@ -586,11 +672,8 @@ function Admin() {
                                 onClick={() => {
                                   updateSelectedUser(user);
                                   updateCurrentDialog({
-                                    showAddUserDialog: false,
-                                    showDeleteUserDialog: false,
-                                    showBlockUserDialog: false,
+                                    ...defaultDialog,
                                     showResetUserDialog: true,
-                                    //showResetSuccessUserDialog: false,
                                   });
                                 }}
                               >
@@ -602,11 +685,8 @@ function Admin() {
                                 onClick={() => {
                                   updateSelectedUser(user);
                                   updateCurrentDialog({
-                                    showAddUserDialog: false,
-                                    showDeleteUserDialog: false,
+                                    ...defaultDialog,
                                     showBlockUserDialog: true,
-                                    showResetUserDialog: false,
-                                    //showResetSuccessUserDialog: false,
                                   });
                                 }}
                               >
@@ -618,11 +698,8 @@ function Admin() {
                                 onClick={() => {
                                   updateSelectedUser(user);
                                   updateCurrentDialog({
-                                    showAddUserDialog: false,
+                                    ...defaultDialog,
                                     showDeleteUserDialog: true,
-                                    showBlockUserDialog: false,
-                                    showResetUserDialog: false,
-                                    //showResetSuccessUserDialog: false,
                                   });
                                 }}
                               >
@@ -763,9 +840,105 @@ function Admin() {
               </Alert>
             )}
             <Stack>
-              <Typography variant="h6">Restore/UnBlock Users:</Typography>
+              <Typography variant="h6">Unblock Users:</Typography>
             </Stack>
-            <Stack direction={"column"}></Stack>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {data.getUserHeading.map((heading, id) => {
+                    return <TableCell key={id}>{heading}</TableCell>;
+                  })}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {blockedUsers && blockedUsers.length > 0 ? (
+                  blockedUsers.map((user, id) => {
+                    return (
+                      <TableRow key={id}>
+                        <TableCell>{user.displayName}</TableCell>
+                        {/* <TableCell>{user.mail}</TableCell> */}
+                        {/* <TableCell>{user.mobilePhone}</TableCell> */}
+                        <TableCell>{user.officeLocation}</TableCell>
+                        <TableCell>
+                          <Stack direction={isMobile ? "column" : "row"}>
+                            <Tooltip title="UnBlock">
+                              <IconButton
+                                onClick={() => {
+                                  updateSelectedUser(user);
+                                  updateCurrentDialog({
+                                    ...defaultDialog,
+                                    ShowUnBlockUserDialog: true,
+                                  });
+                                }}
+                              >
+                                <CheckCircle></CheckCircle>
+                              </IconButton>
+                            </Tooltip>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <></>
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </TabPanel>
+        <TabPanel value={4}>
+          <Box>
+            {isLoading && <LinearProgress></LinearProgress>}
+            {alertProps.show && (
+              <Alert variant="filled" severity={alertProps.severity}>
+                {alertProps.message}
+              </Alert>
+            )}
+            <Stack>
+              <Typography variant="h6">Restore Users:</Typography>
+            </Stack>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {data.getUserHeading.map((heading, id) => {
+                    return <TableCell key={id}>{heading}</TableCell>;
+                  })}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {deletedUsers && deletedUsers.length > 0 ? (
+                  deletedUsers.map((user, id) => {
+                    return (
+                      <TableRow key={id}>
+                        <TableCell>{user.displayName}</TableCell>
+                        {/* <TableCell>{user.mail}</TableCell> */}
+                        {/* <TableCell>{user.mobilePhone}</TableCell> */}
+                        <TableCell>{user.officeLocation}</TableCell>
+                        <TableCell>
+                          <Stack direction={isMobile ? "column" : "row"}>
+                            <Tooltip title="Restore">
+                              <IconButton
+                                onClick={() => {
+                                  updateSelectedUser(user);
+                                  updateCurrentDialog({
+                                    ...defaultDialog,
+                                    ShowRestoreUserDialog: true,
+                                  });
+                                }}
+                              >
+                                <RestoreIcon></RestoreIcon>
+                              </IconButton>
+                            </Tooltip>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <></>
+                )}
+              </TableBody>
+            </Table>
           </Box>
         </TabPanel>
       </TabContext>

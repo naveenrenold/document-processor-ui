@@ -45,7 +45,17 @@
 4.Add admin user hide buttons
 
 7/5/25
-1. Finish list deleted and blocked users
-2. unblock/restore
+1. Finish list deleted and blocked users - done
+2. unblock/restore - done
+3. add location in header - not easy
+4. hide modules for guests -done partially
+
+Conflicts detected while trying to restore the user restoreUserErrors: ErrorValue:<pii>TestUser2</pii>@navigatorxdd.onmicrosoft.com ObjectType:User ConflictingObjectId:3000a507-0235-439e-aaf2-df29cd4113ed, ErrorType:SignInName, ErrorId:ConflictsErrorValue:<pii><pii>TestUser2</pii>@navigatorxdd.onmicrosoft.com</pii> ObjectType:User ConflictingObjectId:3000a507-0235-439e-aaf2-df29cd4113ed, ErrorType:UserPrincipalName, ErrorId:Conflicts
+-done
+
+8/5/25
+1. Need to create new logins and test everything
+2. Need to test permissions for all accounts
+3. If above done, write user logs module
 
 
