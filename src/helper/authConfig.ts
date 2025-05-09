@@ -8,7 +8,7 @@ const msalConfig: msal.Configuration = {
     redirectUri: import.meta.env.VITE_BaseURL,
   },
   cache: {
-    cacheLocation: "sessionStorage",
+    cacheLocation: "memoryStorage",
     storeAuthStateInCookie: false,
   },
   system: {
@@ -37,7 +37,12 @@ const msalConfig: msal.Configuration = {
 };
 
 const loginRequest = {
-  scopes: ["Directory.ReadWrite.All", "GroupMember.ReadWrite.All", "User.ReadWrite.All"],
+  scopes: [
+    "Directory.ReadWrite.All",
+    "GroupMember.ReadWrite.All",
+    "User.ReadWrite.All",
+    "UserAuthenticationMethod.ReadWrite.All",
+  ],
 };
 
 export { msalConfig, loginRequest };

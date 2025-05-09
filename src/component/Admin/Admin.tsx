@@ -47,6 +47,7 @@ function Admin() {
     showDeleteUserDialog: false,
     showBlockUserDialog: false,
     showResetUserDialog: false,
+    showResetUserSuccessDialog: false,
     ShowUnBlockUserDialog: false,
     ShowRestoreUserDialog: false,
   };
@@ -228,30 +229,35 @@ function Admin() {
     );
   };
 
-  // const resetSuccessUserDialog = () => {
-  //   const resetSuccessUserDialogProps: ConfirmationDialogProps = {
-  //     title: "Password Reset!",
-  //     content: ["Password reset for:", `MailId : ${selectedUser?.mail}`],
-  //     onButton1: () => {
-  //       updateCurrentDialog({
-  //         showAddUserDialog: false,
-  //         showDeleteUserDialog: false,
-  //         showBlockUserDialog: false,
-  //         showResetUserDialog: false,
-  //         // showResetSuccessUserDialog: false,
-  //       });
-  //     },
-  //     Button1: "Ok",
-  //   };
-
-  //   return (
-  //     <>
-  //       <ConfirmationDialog
-  //         {...resetSuccessUserDialogProps}
-  //       ></ConfirmationDialog>
-  //     </>
-  //   );
-  // };
+  const resetUserSuccessDialog = () => {
+    const resetUserSuccessDialogProps: ConfirmationDialogProps = {
+      title: "User password Reset!",
+      content: [
+        "User new login details are:",
+        `UserName : ${userDialogProps.username}`,
+        `Password : ${userDialogProps.password}`,
+      ],
+      onButton1: () => {
+        copyToClipboard(
+          `Your new login details for GenuineSoft are as follows : \nUserName : ${userDialogProps.username}\nPassword : ${userDialogProps.password}`,
+          updateSnackBarProps,
+        );
+        updateCurrentDialog(defaultDialog);
+      },
+      onButton2: () => {
+        updateCurrentDialog(defaultDialog);
+      },
+      Button1: "Copy to ClipBoard",
+      Button2: "Cancel",
+    };
+    return (
+      <>
+        <ConfirmationDialog
+          {...resetUserSuccessDialogProps}
+        ></ConfirmationDialog>
+      </>
+    );
+  };
 
   const blockUserDialog = () => {
     const blockUserDialogProps: ConfirmationDialogProps = {
@@ -317,7 +323,8 @@ function Admin() {
       currentDialog.showResetUserDialog ||
       currentDialog.showBlockUserDialog ||
       currentDialog.ShowUnBlockUserDialog ||
-      currentDialog.ShowRestoreUserDialog
+      currentDialog.ShowRestoreUserDialog ||
+      currentDialog.showResetUserSuccessDialog
     );
   };
 
@@ -333,6 +340,9 @@ function Admin() {
     }
     if (currentDialog.showResetUserDialog) {
       return resetUserDialog();
+    }
+    if (currentDialog.showResetUserSuccessDialog) {
+      return resetUserSuccessDialog();
     }
     if (currentDialog.showBlockUserDialog) {
       return blockUserDialog();
@@ -426,19 +436,33 @@ function Admin() {
 
   const resetUserPassword = (user: UserDetails) => {
     const resetPasswordRequest = {
-      passwordProfile: {
-        forceChangePasswordNextSignIn: true,
-      },
+      //passwordProfile: {
+      //forceChangePasswordNextSignIn: true,
+      newPassword: generatePassword(),
+      //},
     };
-    httpClient.patchAsync<any>(
-      `users/${user.userPrincipalName}`,
-      resetPasswordRequest,
-      undefined,
-      updateAlertProps,
-      "Password reset successfully",
-      setIsLoading,
-      true,
-    );
+    httpClient
+      .postAsync<any>(
+        `users/${user.userPrincipalName}/authentication/methods/28c10230-6103-485e-b985-444c60001490/resetPassword`,
+        resetPasswordRequest,
+        undefined,
+        updateAlertProps,
+        "Password reset successfully",
+        setIsLoading,
+        true,
+      )
+      .then((result) => {
+        if (result) {
+          updateUserDialogProps({
+            username: user.userPrincipalName ?? "",
+            password: resetPasswordRequest.newPassword,
+          });
+          updateCurrentDialog({
+            ...defaultDialog,
+            showResetUserSuccessDialog: true,
+          });
+        }
+      });
   };
 
   const blockUser = (user: UserDetails) => {
