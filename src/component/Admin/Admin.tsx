@@ -428,7 +428,7 @@ function Admin() {
           });
 
           updateDeletedUsers((prevUsers) => {
-            return [...prevUsers, user];
+            return [user, ...prevUsers];
           });
         }
       });
