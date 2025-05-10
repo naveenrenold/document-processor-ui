@@ -652,6 +652,7 @@ function Admin() {
       </Dialog>
       <TabContext value={currentTab}>
         <Tabs
+          variant="scrollable"
           value={currentTab}
           onChange={(_, newTab) => updateCurrentTab(newTab)}
         >
