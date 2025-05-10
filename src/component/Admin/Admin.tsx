@@ -95,7 +95,8 @@ function Admin() {
 
   //useEffect
   useEffect(() => {
-    const getUsers = () => {
+    const getUsers = () => 
+      {
       return httpClient.getAsync<UserDetails[]>(
         "users?$filter=userType eq 'Guest'",
         undefined,

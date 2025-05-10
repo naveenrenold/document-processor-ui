@@ -75,3 +75,9 @@ Conflicts detected while trying to restore the user restoreUserErrors: ErrorValu
 4. start with form ? -think architecture
 
 5. add filter?
+
+6. how to get location - I need another api call at header?
+
+11/5/25
+1.Currently used context to get location, need to test
+2. Need to see how to enable 

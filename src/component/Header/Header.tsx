@@ -29,6 +29,9 @@ import { useDrawerContext } from "../../context/MainContextProvider";
 import { useNavigate } from "react-router";
 import { useAdminContext } from "../../context/AdminContextProvider";
 import admins from "../../data/admin.json";
+import { useUserContext } from "../../context/UserContextProvider";
+import httpClient from "../../helper/httpClient";
+import { UserDetails } from "../Admin/Admin";
 
 function Header() {
   //constants
@@ -38,6 +41,7 @@ function Header() {
   let [currentDate, updatecurrentDate] = useState(new Date());
   let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
   let { isLoggedIn, updateIsLoggedIn } = useLoginContext();
+  let { user, updateUser } = useUserContext();
   const isMobile = useMediaQuery("(max-width:639px)");
   let { isDrawerOpen, updateIsDrawerOpen } = useDrawerContext();
   let { isAdmin, updateIsAdmin } = useAdminContext();
@@ -64,14 +68,36 @@ function Header() {
         updateIsAdmin(admins.includes(accounts[0].username));
         updateAccountInfo(accounts[0]);
         updateIsLoggedIn(true);
+        getUserDetails(accounts[0]);
       } else {
         console.log("Default sign in", accounts[0]);
         updateIsAdmin(admins.includes(accounts[0].username));
         updateAccountInfo(accounts[0]);
         updateIsLoggedIn(true);
+        getUserDetails(accounts[0]);
       }
     };
   }, []);
+  //api calls
+  const getUserDetails = (accountInfo: AccountInfo) => {
+    httpClient
+      .getAsync<UserDetails[]>(
+        `users?$filter=userType eq 'Guest' and id eq ${accountInfo.homeAccountId}`,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true,
+      )
+      .then((response) => {
+        if (response && response.length > 0) {
+          updateUser(response[0]);
+        }
+      })
+      .catch((err) => {
+        console.log("Error at getUserDetails", err);
+      });
+  };
   //render function
   const headerHeadings = isAdmin
     ? headings
@@ -86,6 +112,7 @@ function Header() {
         updateAccountInfo(authResult.account);
         updateIsAdmin(admins.includes(authResult.account.username));
         updateIsLoggedIn(true);
+        getUserDetails(authResult.account);
       })
       .catch((err) => {
         console.log("Error at Sign in ", err);
@@ -104,6 +131,7 @@ function Header() {
         updateAccountInfo(null);
         updateIsAdmin(false);
         updateIsLoggedIn(false);
+        updateUser(null);
       })
       .catch((err) => {
         console.log("Error at Sign in ", err);
@@ -172,6 +200,14 @@ function Header() {
                     </ListItemText>
                   </ListItem>
                   <Divider orientation="horizontal" flexItem></Divider>
+                  {user?.officeLocation && (
+                    <>
+                      <ListItem>
+                        <ListItemText>{user.officeLocation}</ListItemText>
+                      </ListItem>
+                      <Divider orientation="horizontal" flexItem></Divider>
+                    </>
+                  )}
                 </>
               ) : (
                 <></>
@@ -223,6 +259,7 @@ function Header() {
             {isLoggedIn ? (
               <>
                 <div className={style.hm}>{accountInfo?.name}</div>
+                <div className={style.hm}>{user?.officeLocation}</div>
                 {/* <Divider orientation="vertical" flexItem></Divider> */}
                 <Button
                   size="small"

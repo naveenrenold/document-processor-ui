@@ -6,11 +6,15 @@ import MSALAuth from "./helper/MSALAuth";
 import LoginContextProvider from "./context/LoginContextProvider";
 import { ThemeProvider } from "@emotion/react";
 import { theme } from "./helper/material-ui-config";
-import Admin from "./component/Admin/Admin";
+import Admin, { UserDetails } from "./component/Admin/Admin";
 import Box from "@mui/material/Box";
 import DrawerContextProvider from "./context/MainContextProvider";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import AdminContextProvider from "./context/AdminContextProvider";
+import Form from "./component/Form";
+import UserContextProvider, {
+  UserContext,
+} from "./context/UserContextProvider";
 
 function Main() {
   useEffect(() => {
@@ -21,6 +25,7 @@ function Main() {
   let [isLoggedIn, updateIsLoggedIn] = useState(false);
   let [isDrawerOpen, updateIsDrawerOpen] = useState(false);
   let [isAdmin, updateIsAdmin] = useState(false);
+  let [user, updateUser] = useState<UserDetails | null>(null);
   const isMobile = useMediaQuery("(max-width:639px)");
 
   return (
@@ -28,18 +33,21 @@ function Main() {
       <ThemeProvider theme={theme}>
         <BrowserRouter basename="/">
           <DrawerContextProvider drawer={{ isDrawerOpen, updateIsDrawerOpen }}>
-            <LoginContextProvider login={{ isLoggedIn, updateIsLoggedIn }}>
-              <AdminContextProvider admin={{ isAdmin, updateIsAdmin }}>
-                <Header />
-              </AdminContextProvider>
-            </LoginContextProvider>
-            <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
-              {isLoggedIn && (
-                <Routes>
-                  {isAdmin && <Route path="admin" element={<Admin />} />}
-                </Routes>
-              )}
-            </Box>
+            <UserContextProvider user={user} updateUser={updateUser}>
+              <LoginContextProvider login={{ isLoggedIn, updateIsLoggedIn }}>
+                <AdminContextProvider admin={{ isAdmin, updateIsAdmin }}>
+                  <Header />
+                </AdminContextProvider>
+              </LoginContextProvider>
+              <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
+                {isLoggedIn && (
+                  <Routes>
+                    {isAdmin && <Route path="admin" element={<Admin />} />}
+                    <Route path="form" element={<Form />} />
+                  </Routes>
+                )}
+              </Box>
+            </UserContextProvider>
           </DrawerContextProvider>
         </BrowserRouter>
       </ThemeProvider>
