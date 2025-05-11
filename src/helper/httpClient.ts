@@ -2,8 +2,8 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getBearerToken } from "./MSALAuth";
 import { loginRequest } from "./authConfig";
 import { UserDetails } from "../Types/Component/UserDetails";
-import { severity } from "../Types/CommonTypes";
 import { AlertProps } from "../Types/ComponentProps/AlertProps";
+import { severity } from "../Types/ComponentProps/ButtonProps";
 
 class httpClient {
   static baseUrl = import.meta.env.VITE_BaseURL;

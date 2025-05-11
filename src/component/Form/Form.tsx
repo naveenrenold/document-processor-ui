@@ -1,6 +1,7 @@
 import { FormLabel, MenuItem, Select, Stack, TextField } from "@mui/material";
 import { useUserContext } from "../../context/UserContextProvider";
 import { useState } from "react";
+import { Attachment, Process } from "../../Types/Component/Form";
 
 function Form() {
   //constants

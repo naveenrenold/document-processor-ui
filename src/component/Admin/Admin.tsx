@@ -25,18 +25,25 @@ import TabContext from "@mui/lab/TabContext";
 import TabPanel from "@mui/lab/TabPanel";
 import httpClient from "../../helper/httpClient";
 import data from "../../data/UserTable.json";
-import generator from "generate-password-browser";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BlockIcon from "@mui/icons-material/Block";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import RestoreIcon from "@mui/icons-material/Restore";
 import { domain, emailRegex, indiaPhoneRegex } from "../../Constant";
+import { UserDetails } from "../../Types/Component/UserDetails";
+import { AlertProps } from "../../Types/ComponentProps/AlertProps";
+import { SnackBarProps } from "../../Types/ComponentProps/SnackBarProps";
+import { ConfirmationDialogProps } from "../../Types/ComponentProps/ConfirmationProps";
+import { ConfirmationDialog } from "../../custom-component/Dialog";
+import { copyToClipboard, generatePassword } from "../../helper/helperFunction";
+import { AddUserRequest } from "../../Types/Component/AddUserRequest";
+import { stringTextField } from "../../Types/ComponentProps/TextFieldProps";
 
 function Admin() {
   //hooks
-  const isMobile = useMediaQuery("(max-width:639px)");  
-  
+  const isMobile = useMediaQuery("(max-width:639px)");
+
   //state variable
   const [currentTab, updateCurrentTab] = useState<number>(1);
   const [users, updateUsers] = useState<UserDetails[]>([]);
@@ -69,7 +76,9 @@ function Admin() {
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedUser, updateSelectedUser] = useState<UserDetails>();
-  const [currentDialog, updateCurrentDialog] = useState<DialogType>(DialogType.None);
+  const [currentDialog, updateCurrentDialog] = useState<DialogType>(
+    DialogType.None,
+  );
   const [userDialogProps, updateUserDialogProps] = useState({
     username: "",
     password: "",
@@ -81,18 +90,36 @@ function Admin() {
 
   //useEffect
   useEffect(() => {
-    httpClient.fetchUsers("users?$filter=userType eq 'Guest'",updateAlertProps,setIsLoading,updateUsers)
-        .then((response) => {
-          updateUsers(response);
-        });
-    httpClient.fetchUsers("users?$filter=userType eq 'Guest' and accountEnabled eq false",updateAlertProps,setIsLoading, updateBlockedUsers)
-        .then((response) => {
-          updateBlockedUsers(response);
-        });
-    httpClient.fetchUsers("/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",updateAlertProps,setIsLoading,updateDeletedUsers)
-        .then((response) => {
-          updateDeletedUsers(response);
-        });            
+    httpClient
+      .fetchUsers(
+        "users?$filter=userType eq 'Guest'",
+        updateAlertProps,
+        setIsLoading,
+        updateUsers,
+      )
+      .then((response) => {
+        updateUsers(response);
+      });
+    httpClient
+      .fetchUsers(
+        "users?$filter=userType eq 'Guest' and accountEnabled eq false",
+        updateAlertProps,
+        setIsLoading,
+        updateBlockedUsers,
+      )
+      .then((response) => {
+        updateBlockedUsers(response);
+      });
+    httpClient
+      .fetchUsers(
+        "/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
+        updateAlertProps,
+        setIsLoading,
+        updateDeletedUsers,
+      )
+      .then((response) => {
+        updateDeletedUsers(response);
+      });
   }, []);
 
   //render functions
@@ -249,7 +276,6 @@ function Admin() {
     );
   };
 
-
   const setDialog = () => {
     switch (currentDialog) {
       case DialogType.AddUser:
@@ -266,8 +292,8 @@ function Admin() {
         return restoreUserDialog();
       case DialogType.ResetUserSuccess:
         return resetUserSuccessDialog();
+    }
   };
-}
   // api calls
   const addUser = () => {
     if (!validateAddUsers()) {
@@ -369,7 +395,7 @@ function Admin() {
   };
 
   const blockUser = (user: UserDetails) => {
-// Consider adding error handling for clipboard operations to provide better user feedback.
+    // Consider adding error handling for clipboard operations to provide better user feedback.
     const blockUserRequest = {
       accountEnabled: false,
     };
@@ -452,10 +478,15 @@ function Admin() {
   };
 
   //helper functions
-  const validateAddUsers = ( ): boolean => {
-    if(displayName.error || emailAlias.error || phoneNumber.error || location.error) {
+  const validateAddUsers = (): boolean => {
+    if (
+      displayName.error ||
+      emailAlias.error ||
+      phoneNumber.error ||
+      location.error
+    ) {
       return false;
-    }        
+    }
     if (!displayName.value) {
       updatedisplayName((lastValue) => ({
         ...lastValue,
@@ -522,7 +553,6 @@ function Admin() {
     }
     return true;
   };
-
 
   return (
     <>
@@ -722,12 +752,7 @@ function Admin() {
                 ></Autocomplete>{" "}
               </Stack>
               <Stack>
-                <Button
-                  onClick={() =>
-                    addUser()
-                  }
-                  variant="contained"
-                >
+                <Button onClick={() => addUser()} variant="contained">
                   Add User
                 </Button>
               </Stack>
@@ -844,15 +869,6 @@ function Admin() {
 }
 export default Admin;
 
-
-
-
-
-
-
-
-
-
 export enum DialogType {
   "None",
   "AddUser",
@@ -861,5 +877,5 @@ export enum DialogType {
   "BlockUser",
   "UnBlockUser",
   "RestoreUser",
-  "ResetUserSuccess"
+  "ResetUserSuccess",
 }

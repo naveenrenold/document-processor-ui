@@ -3,9 +3,3 @@ export interface stringTextField {
   error: boolean;
   helperText: string | null;
 }
-
-export type severity = "error" | "info" | "success" | "warning";
-
-
-
-

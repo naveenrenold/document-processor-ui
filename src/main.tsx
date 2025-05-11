@@ -6,18 +6,19 @@ import MSALAuth from "./helper/MSALAuth";
 import LoginContextProvider from "./context/LoginContextProvider";
 import { ThemeProvider } from "@emotion/react";
 import { theme } from "./helper/material-ui-config";
-import Admin, { UserDetails } from "./component/Admin/Admin";
+import Admin from "./component/Admin/Admin";
 import Box from "@mui/material/Box";
 import DrawerContextProvider from "./context/MainContextProvider";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import AdminContextProvider from "./context/AdminContextProvider";
 import Form from "./component/Form/Form";
 import UserContextProvider from "./context/UserContextProvider";
+import { UserDetails } from "./Types/Component/UserDetails";
 
 function Main() {
   useEffect(() => {
     new MSALAuth();
-    MSALAuth.myMSALObj.initialize();// initialise singleton authentication on program start
+    MSALAuth.myMSALObj.initialize(); // initialise singleton authentication on program start
   }, []);
 
   let [isLoggedIn, updateIsLoggedIn] = useState(false);
