@@ -185,6 +185,7 @@ class httpClient {
     );
     if (response && response.length > 0) {
       updateState(response.filter(filterFn));
+      return;
     }
     console.log(`${url} call failed`);
     return [];

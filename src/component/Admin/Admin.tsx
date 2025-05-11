@@ -49,26 +49,19 @@ function Admin() {
   const [users, updateUsers] = useState<UserDetails[]>([]);
   const [blockedUsers, updateBlockedUsers] = useState<UserDetails[]>([]);
   const [deletedUsers, updateDeletedUsers] = useState<UserDetails[]>([]);
-  const [displayName, updatedisplayName] = useState<stringTextField>({
+  const defaultTextField: stringTextField = {
     value: "",
     error: false,
     helperText: null,
-  });
-  const [emailAlias, updateEmailAlias] = useState<stringTextField>({
-    value: "",
-    error: false,
-    helperText: null,
-  });
-  const [phoneNumber, updatePhoneNumber] = useState<stringTextField>({
-    value: "",
-    error: false,
-    helperText: null,
-  });
-  const [location, updateLocation] = useState<stringTextField>({
-    value: "",
-    error: false,
-    helperText: null,
-  });
+  };
+  const [displayName, updatedisplayName] =
+    useState<stringTextField>(defaultTextField);
+  const [emailAlias, updateEmailAlias] =
+    useState<stringTextField>(defaultTextField);
+  const [phoneNumber, updatePhoneNumber] =
+    useState<stringTextField>(defaultTextField);
+  const [location, updateLocation] =
+    useState<stringTextField>(defaultTextField);
   const [alertProps, updateAlertProps] = useState<AlertProps>({
     show: false,
     message: "",
@@ -90,36 +83,24 @@ function Admin() {
 
   //useEffect
   useEffect(() => {
-    httpClient
-      .fetchUsers(
-        "users?$filter=userType eq 'Guest'",
-        updateAlertProps,
-        setIsLoading,
-        updateUsers,
-      )
-      .then((response) => {
-        updateUsers(response);
-      });
-    httpClient
-      .fetchUsers(
-        "users?$filter=userType eq 'Guest' and accountEnabled eq false",
-        updateAlertProps,
-        setIsLoading,
-        updateBlockedUsers,
-      )
-      .then((response) => {
-        updateBlockedUsers(response);
-      });
-    httpClient
-      .fetchUsers(
-        "/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
-        updateAlertProps,
-        setIsLoading,
-        updateDeletedUsers,
-      )
-      .then((response) => {
-        updateDeletedUsers(response);
-      });
+    httpClient.fetchUsers(
+      "users?$filter=userType eq 'Guest'",
+      updateAlertProps,
+      setIsLoading,
+      updateUsers,
+    );
+    httpClient.fetchUsers(
+      "users?$filter=userType eq 'Guest' and accountEnabled eq false",
+      updateAlertProps,
+      setIsLoading,
+      updateBlockedUsers,
+    );
+    httpClient.fetchUsers(
+      "/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
+      updateAlertProps,
+      setIsLoading,
+      updateDeletedUsers,
+    );
   }, []);
 
   //render functions
