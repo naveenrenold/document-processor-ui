@@ -4,10 +4,6 @@ import {
   Box,
   Button,
   Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   LinearProgress,
   Snackbar,
@@ -35,132 +31,68 @@ import BlockIcon from "@mui/icons-material/Block";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import RestoreIcon from "@mui/icons-material/Restore";
+import { domain, emailRegex, indiaPhoneRegex } from "../../Constant";
 
 function Admin() {
-  //constants
-  const indiaPhoneRegex = new RegExp("^(\\+91|\\+91\-|0)?[789]\\d{9}$");
-  const emailRegex = new RegExp("^[a-zA-Z0-9._%+-]+$");
-  const domain = "@navigatorxdd.onmicrosoft.com";
-  const isMobile = useMediaQuery("(max-width:639px)");
-  const defaultDialog = {
-    showAddUserDialog: false,
-    showDeleteUserDialog: false,
-    showBlockUserDialog: false,
-    showResetUserDialog: false,
-    showResetUserSuccessDialog: false,
-    ShowUnBlockUserDialog: false,
-    ShowRestoreUserDialog: false,
-  };
+  //hooks
+  const isMobile = useMediaQuery("(max-width:639px)");  
+  
   //state variable
-  let [currentTab, updateCurrentTab] = useState<number>(1);
-  let [users, updateUsers] = useState<UserDetails[]>([]);
-  let [blockedUsers, updateBlockedUsers] = useState<UserDetails[]>([]);
-  let [deletedUsers, updateDeletedUsers] = useState<UserDetails[]>([]);
-  let [displayName, updatedisplayName] = useState<stringTextField>({
+  const [currentTab, updateCurrentTab] = useState<number>(1);
+  const [users, updateUsers] = useState<UserDetails[]>([]);
+  const [blockedUsers, updateBlockedUsers] = useState<UserDetails[]>([]);
+  const [deletedUsers, updateDeletedUsers] = useState<UserDetails[]>([]);
+  const [displayName, updatedisplayName] = useState<stringTextField>({
     value: "",
     error: false,
     helperText: null,
   });
-  let [emailAlias, updateEmailAlias] = useState<stringTextField>({
+  const [emailAlias, updateEmailAlias] = useState<stringTextField>({
     value: "",
     error: false,
     helperText: null,
   });
-  let [phoneNumber, updatePhoneNumber] = useState<stringTextField>({
+  const [phoneNumber, updatePhoneNumber] = useState<stringTextField>({
     value: "",
     error: false,
     helperText: null,
   });
-  let [location, updateLocation] = useState<stringTextField>({
+  const [location, updateLocation] = useState<stringTextField>({
     value: "",
     error: false,
     helperText: null,
   });
-  let [alertProps, updateAlertProps] = useState<AlertProps>({
+  const [alertProps, updateAlertProps] = useState<AlertProps>({
     show: false,
     message: "",
     severity: "info",
   });
-  let [isLoading, setIsLoading] = useState<boolean>(false);
-  let [selectedUser, updateSelectedUser] = useState<UserDetails>();
-  let [currentDialog, updateCurrentDialog] = useState(defaultDialog);
-  let [userDialogProps, updateUserDialogProps] = useState({
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedUser, updateSelectedUser] = useState<UserDetails>();
+  const [currentDialog, updateCurrentDialog] = useState<DialogType>(DialogType.None);
+  const [userDialogProps, updateUserDialogProps] = useState({
     username: "",
     password: "",
   });
-  let [SnackBarProps, updateSnackBarProps] = useState<SnackBarProps>({
+  const [SnackBarProps, updateSnackBarProps] = useState<SnackBarProps>({
     isOpen: false,
     message: "",
   });
 
   //useEffect
   useEffect(() => {
-    const getUsers = () => 
-      {
-      return httpClient.getAsync<UserDetails[]>(
-        "users?$filter=userType eq 'Guest'",
-        undefined,
-        updateAlertProps,
-        undefined,
-        setIsLoading,
-        true,
-      );
-    };
-    getUsers().then((response) => {
-      if (!response || response.length === 0) {
-        console.log("Get users call failed");
-        return;
-      }
-      updateUsers(
-        response.filter((value) => {
-          return value.officeLocation;
-        }),
-      );
-    });
-
-    const getBlockedUsers = () => {
-      return httpClient.getAsync<UserDetails[]>(
-        "users?$filter=userType eq 'Guest' and accountEnabled eq false",
-        undefined,
-        updateAlertProps,
-        undefined,
-        setIsLoading,
-        true,
-      );
-    };
-    getBlockedUsers().then((response) => {
-      if (!response || response.length === 0) {
-        console.log("Get blocked users call failed");
-        return;
-      }
-      updateBlockedUsers(
-        response.filter((value) => {
-          return value.officeLocation;
-        }),
-      );
-    });
-
-    const getDeletedUsers = () => {
-      return httpClient.getAsync<UserDetails[]>(
-        "/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
-        undefined,
-        updateAlertProps,
-        undefined,
-        setIsLoading,
-        true,
-      );
-    };
-    getDeletedUsers().then((response) => {
-      if (!response || response.length === 0) {
-        console.log("Get deleted users call failed");
-        return;
-      }
-      updateDeletedUsers(
-        response.filter((value) => {
-          return value.officeLocation;
-        }),
-      );
-    });
+    httpClient.fetchUsers("users?$filter=userType eq 'Guest'",updateAlertProps,setIsLoading,updateUsers)
+        .then((response) => {
+          updateUsers(response);
+        });
+    httpClient.fetchUsers("users?$filter=userType eq 'Guest' and accountEnabled eq false",updateAlertProps,setIsLoading, updateBlockedUsers)
+        .then((response) => {
+          updateBlockedUsers(response);
+        });
+    httpClient.fetchUsers("/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",updateAlertProps,setIsLoading,updateDeletedUsers)
+        .then((response) => {
+          updateDeletedUsers(response);
+        });            
   }, []);
 
   //render functions
@@ -170,10 +102,10 @@ function Admin() {
       content: `Are you sure you want to delete user: ${selectedUser?.displayName}?`,
       onButton1: () => {
         deleteUser(selectedUser!);
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       onButton2: () => {
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
     };
     return (
@@ -196,10 +128,10 @@ function Admin() {
           `Your login details for GenuineSoft are as follows : \nUserName : ${userDialogProps.username}\nPassword : ${userDialogProps.password}`,
           updateSnackBarProps,
         );
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       onButton2: () => {
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       Button1: "Copy to ClipBoard",
       Button2: "Cancel",
@@ -217,10 +149,10 @@ function Admin() {
       content: `Are you sure you want to reset password for ${selectedUser?.displayName}?`,
       onButton1: () => {
         resetUserPassword(selectedUser!);
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       onButton2: () => {
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
     };
     return (
@@ -243,10 +175,10 @@ function Admin() {
           `Your new login details for GenuineSoft are as follows : \nUserName : ${userDialogProps.username}\nPassword : ${userDialogProps.password}`,
           updateSnackBarProps,
         );
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       onButton2: () => {
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       Button1: "Copy to ClipBoard",
       Button2: "Cancel",
@@ -266,10 +198,10 @@ function Admin() {
       content: `Are you sure you want to block user ${selectedUser?.displayName}`,
       onButton1: () => {
         blockUser(selectedUser!);
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       onButton2: () => {
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
     };
     return (
@@ -285,10 +217,10 @@ function Admin() {
       content: `Are you sure you want to unblock user ${selectedUser?.displayName}`,
       onButton1: () => {
         unblockUser(selectedUser!);
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       onButton2: () => {
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
     };
     return (
@@ -304,10 +236,10 @@ function Admin() {
       content: `Are you sure you want to restore user ${selectedUser?.displayName}`,
       onButton1: () => {
         restoreUser(selectedUser!);
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
       onButton2: () => {
-        updateCurrentDialog(defaultDialog);
+        updateCurrentDialog(DialogType.None);
       },
     };
     return (
@@ -317,60 +249,36 @@ function Admin() {
     );
   };
 
-  const isDialogOpen = () => {
-    return (
-      currentDialog.showAddUserDialog ||
-      currentDialog.showDeleteUserDialog ||
-      currentDialog.showResetUserDialog ||
-      currentDialog.showBlockUserDialog ||
-      currentDialog.ShowUnBlockUserDialog ||
-      currentDialog.ShowRestoreUserDialog ||
-      currentDialog.showResetUserSuccessDialog
-    );
-  };
 
   const setDialog = () => {
-    if (!isDialogOpen) {
-      return <></>;
-    }
-    if (currentDialog.showAddUserDialog) {
-      return addUserDialog();
-    }
-    if (currentDialog.showDeleteUserDialog) {
-      return deleteUserDialog();
-    }
-    if (currentDialog.showResetUserDialog) {
-      return resetUserDialog();
-    }
-    if (currentDialog.showResetUserSuccessDialog) {
-      return resetUserSuccessDialog();
-    }
-    if (currentDialog.showBlockUserDialog) {
-      return blockUserDialog();
-    }
-    if (currentDialog.ShowUnBlockUserDialog) {
-      return unBlockUserDialog();
-    }
-    if (currentDialog.ShowRestoreUserDialog) {
-      return restoreUserDialog();
-    }
+    switch (currentDialog) {
+      case DialogType.AddUser:
+        return addUserDialog();
+      case DialogType.DeleteUser:
+        return deleteUserDialog();
+      case DialogType.ResetUser:
+        return resetUserDialog();
+      case DialogType.BlockUser:
+        return blockUserDialog();
+      case DialogType.UnBlockUser:
+        return unBlockUserDialog();
+      case DialogType.RestoreUser:
+        return restoreUserDialog();
+      case DialogType.ResetUserSuccess:
+        return resetUserSuccessDialog();
   };
+}
   // api calls
-  const addUser = (
-    displayName: string | null,
-    emailAlias: string | null,
-    phoneNumber: string | null,
-    location: string | null,
-  ) => {
-    if (!validateAddUsers(displayName, emailAlias, phoneNumber, location)) {
+  const addUser = () => {
+    if (!validateAddUsers()) {
       return;
     }
     const addUserrequest: AddUserRequest = {
       accountEnabled: true,
-      displayName: displayName!,
-      mobilePhone: phoneNumber!,
-      officeLocation: location!,
-      mailNickname: emailAlias!,
+      displayName: displayName.value ?? "",
+      mobilePhone: phoneNumber.value ?? "",
+      officeLocation: location.value ?? "",
+      mailNickname: emailAlias.value ?? "",
       passwordProfile: {
         forceChangePasswordNextSignIn: true,
         password: generatePassword(),
@@ -403,10 +311,7 @@ function Admin() {
             username: addUserrequest.mailNickname + domain,
             password: addUserrequest.passwordProfile.password,
           });
-          updateCurrentDialog({
-            ...defaultDialog,
-            showAddUserDialog: true,
-          });
+          updateCurrentDialog(DialogType.AddUser);
         }
       });
   };
@@ -458,15 +363,13 @@ function Admin() {
             username: user.userPrincipalName ?? "",
             password: resetPasswordRequest.newPassword,
           });
-          updateCurrentDialog({
-            ...defaultDialog,
-            showResetUserSuccessDialog: true,
-          });
+          updateCurrentDialog(DialogType.ResetUserSuccess);
         }
       });
   };
 
   const blockUser = (user: UserDetails) => {
+// Consider adding error handling for clipboard operations to provide better user feedback.
     const blockUserRequest = {
       accountEnabled: false,
     };
@@ -549,13 +452,11 @@ function Admin() {
   };
 
   //helper functions
-  const validateAddUsers = (
-    displayName: string | null,
-    emailAlias: string | null,
-    phoneNumber: string | null,
-    location: string | null,
-  ): boolean => {
-    if (!displayName) {
+  const validateAddUsers = ( ): boolean => {
+    if(displayName.error || emailAlias.error || phoneNumber.error || location.error) {
+      return false;
+    }        
+    if (!displayName.value) {
       updatedisplayName((lastValue) => ({
         ...lastValue,
         error: true,
@@ -563,7 +464,7 @@ function Admin() {
       }));
       return false;
     }
-    if (!emailAlias) {
+    if (!emailAlias.value) {
       updateEmailAlias((lastValue) => ({
         ...lastValue,
         error: true,
@@ -571,7 +472,7 @@ function Admin() {
       }));
       return false;
     }
-    if (!phoneNumber) {
+    if (!phoneNumber.value) {
       updatePhoneNumber((lastValue) => ({
         ...lastValue,
         error: true,
@@ -579,7 +480,7 @@ function Admin() {
       }));
       return false;
     }
-    if (!location) {
+    if (!location.value) {
       updateLocation((lastValue) => ({
         ...lastValue,
         error: true,
@@ -587,7 +488,7 @@ function Admin() {
       }));
       return false;
     }
-    if (displayName.length < 1 || displayName.length > 50) {
+    if (displayName.value.length < 1 || displayName.value.length > 50) {
       updatedisplayName((lastValue) => ({
         ...lastValue,
         error: true,
@@ -595,7 +496,7 @@ function Admin() {
       }));
       return false;
     }
-    if (emailAlias.length < 1 || emailAlias.length > 50) {
+    if (emailAlias.value.length < 1 || emailAlias.value.length > 50) {
       updateEmailAlias((lastValue) => ({
         ...lastValue,
         error: true,
@@ -603,7 +504,7 @@ function Admin() {
       }));
       return false;
     }
-    if (emailAlias.search(emailRegex)) {
+    if (emailAlias.value.search(emailRegex)) {
       updateEmailAlias((lastValue) => ({
         ...lastValue,
         error: true,
@@ -611,7 +512,7 @@ function Admin() {
       }));
       return false;
     }
-    if (phoneNumber.search(indiaPhoneRegex)) {
+    if (phoneNumber.value.search(indiaPhoneRegex)) {
       updatePhoneNumber((lastValue) => ({
         ...lastValue,
         error: true,
@@ -622,16 +523,6 @@ function Admin() {
     return true;
   };
 
-  const generatePassword = (): string => {
-    return generator.generate({
-      length: 8,
-      symbols: true,
-      numbers: true,
-      uppercase: true,
-      lowercase: true,
-      strict: true,
-    });
-  };
 
   return (
     <>
@@ -644,9 +535,9 @@ function Admin() {
         message={SnackBarProps.message}
       ></Snackbar>
       <Dialog
-        open={isDialogOpen()}
+        open={currentDialog != DialogType.None}
         onClose={() => {
-          updateCurrentDialog(defaultDialog);
+          updateCurrentDialog(DialogType.None);
         }}
       >
         {setDialog()}
@@ -697,10 +588,7 @@ function Admin() {
                               <IconButton
                                 onClick={() => {
                                   updateSelectedUser(user);
-                                  updateCurrentDialog({
-                                    ...defaultDialog,
-                                    showResetUserDialog: true,
-                                  });
+                                  updateCurrentDialog(DialogType.ResetUser);
                                 }}
                               >
                                 <LockResetIcon></LockResetIcon>
@@ -710,10 +598,7 @@ function Admin() {
                               <IconButton
                                 onClick={() => {
                                   updateSelectedUser(user);
-                                  updateCurrentDialog({
-                                    ...defaultDialog,
-                                    showBlockUserDialog: true,
-                                  });
+                                  updateCurrentDialog(DialogType.BlockUser);
                                 }}
                               >
                                 <BlockIcon></BlockIcon>
@@ -723,10 +608,7 @@ function Admin() {
                               <IconButton
                                 onClick={() => {
                                   updateSelectedUser(user);
-                                  updateCurrentDialog({
-                                    ...defaultDialog,
-                                    showDeleteUserDialog: true,
-                                  });
+                                  updateCurrentDialog(DialogType.DeleteUser);
                                 }}
                               >
                                 <DeleteIcon></DeleteIcon>
@@ -842,12 +724,7 @@ function Admin() {
               <Stack>
                 <Button
                   onClick={() =>
-                    addUser(
-                      displayName.value,
-                      emailAlias.value,
-                      phoneNumber.value,
-                      location.value,
-                    )
+                    addUser()
                   }
                   variant="contained"
                 >
@@ -891,10 +768,7 @@ function Admin() {
                               <IconButton
                                 onClick={() => {
                                   updateSelectedUser(user);
-                                  updateCurrentDialog({
-                                    ...defaultDialog,
-                                    ShowUnBlockUserDialog: true,
-                                  });
+                                  updateCurrentDialog(DialogType.UnBlockUser);
                                 }}
                               >
                                 <CheckCircle></CheckCircle>
@@ -946,10 +820,7 @@ function Admin() {
                               <IconButton
                                 onClick={() => {
                                   updateSelectedUser(user);
-                                  updateCurrentDialog({
-                                    ...defaultDialog,
-                                    ShowRestoreUserDialog: true,
-                                  });
+                                  updateCurrentDialog(DialogType.RestoreUser);
                                 }}
                               >
                                 <RestoreIcon></RestoreIcon>
@@ -973,125 +844,22 @@ function Admin() {
 }
 export default Admin;
 
-export interface UserDetails {
-  businessPhones?: number[];
-  displayName?: string;
-  givenName?: string;
-  jobTitle?: string;
-  mail?: string;
-  mobilePhone?: number;
-  officeLocation?: string;
-  preferredLanguage?: string;
-  surname?: string;
-  userPrincipalName?: string;
-  id?: string;
-}
-export interface AddUserRequest {
-  accountEnabled: boolean;
-  displayName: string;
-  mailNickname: string;
-  userPrincipalName: string;
-  passwordProfile: {
-    forceChangePasswordNextSignIn: boolean;
-    password: string;
-  };
-  mail?: string;
-  mobilePhone?: string;
-  officeLocation?: string;
-  userType: "Member" | "Guest";
-}
 
-export interface stringTextField {
-  value: string | null;
-  error: boolean;
-  helperText: string | null;
-}
-export interface AlertProps {
-  show: boolean;
-  severity: severity;
-  message: string;
-}
-export type severity = "error" | "info" | "success" | "warning";
 
-export interface SnackBarProps {
-  isOpen: boolean;
-  message: string;
-}
 
-export type ConfirmationDialogProps = {
-  title: string;
-  content: string | string[];
-  onButton1?: () => void;
-  onButton2?: () => void;
-  Button1?: string;
-  Button2?: string;
-};
 
-export const copyToClipboard = (
-  message: string,
-  updateSnackBarProps: React.Dispatch<React.SetStateAction<SnackBarProps>>,
-) => {
-  navigator.clipboard
-    .writeText(message)
-    .then(() => {
-      updateSnackBarProps({
-        isOpen: true,
-        message: "Copied to clipboard",
-      });
-    })
-    .catch(() => {
-      updateSnackBarProps({
-        isOpen: true,
-        message: "Failed to copy to clipboard",
-      });
-    });
-};
 
-export function ConfirmationDialog(props: ConfirmationDialogProps) {
-  const {
-    title,
-    content,
-    onButton1,
-    onButton2,
-    Button1 = "Yes",
-    Button2 = "Cancel",
-  } = props;
-  return (
-    <>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        {content && typeof content === "object" ? (
-          content.map((value, id) => {
-            return <DialogContentText key={id}>{value}</DialogContentText>;
-          })
-        ) : (
-          <>
-            <DialogContentText>{content}</DialogContentText>
-          </>
-        )}
-      </DialogContent>
-      <DialogActions>
-        {onButton1 && (
-          <Button
-            variant="contained"
-            onClick={() => {
-              onButton1();
-            }}
-          >
-            {Button1}
-          </Button>
-        )}
-        {onButton2 && (
-          <Button
-            variant="outlined"
-            onClick={() => {
-              onButton2();
-            }}
-          >
-            {Button2}
-          </Button>
-        )}
-      </DialogActions>
-    </>
-  );
+
+
+
+
+export enum DialogType {
+  "None",
+  "AddUser",
+  "DeleteUser",
+  "ResetUser",
+  "BlockUser",
+  "UnBlockUser",
+  "RestoreUser",
+  "ResetUserSuccess"
 }

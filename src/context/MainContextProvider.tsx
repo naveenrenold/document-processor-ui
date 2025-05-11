@@ -1,4 +1,9 @@
 import { createContext, ReactNode, use } from "react";
+import {
+  Drawer,
+  DrawerContextProviderProps,
+} from "../Types/Context/ContextTypes";
+import { UserDetails } from "../Types/Component/UserDetails";
 
 export let DrawerContext = createContext<Drawer | null>(null);
 function DrawerContextProvider({
@@ -22,12 +27,12 @@ export function useDrawerContext() {
   return context;
 }
 
-interface Drawer {
-  isDrawerOpen: boolean;
-  updateIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-type DrawerContextProviderProps = {
+export interface UserContextProps {
   children: ReactNode;
-  drawer: Drawer;
-};
+  user: UserDetails | null;
+  updateUser: React.Dispatch<React.SetStateAction<UserDetails | null>>;
+}
+export interface UserProps {
+  user: UserDetails | null;
+  updateUser: React.Dispatch<React.SetStateAction<UserDetails | null>>;
+}

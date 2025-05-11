@@ -1,9 +1,10 @@
 import { FormLabel, MenuItem, Select, Stack, TextField } from "@mui/material";
-import { useUserContext } from "../context/UserContextProvider";
+import { useUserContext } from "../../context/UserContextProvider";
 import { useState } from "react";
 
 function Form() {
   //constants
+  //usestate
   const { user, updateUser } = useUserContext();
   const [customerName, updatecustomerName] = useState("");
   const [customerAddress, updateCustomerAddress] = useState("");
@@ -11,7 +12,6 @@ function Form() {
   const [process, updateProcess] = useState<Process[]>([]);
   const [attachments, updateattachments] = useState<Attachment[]>([]);
 
-  //usestate
   //useeffect
   //other api calls
   //render functions
@@ -65,24 +65,3 @@ function Form() {
   );
 }
 export default Form;
-
-export interface FormDetails {
-  processId: number;
-  customerName: string;
-  customerAddress?: string;
-  location: string;
-  submittedBy: string;
-}
-
-export interface Process {
-  processId: number;
-  processName: string;
-}
-export interface Attachment {
-  filename?: string;
-  filepath?: string;
-}
-export interface Activity {
-  activityTypeId: number;
-  comments?: number;
-}

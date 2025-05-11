@@ -11,15 +11,13 @@ import Box from "@mui/material/Box";
 import DrawerContextProvider from "./context/MainContextProvider";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import AdminContextProvider from "./context/AdminContextProvider";
-import Form from "./component/Form";
-import UserContextProvider, {
-  UserContext,
-} from "./context/UserContextProvider";
+import Form from "./component/Form/Form";
+import UserContextProvider from "./context/UserContextProvider";
 
 function Main() {
   useEffect(() => {
     new MSALAuth();
-    MSALAuth.myMSALObj.initialize();
+    MSALAuth.myMSALObj.initialize();// initialise singleton authentication on program start
   }, []);
 
   let [isLoggedIn, updateIsLoggedIn] = useState(false);

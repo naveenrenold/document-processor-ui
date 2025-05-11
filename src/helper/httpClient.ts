@@ -1,7 +1,9 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getBearerToken } from "./MSALAuth";
 import { loginRequest } from "./authConfig";
-import { AlertProps, severity } from "../component/Admin/Admin";
+import { UserDetails } from "../Types/Component/UserDetails";
+import { severity } from "../Types/CommonTypes";
+import { AlertProps } from "../Types/ComponentProps/AlertProps";
 
 class httpClient {
   static baseUrl = import.meta.env.VITE_BaseURL;
@@ -165,6 +167,28 @@ class httpClient {
       },
     };
   }
+  static async fetchUsers(
+    url: string,
+    updateAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+    updateState: React.Dispatch<React.SetStateAction<UserDetails[]>>,
+    filterFn: (value: UserDetails) => boolean = (value) =>
+      value.officeLocation !== null,
+  ) {
+    const response = await httpClient.getAsync<UserDetails[]>(
+      url,
+      undefined,
+      updateAlertProps,
+      undefined,
+      setIsLoading,
+      true,
+    );
+    if (response && response.length > 0) {
+      updateState(response.filter(filterFn));
+    }
+    console.log(`${url} call failed`);
+    return [];
+  }
 
   static async setAlerts<T>(
     result?: T,
@@ -190,6 +214,12 @@ class httpClient {
       setTimeout(() => {
         setAlert(alert);
       }, 5000);
+    } else {
+      console.log(
+        response?.error?.message ||
+          response?.message ||
+          (response ? response.toString() : "Error occured"),
+      );
     }
   }
 }

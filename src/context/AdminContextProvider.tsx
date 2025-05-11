@@ -1,34 +1,24 @@
-import {createContext, ReactNode, use} from "react";
+import { createContext, use } from "react";
+import {
+  admin,
+  AdminContextProviderProps,
+} from "../Types/Context/ContextTypes";
 
 export let adminContext = createContext<admin | null>(null);
-function AdminContextProvider({children, admin} : AdminContextProviderProps)
-{            
-    return <>
-    <adminContext.Provider value = {admin}>
-        {children}
-    </adminContext.Provider>
+function AdminContextProvider({ children, admin }: AdminContextProviderProps) {
+  return (
+    <>
+      <adminContext.Provider value={admin}>{children}</adminContext.Provider>
     </>
-    
+  );
 }
 
 export default AdminContextProvider;
 
-export function useAdminContext()
-{
-    let context = use(adminContext);
-    if(!context)
-    {
-        throw new Error("Error at useAdminContext: null Context")        
-    }
-    return context;
+export function useAdminContext() {
+  let context = use(adminContext);
+  if (!context) {
+    throw new Error("Error at useAdminContext: null Context");
+  }
+  return context;
 }
-
-interface admin{
-    isAdmin: boolean;
-    updateIsAdmin : React.Dispatch<React.SetStateAction<boolean>>;
-   }
-
-type AdminContextProviderProps = {
-    children: ReactNode;
-    admin :admin    
-};

@@ -31,11 +31,13 @@ import { useAdminContext } from "../../context/AdminContextProvider";
 import admins from "../../data/admin.json";
 import { useUserContext } from "../../context/UserContextProvider";
 import httpClient from "../../helper/httpClient";
-import { UserDetails } from "../Admin/Admin";
+import { drawerWidth } from "../../Constant";
+import { UserDetails } from "../../Types/Component/UserDetails";
 
 function Header() {
   //constants
-  const drawerWidth = 240;
+
+  //hooks
   const navigate = useNavigate();
   //useState
   let [currentDate, updatecurrentDate] = useState(new Date());
