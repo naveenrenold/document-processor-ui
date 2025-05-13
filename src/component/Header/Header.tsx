@@ -12,24 +12,26 @@ import {
   PopupRequest,
 } from "@azure/msal-browser";
 import {
+  Alert,
   AppBar,
+  Dialog,
   Drawer,
   IconButton,
+  LinearProgress,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
+  Snackbar,
   Toolbar,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 import style from "./Header.module.css";
 import headings from "../../data/headings.json";
-import { useDrawerContext } from "../../context/MainContextProvider";
+import { useMainContext } from "../../context/MainContextProvider";
 import { useNavigate } from "react-router";
-import { useAdminContext } from "../../context/AdminContextProvider";
 import admins from "../../data/admin.json";
-import { useUserContext } from "../../context/UserContextProvider";
 import httpClient from "../../helper/httpClient";
 import { drawerWidth } from "../../Constant";
 import { UserDetails } from "../../Types/Component/UserDetails";
@@ -41,12 +43,17 @@ function Header() {
   const navigate = useNavigate();
   //useState
   let [currentDate, updatecurrentDate] = useState(new Date());
-  let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
-  let { isLoggedIn, updateIsLoggedIn } = useLoginContext();
-  let { user, updateUser } = useUserContext();
+  let { user, updateUser, accountInfo, updateAccountInfo, role, updateRole } =
+    useLoginContext();
+  let {
+    isDrawerOpen,
+    updateIsDrawerOpen,
+    alertProps,
+    isLoading,
+    snackBarProps: SnackBarProps,
+    updateSnackBarProps,
+  } = useMainContext();
   const isMobile = useMediaQuery("(max-width:639px)");
-  let { isDrawerOpen, updateIsDrawerOpen } = useDrawerContext();
-  let { isAdmin, updateIsAdmin } = useAdminContext();
   //useEffect
   useEffect(() => {
     new MSALAuth();
@@ -64,18 +71,21 @@ function Header() {
       if (!accounts || accounts.length == 0) {
         console.log("Signing in");
         signIn();
+        accounts = MSALAuth.myMSALObj.getAllAccounts();
         return;
       } else if (accounts.length > 1) {
         console.log("Warning, more than 1 active account");
-        updateIsAdmin(admins.includes(accounts[0].username));
+        if (admins.includes(accounts[0].username)) {
+          updateRole("Admin");
+        }
         updateAccountInfo(accounts[0]);
-        updateIsLoggedIn(true);
         getUserDetails(accounts[0]);
       } else {
         console.log("Default sign in", accounts[0]);
-        updateIsAdmin(admins.includes(accounts[0].username));
+        if (admins.includes(accounts[0].username)) {
+          updateRole("Admin");
+        }
         updateAccountInfo(accounts[0]);
-        updateIsLoggedIn(true);
         getUserDetails(accounts[0]);
       }
     };
@@ -84,7 +94,7 @@ function Header() {
   const getUserDetails = (accountInfo: AccountInfo) => {
     httpClient
       .getAsync<UserDetails[]>(
-        `users?$filter=userType eq 'Guest' and id eq ${accountInfo.homeAccountId}`,
+        `users/${accountInfo.localAccountId}`,
         undefined,
         undefined,
         undefined,
@@ -101,9 +111,10 @@ function Header() {
       });
   };
   //render function
-  const headerHeadings = isAdmin
-    ? headings
-    : headings.filter((heading) => heading.adminModule === false);
+  const headerHeadings =
+    role === "Admin"
+      ? headings
+      : headings.filter((heading) => heading.adminModule === false);
   // helper functions
   const signIn = () => {
     let request: PopupRequest = loginRequest;
@@ -112,8 +123,9 @@ function Header() {
       .then((authResult) => {
         MSALAuth.myMSALObj.setActiveAccount(authResult.account);
         updateAccountInfo(authResult.account);
-        updateIsAdmin(admins.includes(authResult.account.username));
-        updateIsLoggedIn(true);
+        if (admins.includes(authResult.account.username)) {
+          updateRole("Admin");
+        }
         getUserDetails(authResult.account);
       })
       .catch((err) => {
@@ -130,13 +142,12 @@ function Header() {
       .logoutPopup(request)
       .then(() => {
         console.log("logoutsuccess");
-        updateAccountInfo(null);
-        updateIsAdmin(false);
-        updateIsLoggedIn(false);
         updateUser(null);
+        updateRole("Employee");
+        updateAccountInfo(null);
       })
       .catch((err) => {
-        console.log("Error at Sign in ", err);
+        console.log("Error at Sign out ", err);
       });
   };
 
@@ -192,7 +203,7 @@ function Header() {
           })}
           {isMobile ? (
             <>
-              {isLoggedIn ? (
+              {accountInfo ? (
                 <>
                   <ListItem>
                     <ListItemText>
@@ -258,7 +269,7 @@ function Header() {
             justifyContent={"space-between"}
             alignItems={"center"}
           >
-            {isLoggedIn ? (
+            {accountInfo ? (
               <>
                 <div className={style.hm}>{accountInfo?.name}</div>
                 <div className={style.hm}>{user?.officeLocation}</div>
@@ -292,6 +303,28 @@ function Header() {
           </Stack>
         </Stack>
       </AppBar>
+      {isLoading && <LinearProgress></LinearProgress>}
+      {alertProps.show && (
+        <Alert variant="filled" severity={alertProps.severity}>
+          {alertProps.message}
+        </Alert>
+      )}
+      <Snackbar
+        open={SnackBarProps.isOpen}
+        autoHideDuration={5000}
+        onClose={() => {
+          updateSnackBarProps({ isOpen: false, message: "" });
+        }}
+        message={SnackBarProps.message}
+      ></Snackbar>
+      {/* <Dialog
+        open={currentDialog != DialogType.None}
+        onClose={() => {
+          updateCurrentDialog(DialogType.None);
+        }}
+      >
+        {setDialog()}
+      </Dialog> */}
     </>
   );
 }

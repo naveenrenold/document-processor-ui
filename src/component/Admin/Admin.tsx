@@ -38,7 +38,8 @@ import { ConfirmationDialogProps } from "../../Types/ComponentProps/Confirmation
 import { ConfirmationDialog } from "../../custom-component/Dialog";
 import { copyToClipboard, generatePassword } from "../../helper/helperFunction";
 import { AddUserRequest } from "../../Types/Component/AddUserRequest";
-import { stringTextField } from "../../Types/ComponentProps/TextFieldProps";
+import { textFieldString } from "../../Types/ComponentProps/TextFieldProps";
+import { useMainContext } from "../../context/MainContextProvider";
 
 function Admin() {
   //hooks
@@ -49,25 +50,30 @@ function Admin() {
   const [users, updateUsers] = useState<UserDetails[]>([]);
   const [blockedUsers, updateBlockedUsers] = useState<UserDetails[]>([]);
   const [deletedUsers, updateDeletedUsers] = useState<UserDetails[]>([]);
-  const defaultTextField: stringTextField = {
+  const defaultTextField: textFieldString = {
     value: "",
     error: false,
     helperText: null,
   };
   const [displayName, updatedisplayName] =
-    useState<stringTextField>(defaultTextField);
+    useState<textFieldString>(defaultTextField);
   const [emailAlias, updateEmailAlias] =
-    useState<stringTextField>(defaultTextField);
+    useState<textFieldString>(defaultTextField);
   const [phoneNumber, updatePhoneNumber] =
-    useState<stringTextField>(defaultTextField);
+    useState<textFieldString>(defaultTextField);
   const [location, updateLocation] =
-    useState<stringTextField>(defaultTextField);
-  const [alertProps, updateAlertProps] = useState<AlertProps>({
-    show: false,
-    message: "",
-    severity: "info",
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+    useState<textFieldString>(defaultTextField);
+  const {
+    updateAlertProps,
+    updateIsLoading: setIsLoading,
+    updateSnackBarProps,
+  } = useMainContext();
+  // const [alertProps, updateAlertProps] = useState<AlertProps>({
+  //   show: false,
+  //   message: "",
+  //   severity: "info",
+  // });
+  // const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedUser, updateSelectedUser] = useState<UserDetails>();
   const [currentDialog, updateCurrentDialog] = useState<DialogType>(
     DialogType.None,
@@ -76,15 +82,15 @@ function Admin() {
     username: "",
     password: "",
   });
-  const [SnackBarProps, updateSnackBarProps] = useState<SnackBarProps>({
-    isOpen: false,
-    message: "",
-  });
+  // const [SnackBarProps, updateSnackBarProps] = useState<SnackBarProps>({
+  //   isOpen: false,
+  //   message: "",
+  // });
 
   //useEffect
   useEffect(() => {
     httpClient.fetchUsers(
-      "users?$filter=userType eq 'Guest'",
+      "users?$filter=userType eq 'Guest' and accountEnabled eq true",
       updateAlertProps,
       setIsLoading,
       updateUsers,
@@ -290,7 +296,7 @@ function Admin() {
         forceChangePasswordNextSignIn: true,
         password: generatePassword(),
       },
-      userPrincipalName: emailAlias! + domain,
+      userPrincipalName: emailAlias.value! + domain,
       userType: "Guest",
     };
     httpClient
@@ -537,14 +543,14 @@ function Admin() {
 
   return (
     <>
-      <Snackbar
+      {/* <Snackbar
         open={SnackBarProps.isOpen}
         autoHideDuration={5000}
         onClose={() => {
           updateSnackBarProps({ isOpen: false, message: "" });
         }}
         message={SnackBarProps.message}
-      ></Snackbar>
+      ></Snackbar> */}
       <Dialog
         open={currentDialog != DialogType.None}
         onClose={() => {
@@ -567,12 +573,12 @@ function Admin() {
         </Tabs>
         <TabPanel value={1}>
           <Box>
-            {isLoading && <LinearProgress></LinearProgress>}
+            {/* {isLoading && <LinearProgress></LinearProgress>}
             {alertProps.show && (
               <Alert variant="filled" severity={alertProps.severity}>
                 {alertProps.message}
               </Alert>
-            )}
+            )} */}
             <Stack>
               <Typography variant="h6">List Users:</Typography>
             </Stack>
@@ -640,12 +646,12 @@ function Admin() {
 
         <TabPanel value={2}>
           <Box>
-            {isLoading && <LinearProgress></LinearProgress>}
+            {/* {isLoading && <LinearProgress></LinearProgress>}
             {alertProps.show && (
               <Alert variant="filled" severity={alertProps.severity}>
                 {alertProps.message}
               </Alert>
-            )}
+            )} */}
             <Stack>
               <Typography variant="h6">Add Users:</Typography>
             </Stack>
@@ -742,12 +748,12 @@ function Admin() {
         </TabPanel>
         <TabPanel value={3}>
           <Box>
-            {isLoading && <LinearProgress></LinearProgress>}
+            {/* {isLoading && <LinearProgress></LinearProgress>}
             {alertProps.show && (
               <Alert variant="filled" severity={alertProps.severity}>
                 {alertProps.message}
               </Alert>
-            )}
+            )} */}
             <Stack>
               <Typography variant="h6">Unblock Users:</Typography>
             </Stack>
@@ -794,12 +800,12 @@ function Admin() {
         </TabPanel>
         <TabPanel value={4}>
           <Box>
-            {isLoading && <LinearProgress></LinearProgress>}
+            {/* {isLoading && <LinearProgress></LinearProgress>}
             {alertProps.show && (
               <Alert variant="filled" severity={alertProps.severity}>
                 {alertProps.message}
               </Alert>
-            )}
+            )} */}
             <Stack>
               <Typography variant="h6">Restore Users:</Typography>
             </Stack>

@@ -8,12 +8,14 @@ import { ThemeProvider } from "@emotion/react";
 import { theme } from "./helper/material-ui-config";
 import Admin from "./component/Admin/Admin";
 import Box from "@mui/material/Box";
-import DrawerContextProvider from "./context/MainContextProvider";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import AdminContextProvider from "./context/AdminContextProvider";
 import Form from "./component/Form/Form";
-import UserContextProvider from "./context/UserContextProvider";
 import { UserDetails } from "./Types/Component/UserDetails";
+import MainContextProvider from "./context/MainContextProvider";
+import { AlertProps } from "./Types/ComponentProps/AlertProps";
+import { AccountInfo } from "@azure/msal-browser";
+import { Role } from "./Types/Component/Role";
+import { SnackBarProps } from "./Types/ComponentProps/SnackBarProps";
 
 function Main() {
   useEffect(() => {
@@ -21,33 +23,61 @@ function Main() {
     MSALAuth.myMSALObj.initialize(); // initialise singleton authentication on program start
   }, []);
 
-  let [isLoggedIn, updateIsLoggedIn] = useState(false);
   let [isDrawerOpen, updateIsDrawerOpen] = useState(false);
-  let [isAdmin, updateIsAdmin] = useState(false);
+  let [alertProps, updateAlertProps] = useState<AlertProps>({
+    message: "",
+    show: false,
+    severity: "info",
+  });
+  let [snackBarProps, updateSnackBarProps] = useState<SnackBarProps>({
+    isOpen: false,
+    message: "",
+  });
+  let [isLoading, updateIsLoading] = useState(false);
   let [user, updateUser] = useState<UserDetails | null>(null);
+  let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
+  let [role, updateRole] = useState<Role>("Employee");
   const isMobile = useMediaQuery("(max-width:639px)");
 
   return (
     <>
       <ThemeProvider theme={theme}>
         <BrowserRouter basename="/">
-          <DrawerContextProvider drawer={{ isDrawerOpen, updateIsDrawerOpen }}>
-            <UserContextProvider user={user} updateUser={updateUser}>
-              <LoginContextProvider login={{ isLoggedIn, updateIsLoggedIn }}>
-                <AdminContextProvider admin={{ isAdmin, updateIsAdmin }}>
-                  <Header />
-                </AdminContextProvider>
-              </LoginContextProvider>
+          <MainContextProvider
+            mainContext={{
+              isDrawerOpen,
+              updateIsDrawerOpen,
+              alertProps,
+              updateAlertProps,
+              isLoading,
+              updateIsLoading,
+              snackBarProps,
+              updateSnackBarProps,
+            }}
+          >
+            <LoginContextProvider
+              loginContextProvider={{
+                user,
+                updateUser,
+                accountInfo,
+                updateAccountInfo,
+                role,
+                updateRole,
+              }}
+            >
+              <Header />
               <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
-                {isLoggedIn && (
+                {accountInfo && (
                   <Routes>
-                    {isAdmin && <Route path="admin" element={<Admin />} />}
+                    {role === "Admin" && (
+                      <Route path="admin" element={<Admin />} />
+                    )}
                     <Route path="form" element={<Form />} />
                   </Routes>
                 )}
               </Box>
-            </UserContextProvider>
-          </DrawerContextProvider>
+            </LoginContextProvider>
+          </MainContextProvider>
         </BrowserRouter>
       </ThemeProvider>
     </>

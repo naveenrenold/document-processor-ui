@@ -1,38 +1,29 @@
 import { createContext, ReactNode, use } from "react";
 import {
-  Drawer,
-  DrawerContextProviderProps,
+  MainContextProviderProps,
+  MainContextType,
 } from "../Types/Context/ContextTypes";
-import { UserDetails } from "../Types/Component/UserDetails";
 
-export let DrawerContext = createContext<Drawer | null>(null);
-function DrawerContextProvider({
+export let MainContext = createContext<MainContextType | null>(null);
+function MainContextProvider({
   children,
-  drawer,
-}: DrawerContextProviderProps) {
+  mainContext,
+}: MainContextProviderProps) {
   return (
     <>
-      <DrawerContext.Provider value={drawer}>{children}</DrawerContext.Provider>
+      <MainContext.Provider value={mainContext}>
+        {children}
+      </MainContext.Provider>
     </>
   );
 }
 
-export default DrawerContextProvider;
+export default MainContextProvider;
 
-export function useDrawerContext() {
-  let context = use(DrawerContext);
+export function useMainContext() {
+  let context = use(MainContext);
   if (!context) {
-    throw new Error("Error at usedrawerContext: null Context");
+    throw new Error("Error at useMainContext: null Context");
   }
   return context;
-}
-
-export interface UserContextProps {
-  children: ReactNode;
-  user: UserDetails | null;
-  updateUser: React.Dispatch<React.SetStateAction<UserDetails | null>>;
-}
-export interface UserProps {
-  user: UserDetails | null;
-  updateUser: React.Dispatch<React.SetStateAction<UserDetails | null>>;
 }

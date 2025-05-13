@@ -1,14 +1,19 @@
 import { createContext, use } from "react";
 import {
-  login,
   LoginContextProviderProps,
+  LoginContextType,
 } from "../Types/Context/ContextTypes";
 
-export let loginContext = createContext<login | null>(null);
-function LoginContextProvider({ children, login }: LoginContextProviderProps) {
+export const loginContext = createContext<LoginContextType | null>(null);
+function LoginContextProvider({
+  children,
+  loginContextProvider,
+}: LoginContextProviderProps) {
   return (
     <>
-      <loginContext.Provider value={login}>{children}</loginContext.Provider>
+      <loginContext.Provider value={loginContextProvider}>
+        {children}
+      </loginContext.Provider>
     </>
   );
 }

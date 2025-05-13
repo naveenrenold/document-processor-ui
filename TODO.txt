@@ -81,3 +81,26 @@ Conflicts detected while trying to restore the user restoreUserErrors: ErrorValu
 11/5/25
 1.Currently used context to get location, need to test
 2. Need to see how to enable 
+3. refactored types and functions
+4. added env files for prod
+5. refactored admin.tsx
+
+13/5/25
+1.I need to decide for database
+2. I also need to finish UI and start api
+database
+1. how much time will it take to migrate
+it will take some time
+for now dont do it
+
+1. for now fixed the ui bug  -done
+2. In ui need to use the correct input fields - done
+3. Move isloading and alert props to header -done
+4. for that i need to create correct context - done
+5. combine admin and login context and drawer, user and main(loading and alert) -done
+wait what does user do?
+ah right 
+make user with admin
+
+14/5/25
+1. finish the form - text boxes and well the form itself

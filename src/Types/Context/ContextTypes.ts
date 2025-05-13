@@ -1,31 +1,35 @@
 import { ReactNode } from "react";
-
-export interface admin {
-  isAdmin: boolean;
-  updateIsAdmin: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export type AdminContextProviderProps = {
-  children: ReactNode;
-  admin: admin;
-};
-
-export interface login {
-  isLoggedIn: boolean;
-  updateIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-}
+import { UserDetails } from "../Component/UserDetails";
+import { AlertProps } from "../ComponentProps/AlertProps";
+import { AccountInfo } from "@azure/msal-browser";
+import { Role } from "../Component/Role";
+import { SnackBarProps } from "../ComponentProps/SnackBarProps";
 
 export type LoginContextProviderProps = {
   children: ReactNode;
-  login: login;
+  loginContextProvider: LoginContextType;
+};
+export type LoginContextType = {
+  user: UserDetails | null;
+  updateUser: React.Dispatch<React.SetStateAction<UserDetails | null>>;
+  accountInfo: AccountInfo | null;
+  updateAccountInfo: React.Dispatch<React.SetStateAction<AccountInfo | null>>;
+  role: Role;
+  updateRole: React.Dispatch<React.SetStateAction<Role>>;
 };
 
-export interface Drawer {
+export type MainContextProviderProps = {
+  children: ReactNode;
+  mainContext: MainContextType;
+};
+
+export type MainContextType = {
   isDrawerOpen: boolean;
   updateIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export type DrawerContextProviderProps = {
-  children: ReactNode;
-  drawer: Drawer;
+  alertProps: AlertProps;
+  updateAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>;
+  isLoading: boolean;
+  updateIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  snackBarProps: SnackBarProps;
+  updateSnackBarProps: React.Dispatch<React.SetStateAction<SnackBarProps>>;
 };

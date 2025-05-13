@@ -8,7 +8,7 @@ const msalConfig: msal.Configuration = {
     redirectUri: import.meta.env.VITE_BaseURL,
   },
   cache: {
-    cacheLocation: "memoryStorage",
+    cacheLocation: "sessionStorage",
     storeAuthStateInCookie: false,
   },
   system: {
