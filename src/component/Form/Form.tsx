@@ -25,7 +25,9 @@ function Form() {
     error: false,
     helperText: "",
   };
-  const { user, updateUser } = useLoginContext();
+  const { user } = useLoginContext();
+  const { updateAlertProps, updateIsLoading, updateSnackBarProps } =
+    useMainContext();
   const [customerName, updatecustomerName] = useState<textFieldString>(
     defaultTextFieldString,
   );
@@ -46,21 +48,25 @@ function Form() {
       <Container maxWidth="xs">
         <Stack>
           <Typography variant="h5" fontWeight={800} color="primary">
-            Form 1:
+            Form:
           </Typography>
         </Stack>
         <Stack direction={"row-reverse"}>{user?.officeLocation ?? ""}</Stack>
         <Stack>
           <TextField
             label="Name of the Candidate:"
-            value={customerName}
+            value={customerName.value}
             required={true}
             error={customerName.error}
             helperText={customerName.helperText}
             variant="filled"
             margin="normal"
             onChange={(e) => {
-              //updatecustomerName(e.target.value);
+              updatecustomerName({
+                value: e.target.value,
+                error: false,
+                helperText: "",
+              });
             }}
           ></TextField>
         </Stack>
@@ -69,13 +75,18 @@ function Form() {
             label="Address"
             multiline={true}
             minRows={3}
-            value={customerAddress}
+            maxRows={5}
+            value={customerAddress.value}
             margin="normal"
             variant="filled"
             error={customerAddress.error}
             helperText={customerAddress.helperText}
             onChange={(e) => {
-              //updateCustomerAddress(e.target.value);
+              updateCustomerAddress({
+                value: e.target.value,
+                error: false,
+                helperText: "",
+              });
             }}
           ></TextField>
         </Stack>
