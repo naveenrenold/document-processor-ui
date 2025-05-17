@@ -1,9 +1,11 @@
 import {
   Alert,
   Box,
+  Button,
   Container,
   Divider,
   FormLabel,
+  InputLabel,
   LinearProgress,
   MenuItem,
   Select,
@@ -16,6 +18,7 @@ import { Attachment, Process } from "../../Types/Component/Form";
 import { textFieldString } from "../../Types/ComponentProps/TextFieldProps";
 import { useMainContext } from "../../context/MainContextProvider";
 import { useLoginContext } from "../../context/LoginContextProvider";
+import processData from "../../data/process.json";
 
 function Form() {
   //constants
@@ -35,7 +38,7 @@ function Form() {
     defaultTextFieldString,
   );
   const [currentProcess, updateCurrentProcess] = useState(0);
-  const [process, updateProcess] = useState<Process[]>([]);
+  const [process, updateProcess] = useState<Process[]>(processData);
   const [attachments, updateattachments] = useState<Attachment[]>([]);
 
   //useeffect
@@ -47,7 +50,7 @@ function Form() {
     <>
       <Container maxWidth="xs">
         <Stack>
-          <Typography variant="h5" fontWeight={800} color="primary">
+          <Typography variant="h5" fontWeight={800} color="secondary">
             Form:
           </Typography>
         </Stack>
@@ -91,12 +94,13 @@ function Form() {
           ></TextField>
         </Stack>
         <Stack>
-          <Select
+          <TextField
+            select
             label="Process"
             value={currentProcess}
             variant="filled"
             onChange={(e) => {
-              updateCurrentProcess(e.target.value as number);
+              updateCurrentProcess(Number(e.target.value));
             }}
           >
             {process.map((process) => {
@@ -106,10 +110,24 @@ function Form() {
                 </MenuItem>
               );
             })}
-          </Select>
+          </TextField>
         </Stack>
-        <Stack>
-          <></>
+        <Stack direction={"row"} spacing={2} marginTop={2}>
+          <Button variant="contained" component="label">
+            Browse
+            <input
+              hidden
+              type="file"
+              title="browse"
+              multiple
+              accept="image/png, image/jpg, image/jpeg"
+              capture="environment"
+            ></input>
+          </Button>
+        </Stack>
+        <Stack direction={"row"} spacing={2} marginTop={2}>
+          <Button variant="contained">Save</Button>
+          <Button variant="contained">Submit</Button>
         </Stack>
       </Container>
     </>

@@ -104,3 +104,9 @@ make user with admin
 
 14/5/25
 1. finish the form - text boxes and well the form itself
+
+17/5/25
+1.Make a common function for both???
+2. make upload file button or use camera
+3. need more input to continue
+4. focus on work a bit more
