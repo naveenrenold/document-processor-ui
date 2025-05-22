@@ -118,3 +118,6 @@ in local iis it is working finish it. the folder structure is an issue
 
 21/5/25
 1.change iis to node js hosting
+
+22/5/25
+finally hosting is real
