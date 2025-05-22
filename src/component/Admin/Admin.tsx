@@ -693,7 +693,7 @@ function Admin() {
                 <TextField
                   className="w-1/2"
                   disabled={true}
-                  value="@navigatorxdd.onmicrosoft.com"
+                  value={domain}
                 ></TextField>
               </Stack>
               <Stack>

@@ -110,3 +110,11 @@ make user with admin
 2. make upload file button or use camera
 3. need more input to continue
 4. focus on work a bit more
+
+18/5/25
+1.You need to check how to write rewrite for iis and then make changes to react also
+
+in local iis it is working finish it. the folder structure is an issue
+
+21/5/25
+1.change iis to node js hosting
