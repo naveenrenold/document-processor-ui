@@ -5,5 +5,6 @@ interface ImportMetaEnv {
   readonly VITE_TenantId: string;
   readonly VITE_BaseURL: string;
   readonly VITE_Base: string;
+  readonly VITE_ApiUrl: string;
   // more env variables...
 }

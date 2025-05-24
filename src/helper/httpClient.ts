@@ -6,8 +6,11 @@ import { AlertProps } from "../Types/ComponentProps/AlertProps";
 import { severity } from "../Types/ComponentProps/ButtonProps";
 
 class httpClient {
-  static baseUrl = import.meta.env.VITE_BaseURL;
+  static apiUrl = import.meta.env.VITE_ApiUrl;
   static graphApiUrl = "https://graph.microsoft.com/v1.0/";
+
+  static GetForm = "form";
+  static GetProcess = "process";
 
   public static async getAsync<T>(
     url: string,
@@ -22,7 +25,7 @@ class httpClient {
       return;
     }
     let response = axios.get<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
+      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
       header,
     );
     if (setIsLoading) {
@@ -53,7 +56,7 @@ class httpClient {
       return;
     }
     let response = axios.post<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
+      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
       request,
       header,
     );
@@ -84,7 +87,7 @@ class httpClient {
       return;
     }
     let response = axios.delete<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
+      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
       header,
     );
     if (setIsLoading) {
@@ -115,7 +118,7 @@ class httpClient {
       return;
     }
     let response = axios.patch<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.baseUrl}${url}`,
+      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
       request,
       header,
     );

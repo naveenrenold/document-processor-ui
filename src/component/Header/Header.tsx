@@ -93,7 +93,7 @@ function Header() {
   //api calls
   const getUserDetails = (accountInfo: AccountInfo) => {
     httpClient
-      .getAsync<UserDetails[]>(
+      .getAsync<UserDetails>(
         `users/${accountInfo.localAccountId}`,
         undefined,
         undefined,
@@ -102,8 +102,8 @@ function Header() {
         true,
       )
       .then((response) => {
-        if (response && response.length > 0) {
-          updateUser(response[0]);
+        if (response) {
+          updateUser(response);
         }
       })
       .catch((err) => {
@@ -272,8 +272,14 @@ function Header() {
             {accountInfo ? (
               <>
                 <div className={style.hm}>{accountInfo?.name}</div>
-                <div className={style.hm}>{user?.officeLocation}</div>
-                {/* <Divider orientation="vertical" flexItem></Divider> */}
+                {user?.officeLocation && !isMobile && (
+                  <>
+                    <Divider orientation="vertical" flexItem></Divider>
+                    <div className={style.hm}>{user?.officeLocation}</div>
+                    <Divider orientation="vertical" flexItem></Divider>
+                  </>
+                )}
+
                 <Button
                   size="small"
                   color={"secondary"}

@@ -12,12 +12,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Attachment, Process } from "../../Types/Component/Form";
 import { textFieldString } from "../../Types/ComponentProps/TextFieldProps";
 import { useMainContext } from "../../context/MainContextProvider";
 import { useLoginContext } from "../../context/LoginContextProvider";
 import processData from "../../data/process.json";
+import style from "./Form.module.css";
+import httpClient from "../../helper/httpClient";
 
 function Form() {
   //constants
@@ -37,10 +39,23 @@ function Form() {
     defaultTextFieldString,
   );
   const [currentProcess, updateCurrentProcess] = useState(0);
-  const [process, updateProcess] = useState<Process[]>(processData);
+  const [process, updateProcess] = useState<Process[]>([]);
   const [attachments, updateattachments] = useState<Attachment[]>([]);
 
   //useeffect
+  useEffect(() => {
+    httpClient
+      .getAsync<
+        Process[]
+      >(httpClient.GetProcess, [], updateAlertProps, undefined, updateIsLoading, false)
+      .then((response) => {
+        if (response && response.length > 0) {
+          {
+            updateProcess(response);
+          }
+        }
+      });
+  }, []);
   //other api calls
   //render functions
   //helper funtions
@@ -49,11 +64,20 @@ function Form() {
     <>
       <Container maxWidth="xs">
         <Stack>
-          <Typography variant="h5" fontWeight={800} color="secondary">
+          <Typography
+            variant="h5"
+            fontWeight={800}
+            color="primary"
+            className={style.textshadowsec}
+          >
             Form:
           </Typography>
         </Stack>
-        <Stack direction={"row-reverse"}>{user?.officeLocation ?? ""}</Stack>
+        {/* <Stack direction={"row-reverse"}>
+          <Typography className={style.textshadowsec} color="primary">
+            {user?.officeLocation ?? ""}
+          </Typography>
+        </Stack> */}
         <Stack>
           <TextField
             label="Name of the Candidate:"
