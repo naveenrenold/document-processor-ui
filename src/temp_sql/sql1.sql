@@ -34,3 +34,9 @@ Select @@IDENTITY
 
 
 Alter table Activity Alter column CreatedOn DateTime not null;
+
+
+
+Select * from Form
+
+Insert into Location values('Nagercoil')

@@ -201,11 +201,13 @@ class httpClient {
   ) {
     let response: any = result;
     if (setAlert) {
+      let alertMessage = response?.error?.message || response?.message;
+      if (!alertMessage) {
+        console.log(response ? response.toString() : "Error occured");
+        return;
+      }
       let alert: AlertProps = {
-        message:
-          response?.error?.message ||
-          response?.message ||
-          (response ? response.toString() : "Error occured"),
+        message: alertMessage || "Error occured",
         severity: severity,
         show: true,
       };

@@ -121,3 +121,8 @@ in local iis it is working finish it. the folder structure is an issue
 
 22/5/25
 finally hosting is real
+
+25/5/25
+1. Big issue how to handle attachment
+2. Need to finish attachments
+3. Added attchments need to send files in api calls also
