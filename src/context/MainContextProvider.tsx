@@ -3,6 +3,7 @@ import {
   MainContextProviderProps,
   MainContextType,
 } from "../Types/Context/ContextTypes";
+import { AlertProps } from "../Types/ComponentProps/AlertProps";
 
 export let MainContext = createContext<MainContextType | null>(null);
 function MainContextProvider({
@@ -27,3 +28,18 @@ export function useMainContext() {
   }
   return context;
 }
+
+export const setAlerts = (
+  alertProps: AlertProps,
+  updateAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>,
+) => {
+  updateAlertProps(alertProps);
+  window.scrollTo(0, 0);
+  setTimeout(() => {
+    updateAlertProps({
+      message: "",
+      severity: "info",
+      show: false,
+    });
+  }, 5000);
+};

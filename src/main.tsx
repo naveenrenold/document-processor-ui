@@ -11,7 +11,7 @@ import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Form from "./component/Form/Form";
 import { UserDetails } from "./Types/Component/UserDetails";
-import MainContextProvider from "./context/MainContextProvider";
+import MainContextProvider, { setAlerts } from "./context/MainContextProvider";
 import { AlertProps } from "./Types/ComponentProps/AlertProps";
 import { AccountInfo } from "@azure/msal-browser";
 import { Role } from "./Types/Component/Role";
@@ -53,6 +53,8 @@ function Main() {
               updateIsLoading,
               snackBarProps,
               updateSnackBarProps,
+              setAlerts,
+              isMobile,
             }}
           >
             <LoginContextProvider

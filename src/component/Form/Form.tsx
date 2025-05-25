@@ -37,8 +37,13 @@ function Form() {
     helperText: "",
   };
   const { user } = useLoginContext();
-  const { updateAlertProps, updateIsLoading, updateSnackBarProps } =
-    useMainContext();
+  const {
+    updateAlertProps,
+    updateIsLoading,
+    updateSnackBarProps,
+    setAlerts,
+    isMobile,
+  } = useMainContext();
   const [customerName, updatecustomerName] = useState<textFieldString>(
     defaultTextFieldString,
   );
@@ -80,7 +85,7 @@ function Form() {
       },
     };
     httpClient
-      .postAsync<number>(
+      .postAsync<string>(
         httpClient.GetForm,
         requestBody,
         undefined,
@@ -90,20 +95,24 @@ function Form() {
         false,
       )
       .then((response) => {
-        if (response && response > 0) {
-          setAlerts({
-            message: `Form: ${response} has been created`,
-            severity: "success",
-            show: true,
-          });
+        if (response) {
+          setAlerts(
+            {
+              message: response,
+              severity: "success",
+              show: true,
+            },
+            updateAlertProps,
+          );
         }
       });
   };
   //render functions
   const attachmentForRender = () => {
+    let imgsInARow = isMobile ? 2 : 5;
     let attachmentElements: Attachment[][] = [];
-    for (let i = 0; i < attachments.length; i = i + 5) {
-      attachmentElements.push(attachments.slice(i, i + 5));
+    for (let i = 0; i < attachments.length; i = i + imgsInARow) {
+      attachmentElements.push(attachments.slice(i, i + imgsInARow));
     }
     return attachmentElements;
   };
@@ -153,28 +162,37 @@ function Form() {
         ),
       )
     ) {
-      setAlerts({
-        message: "File with same name already exists",
-        severity: "error",
-        show: true,
-      });
+      setAlerts(
+        {
+          message: "File with same name already exists",
+          severity: "error",
+          show: true,
+        },
+        updateAlertProps,
+      );
       return false;
     }
     if (fileAttachments.length > 20) {
-      setAlerts({
-        message: "Maximum 20 attachments allowed",
-        severity: "error",
-        show: true,
-      });
+      setAlerts(
+        {
+          message: "Maximum 20 attachments allowed",
+          severity: "error",
+          show: true,
+        },
+        updateAlertProps,
+      );
       return false;
     }
     for (const attachment of fileAttachments) {
       if (!attachment.filename) {
-        setAlerts({
-          message: "FileName is required",
-          severity: "error",
-          show: true,
-        });
+        setAlerts(
+          {
+            message: "FileName is required",
+            severity: "error",
+            show: true,
+          },
+          updateAlertProps,
+        );
         return false;
       }
       if (
@@ -183,27 +201,36 @@ function Form() {
         attachment.fileSizeInKb < 0 ||
         !attachment.fileType
       ) {
-        setAlerts({
-          message: "Invalid File",
-          severity: "error",
-          show: true,
-        });
+        setAlerts(
+          {
+            message: "Invalid File",
+            severity: "error",
+            show: true,
+          },
+          updateAlertProps,
+        );
         return false;
       }
       if (!attachment.fileType?.startsWith("image")) {
-        setAlerts({
-          message: `Only img files allowed. Error in ${attachment.filename}`,
-          severity: "error",
-          show: true,
-        });
+        setAlerts(
+          {
+            message: `Only img files allowed. Error in ${attachment.filename}`,
+            severity: "error",
+            show: true,
+          },
+          updateAlertProps,
+        );
         return false;
       }
-      if (attachment.fileSizeInKb > 5000) {
-        setAlerts({
-          message: `File size should be less than 5000 KB. Error in ${attachment.filename} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
-          severity: "error",
-          show: true,
-        });
+      if (attachment.fileSizeInKb > 2000) {
+        setAlerts(
+          {
+            message: `File size should be less than 2000 KB. Error in ${attachment.filename} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
+            severity: "error",
+            show: true,
+          },
+          updateAlertProps,
+        );
         return false;
       }
     }
@@ -228,11 +255,14 @@ function Form() {
       return false;
     }
     if (currentProcess <= 0) {
-      setAlerts({
-        message: "Please select a process",
-        severity: "error",
-        show: true,
-      });
+      setAlerts(
+        {
+          message: "Please select a process",
+          severity: "error",
+          show: true,
+        },
+        updateAlertProps,
+      );
       return false;
     }
     // if (attachments.length === 0) {
@@ -244,18 +274,6 @@ function Form() {
     //   return false;
     // }
     return true;
-  };
-
-  const setAlerts = (alertProps: AlertProps) => {
-    updateAlertProps(alertProps);
-    window.scrollTo(0, 0);
-    setTimeout(() => {
-      updateAlertProps({
-        message: "",
-        severity: "info",
-        show: false,
-      });
-    }, 5000);
   };
   //render
   return (
@@ -387,8 +405,13 @@ function Form() {
             </>
           );
         })}
-        <Stack direction={"row"} spacing={2} marginTop={2}>
-          <Button variant="contained">Save</Button>
+        <Stack
+          direction={"row"}
+          spacing={2}
+          marginTop={2}
+          justifyContent={"center"}
+        >
+          {/* <Button variant="contained">Save</Button> */}
           <Button variant="contained" onClick={postForm}>
             Submit
           </Button>

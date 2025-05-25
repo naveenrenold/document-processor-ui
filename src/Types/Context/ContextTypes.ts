@@ -28,8 +28,13 @@ export type MainContextType = {
   updateIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
   alertProps: AlertProps;
   updateAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>;
+  setAlerts: (
+    alertProps: AlertProps,
+    setAlerts: React.Dispatch<React.SetStateAction<AlertProps>>,
+  ) => void;
   isLoading: boolean;
   updateIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   snackBarProps: SnackBarProps;
   updateSnackBarProps: React.Dispatch<React.SetStateAction<SnackBarProps>>;
+  isMobile?: boolean;
 };

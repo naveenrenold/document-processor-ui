@@ -311,7 +311,11 @@ function Header() {
       </AppBar>
       {isLoading && <LinearProgress></LinearProgress>}
       {alertProps.show && (
-        <Alert variant="filled" severity={alertProps.severity}>
+        <Alert
+          variant="filled"
+          severity={alertProps.severity}
+          style={isDrawerOpen ? { marginLeft: "240px" } : {}}
+        >
           {alertProps.message}
         </Alert>
       )}
