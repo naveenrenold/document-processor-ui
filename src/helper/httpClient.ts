@@ -50,12 +50,55 @@ class httpClient {
     successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
     isGraph = false,
+    formData = false,
   ) {
     let header = await this.getAuthHeader(scopes);
     if (!header) {
       return;
     }
+    if (formData) {
+      header.headers = {
+        ...header.headers,
+        "Content-Type": "multipart/form-data",
+      };
+    }
     let response = axios.post<T>(
+      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
+      request,
+      header,
+    );
+    if (setIsLoading) {
+      setIsLoading(true);
+    }
+    let result = await httpClient.handleHttpResponse<T>(
+      response,
+      setAlert,
+      successAlertMessage,
+    );
+    if (setIsLoading) {
+      setIsLoading(false);
+    }
+    return result;
+  }
+
+  public static async postFormAsync<T>(
+    url: string,
+    request: any,
+    scopes: string[] = loginRequest.scopes,
+    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    successAlertMessage?: string,
+    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+    isGraph = false,
+  ) {
+    let header = await this.getAuthHeader(scopes);
+    if (!header) {
+      return;
+    }
+    // header.headers = {
+    //   ...header.headers,
+    //   "Content-Type": "multipart/form-data",
+    // };
+    let response = axios.postForm<T>(
       `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
       request,
       header,

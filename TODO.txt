@@ -123,6 +123,10 @@ in local iis it is working finish it. the folder structure is an issue
 finally hosting is real
 
 25/5/25
-1. Big issue how to handle attachment
-2. Need to finish attachments
-3. Added attchments need to send files in api calls also
+1. Big issue how to handle attachment - done
+2. Need to finish attachments -done
+3. Added Attachments need to send files in api calls also
+    So i need to send data as formdata
+Attachment sending in api calls finished.
+26/5/25
+1. Need to test module for errors

@@ -40,3 +40,18 @@ Alter table Activity Alter column CreatedOn DateTime not null;
 Select * from Form
 
 Insert into Location values('Nagercoil')
+
+
+Select * from attachment
+
+
+Insert into Attachment(Id, FileName, FilePath, FileType, UploadedBy, UploadedOn) values(
+@Id, @FileName, @FilePath, @FileType, @UploadedBy, @UploadedOn)
+)
+
+Insert into Attachment(Id, FileName, FilePath, FileType, UploadedBy, UploadedOn) values(
+@@Identity, @FileName, @FilePath, @FileType, @UploadedBy, @UploadedOn)
+
+Alter table Attachment drop column AttachmentId
+
+Select * from Attachment

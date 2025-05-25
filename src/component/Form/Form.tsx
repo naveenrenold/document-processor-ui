@@ -74,6 +74,7 @@ function Form() {
     if (!validateForm()) {
       return;
     }
+    let formRequest: FormData = new FormData();
     const requestBody: FormRequest = {
       form: {
         customerName: customerName.value ?? "",
@@ -84,10 +85,17 @@ function Form() {
         location: user?.officeLocation ?? "",
       },
     };
+    formRequest.append("request", JSON.stringify(requestBody.form));
+    for (const attachment of attachments) {
+      if (attachment.filepath) {
+        const file = await fetch(attachment.filepath).then((res) => res.blob());
+        formRequest.append("attachments", file, attachment.filename);
+      }
+    }
     httpClient
-      .postAsync<string>(
+      .postFormAsync<string>(
         httpClient.GetForm,
-        requestBody,
+        formRequest,
         undefined,
         updateAlertProps,
         undefined,
