@@ -7,13 +7,23 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useImperativeHandle, useState } from "react";
 import { Attachment, FormRequest, Process } from "../../Types/Component/Form";
-import { textFieldString } from "../../Types/ComponentProps/TextFieldProps";
+import {
+  textFieldString,
+  updateTextField,
+  validateTextField,
+} from "../../Types/ComponentProps/TextFieldProps";
 import { useMainContext } from "../../context/MainContextProvider";
 import { useLoginContext } from "../../context/LoginContextProvider";
 import style from "./Form.module.css";
 import httpClient from "../../helper/httpClient";
+import { validatePhoneNumber } from "../Admin/Admin";
+import { useNavigate } from "react-router";
+import { AlertProps } from "../../Types/ComponentProps/AlertProps";
+import { severity } from "../../Types/ComponentProps/ButtonProps";
+import { time } from "console";
+import TextBox from "../../custom-component/TextBox";
 
 function Form() {
   //constants
@@ -31,16 +41,36 @@ function Form() {
     updateSnackBarProps,
     setAlerts,
     isMobile,
+    isLoading,
   } = useMainContext();
-  const [customerName, updatecustomerName] = useState<textFieldString>(
-    defaultTextFieldString,
-  );
-  const [customerAddress, updateCustomerAddress] = useState(
-    defaultTextFieldString,
-  );
+  let [readonly, updateReadonly] = useState<boolean>(false);
+  const [customerName, updatecustomerName] = useState<textFieldString>({
+    ...defaultTextFieldString,
+    name: "Customer Name",
+    type: "text",
+    required: true,
+  });
+  const [customerAddress, updateCustomerAddress] = useState<textFieldString>({
+    ...defaultTextFieldString,
+    name: "Customer Address",
+    type: "text",
+    required: true,
+  });
   const [currentProcess, updateCurrentProcess] = useState(0);
   const [process, updateProcess] = useState<Process[]>([]);
   const [attachments, updateAttachments] = useState<Attachment[]>([]);
+  const [phoneNumber, updatePhoneNumber] = useState<textFieldString>({
+    ...defaultTextFieldString,
+    name: "Phone Number",
+    type: "phone",
+    required: true,
+  });
+  const [phoneNumber2, updatePhoneNumber2] = useState<textFieldString>({
+    ...defaultTextFieldString,
+    name: "Phone Number 2",
+    type: "phone",
+  });
+  const navigate = useNavigate();
 
   //useeffect
   useEffect(() => {
@@ -71,6 +101,8 @@ function Form() {
         processId: currentProcess,
         lastUpdatedBy: user?.userPrincipalName ?? "",
         location: user?.officeLocation ?? "",
+        customerPhone: phoneNumber.value ?? "",
+        customerPhone2: phoneNumber2.value ?? "",
       },
     };
     formRequest.append("request", JSON.stringify(requestBody.form));
@@ -92,14 +124,11 @@ function Form() {
       )
       .then((response) => {
         if (response) {
-          setAlerts(
-            {
-              message: response,
-              severity: "success",
-              show: true,
-            },
-            updateAlertProps,
-          );
+          setAlert(response, "success", 3000);
+          updateReadonly(true);
+          setTimeout(() => {
+            navigate("/");
+          }, 3000);
         }
       });
   };
@@ -159,37 +188,16 @@ function Form() {
         ),
       )
     ) {
-      setAlerts(
-        {
-          message: "File with same name already exists",
-          severity: "error",
-          show: true,
-        },
-        updateAlertProps,
-      );
+      setAlert("File with same name already exists");
       return false;
     }
-    if (fileAttachments.length > 20) {
-      setAlerts(
-        {
-          message: "Maximum 20 attachments allowed",
-          severity: "error",
-          show: true,
-        },
-        updateAlertProps,
-      );
+    if (fileAttachments.length > 10) {
+      setAlert("Maximum 10 attachments allowed");
       return false;
     }
     for (const attachment of fileAttachments) {
       if (!attachment.filename) {
-        setAlerts(
-          {
-            message: "FileName is required",
-            severity: "error",
-            show: true,
-          },
-          updateAlertProps,
-        );
+        setAlert("FileName is required");
         return false;
       }
       if (
@@ -198,79 +206,114 @@ function Form() {
         attachment.fileSizeInKb < 0 ||
         !attachment.fileType
       ) {
-        setAlerts(
-          {
-            message: "Invalid File",
-            severity: "error",
-            show: true,
-          },
-          updateAlertProps,
-        );
+        setAlert("Invalid File");
         return false;
       }
       if (
         !attachment.fileType?.startsWith("image") &&
         !attachment.fileType?.endsWith("pdf")
       ) {
-        setAlerts(
-          {
-            message: `Only img or pdf files allowed. Error in ${attachment.filename}`,
-            severity: "error",
-            show: true,
-          },
-          updateAlertProps,
+        setAlert(
+          `Only img or pdf files allowed. Error in ${attachment.filename}`,
         );
         return false;
       }
       if (attachment.fileSizeInKb > 3000) {
-        setAlerts(
-          {
-            message: `File size should be less than 3000 KB. Error in ${attachment.filename} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
-            severity: "error",
-            show: true,
-          },
-          updateAlertProps,
+        setAlert(
+          `File size should be less than 3000 KB. Error in ${attachment.filename} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
         );
         return false;
       }
     }
     return true;
   };
+  const setAlert = (
+    alertMessage: string,
+    severity: severity = "error",
+    timeout: number = 5000,
+  ) =>
+    setAlerts(
+      {
+        message: alertMessage,
+        severity: severity,
+        show: true,
+      },
+      updateAlertProps,
+      timeout,
+    );
 
   const validateForm = (): boolean => {
-    if (!customerName.value || customerName.value.trim() === "") {
-      updatecustomerName({
-        value: customerName.value,
-        error: true,
-        helperText: "Customer Name is required",
-      });
+    if (
+      !(
+        validateTextField(customerName, updatecustomerName, 3, 30, setAlert) &&
+        validateTextField(
+          customerAddress,
+          updateCustomerAddress,
+          5,
+          200,
+          setAlert,
+        ) &&
+        validateTextField(
+          phoneNumber,
+          updatePhoneNumber,
+          undefined,
+          undefined,
+          setAlert,
+        ) &&
+        validateTextField(
+          phoneNumber2,
+          updatePhoneNumber2,
+          undefined,
+          undefined,
+          setAlert,
+        )
+      )
+    ) {
       return false;
     }
-    if (!customerAddress.value || customerAddress.value.trim() === "") {
-      updateCustomerAddress({
-        value: customerAddress.value,
-        error: true,
-        helperText: "Customer Address is required",
-      });
-      return false;
-    }
-    if (currentProcess <= 0) {
-      setAlerts(
-        {
-          message: "Please select a process",
-          severity: "error",
-          show: true,
-        },
-        updateAlertProps,
-      );
-      return false;
-    }
-    // if (attachments.length === 0) {
-    //   setAlerts({
-    //     message: "Please attach at least one file",
-    //     severity: "error",
-    //     show: true,
+
+    // if (!customerName.value || customerName.value.trim() === "") {
+    //   updatecustomerName({
+    //     value: customerName.value,
+    //     error: true,
+    //     helperText: "Customer Name is required",
     //   });
+    //   return false;
+    // }
+    // if (!customerAddress.value || customerAddress.value.trim() === "") {
+    //   updateCustomerAddress({
+    //     value: customerAddress.value,
+    //     error: true,
+    //     helperText: "Customer Address is required",
+    //   });
+    //   return false;
+    // }
+    if (currentProcess <= 0) {
+      setAlert("Please select a process");
+      return false;
+    }
+    if (attachments.length === 0) {
+      setAlert("Please attach at least one file");
+      return false;
+    }
+    if (attachments.length > 10) {
+      setAlert("Maximum 10 attachments allowed");
+      return false;
+    }
+    // if (!phoneNumber.value) {
+    //   updatePhoneNumber((lastValue) => ({
+    //     ...lastValue,
+    //     error: true,
+    //     helperText: "PhoneNumber is required",
+    //   }));
+    //   return false;
+    // }
+    // if (validatePhoneNumber(phoneNumber.value)) {
+    //   setAlert("Phone Number is not valid");
+    //   return false;
+    // }
+    // if (phoneNumber2.value && validatePhoneNumber(phoneNumber2.value)) {
+    //   setAlert("Phone Number2 is not valid");
     //   return false;
     // }
     return true;
@@ -295,7 +338,14 @@ function Form() {
           </Typography>
         </Stack> */}
         <Stack>
-          <TextField
+          <TextBox
+            {...{
+              textFieldString: customerName,
+              updateTextFieldString: updatecustomerName,
+              readonly: readonly,
+            }}
+          ></TextBox>
+          {/* <TextField
             label="Name of the Candidate:"
             value={customerName.value}
             required={true}
@@ -303,17 +353,21 @@ function Form() {
             helperText={customerName.helperText}
             variant="filled"
             margin="normal"
-            onChange={(e) => {
-              updatecustomerName({
-                value: e.target.value,
-                error: false,
-                helperText: "",
-              });
-            }}
-          ></TextField>
+            onChange={(e) =>
+              updateTextField(updatecustomerName, e.target.value)
+            }
+          ></TextField> */}
         </Stack>
         <Stack>
-          <TextField
+          <TextBox
+            {...{
+              textFieldString: customerAddress,
+              updateTextFieldString: updateCustomerAddress,
+              readonly: readonly,
+              multiline: true,
+            }}
+          ></TextBox>
+          {/* <TextField
             label="Address"
             multiline={true}
             minRows={3}
@@ -324,20 +378,17 @@ function Form() {
             required
             error={customerAddress.error}
             helperText={customerAddress.helperText}
-            onChange={(e) => {
-              updateCustomerAddress({
-                value: e.target.value,
-                error: false,
-                helperText: "",
-              });
-            }}
-          ></TextField>
+            onChange={(e) =>
+              updateTextField(updateCustomerAddress, e.target.value)
+            }
+          ></TextField> */}
         </Stack>
         <Stack>
           <TextField
             select
             label="Process"
             required
+            disabled={readonly}
             value={currentProcess}
             variant="filled"
             onChange={(e) => {
@@ -354,7 +405,44 @@ function Form() {
           </TextField>
         </Stack>
         <Stack direction={"row"} spacing={2} marginTop={2}>
-          <Button variant="contained" component="label">
+          <TextBox
+            {...{
+              textFieldString: phoneNumber,
+              updateTextFieldString: updatePhoneNumber,
+              readonly: readonly,
+            }}
+          ></TextBox>
+          {/* <TextField
+            margin="normal"
+            label="Phone Number"
+            required
+            value={phoneNumber.value}
+            error={phoneNumber.error}
+            helperText={phoneNumber.helperText}
+            variant="filled"
+            onChange={(e) => updateTextField(updatePhoneNumber, e.target.value)}
+          ></TextField> */}
+          <TextBox
+            {...{
+              textFieldString: phoneNumber2,
+              updateTextFieldString: updatePhoneNumber2,
+              readonly: readonly,
+            }}
+          ></TextBox>
+          {/* <TextField
+            margin="normal"
+            label="Phone Number 2"
+            value={phoneNumber2.value}
+            error={phoneNumber2.error}
+            helperText={phoneNumber2.helperText}
+            variant="filled"
+            onChange={(e) =>
+              updateTextField(updatePhoneNumber2, e.target.value)
+            }
+          ></TextField> */}
+        </Stack>
+        <Stack direction={"row"} spacing={2} marginTop={2}>
+          <Button variant="contained" component="label" disabled={readonly}>
             Browse
             <input
               hidden
@@ -419,7 +507,11 @@ function Form() {
           justifyContent={"center"}
         >
           {/* <Button variant="contained">Save</Button> */}
-          <Button variant="contained" onClick={postForm}>
+          <Button
+            variant="contained"
+            onClick={postForm}
+            disabled={readonly || isLoading}
+          >
             Submit
           </Button>
         </Stack>

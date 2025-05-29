@@ -3,6 +3,8 @@ export interface FormDetails {
   processId: number;
   customerName: string;
   customerAddress?: string;
+  customerPhone: string;
+  customerPhone2?: string;
   location: string;
   lastUpdatedBy: string;
 }

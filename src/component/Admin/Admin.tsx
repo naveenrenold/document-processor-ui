@@ -522,7 +522,7 @@ function Admin() {
       }));
       return false;
     }
-    if (emailAlias.value.search(emailRegex)) {
+    if (validateEmail(emailAlias.value)) {
       updateEmailAlias((lastValue) => ({
         ...lastValue,
         error: true,
@@ -530,7 +530,7 @@ function Admin() {
       }));
       return false;
     }
-    if (phoneNumber.value.search(indiaPhoneRegex)) {
+    if (validatePhoneNumber(phoneNumber.value)) {
       updatePhoneNumber((lastValue) => ({
         ...lastValue,
         error: true,
@@ -866,3 +866,11 @@ export enum DialogType {
   "RestoreUser",
   "ResetUserSuccess",
 }
+
+export const validatePhoneNumber = (phoneNumber: string): boolean => {
+  return phoneNumber.search(indiaPhoneRegex) != -1;
+};
+
+export const validateEmail = (email: string): boolean => {
+  return email.search(emailRegex) != -1;
+};

@@ -131,3 +131,12 @@ Attachment sending in api calls finished.
 26/5/25
 1. Need to test module for errors
 2. In phone allow select
+3. Better way for validate text field for all fields
+
+29/5/25
+1. refactored all text box ,alert and button disables
+2. now goes to dashboard
+3. Made validation functions
+
+4. Next is def dashboard 
+5 Also make a function that convert object to api call

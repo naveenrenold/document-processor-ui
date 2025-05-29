@@ -32,6 +32,7 @@ export function useMainContext() {
 export const setAlerts = (
   alertProps: AlertProps,
   updateAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>,
+  timeOut = 5000,
 ) => {
   updateAlertProps(alertProps);
   window.scrollTo(0, 0);
@@ -41,5 +42,5 @@ export const setAlerts = (
       severity: "info",
       show: false,
     });
-  }, 5000);
+  }, timeOut);
 };

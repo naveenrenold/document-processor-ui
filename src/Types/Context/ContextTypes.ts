@@ -31,6 +31,7 @@ export type MainContextType = {
   setAlerts: (
     alertProps: AlertProps,
     setAlerts: React.Dispatch<React.SetStateAction<AlertProps>>,
+    timeOut?: number,
   ) => void;
   isLoading: boolean;
   updateIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
