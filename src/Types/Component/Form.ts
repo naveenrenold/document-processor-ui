@@ -3,6 +3,17 @@ export interface FormDetails {
   processId: number;
   customerName: string;
   customerAddress?: string;
+  phoneNumber: string;
+  phoneNumber2?: string;
+  location: string;
+  lastUpdatedBy: string;
+}
+
+export interface FormResponse {
+  typeName: number;
+  processName: number;
+  customerName: string;
+  customerAddress?: string;
   customerPhone: string;
   customerPhone2?: string;
   location: string;

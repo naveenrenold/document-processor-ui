@@ -55,3 +55,11 @@ Insert into Attachment(Id, FileName, FilePath, FileType, UploadedBy, UploadedOn)
 Alter table Attachment drop column AttachmentId
 
 Select * from Attachment
+
+
+Alter table Form add phoneNumber varchar(15) not null;
+Alter table Form add phoneNumber2 varchar(15) not null;
+
+delete from Attachment
+delete from Form
+delete from Attachment

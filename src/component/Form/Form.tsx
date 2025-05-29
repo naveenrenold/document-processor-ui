@@ -101,8 +101,8 @@ function Form() {
         processId: currentProcess,
         lastUpdatedBy: user?.userPrincipalName ?? "",
         location: user?.officeLocation ?? "",
-        customerPhone: phoneNumber.value ?? "",
-        customerPhone2: phoneNumber2.value ?? "",
+        phoneNumber: phoneNumber.value ?? "",
+        phoneNumber2: phoneNumber2.value ?? "",
       },
     };
     formRequest.append("request", JSON.stringify(requestBody.form));

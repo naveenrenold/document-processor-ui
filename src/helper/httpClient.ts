@@ -289,3 +289,5 @@ export interface axiosTypes<T> {
 }
 
 export default httpClient;
+
+export const queryParams = () => {};
