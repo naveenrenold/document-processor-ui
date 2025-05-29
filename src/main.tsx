@@ -16,6 +16,7 @@ import { AlertProps } from "./Types/ComponentProps/AlertProps";
 import { AccountInfo } from "@azure/msal-browser";
 import { Role } from "./Types/Component/Role";
 import { SnackBarProps } from "./Types/ComponentProps/SnackBarProps";
+import DashBoard from "./component/DashBoard/DashBoard";
 
 function Main() {
   useEffect(() => {
@@ -75,6 +76,7 @@ function Main() {
                       <Route path="admin" element={<Admin />} />
                     )}
                     <Route path="form" element={<Form />} />
+                    <Route path="/" element={<DashBoard />} />
                   </Routes>
                 )}
               </Box>

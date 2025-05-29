@@ -1,5 +1,10 @@
 [
   {
+    "name": "Dashboard",
+    "href": "/",
+    "adminModule": false
+  },
+  {
     "name": "Submit form",
     "href": "/form",
     "adminModule": false

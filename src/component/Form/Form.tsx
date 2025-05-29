@@ -1,35 +1,23 @@
 import {
-  Alert,
-  Box,
   Button,
   Chip,
   Container,
-  Divider,
-  FormLabel,
-  InputLabel,
-  LinearProgress,
   MenuItem,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import {
-  Attachment,
-  FormDetails,
-  FormRequest,
-  Process,
-} from "../../Types/Component/Form";
+import { Attachment, FormRequest, Process } from "../../Types/Component/Form";
 import { textFieldString } from "../../Types/ComponentProps/TextFieldProps";
 import { useMainContext } from "../../context/MainContextProvider";
 import { useLoginContext } from "../../context/LoginContextProvider";
-import processData from "../../data/process.json";
 import style from "./Form.module.css";
 import httpClient from "../../helper/httpClient";
-import { AlertProps } from "../../Types/ComponentProps/AlertProps";
 
 function Form() {
   //constants
+  let [fileIndex, updateFileIndex] = useState<number>(1);
   //usestate
   const defaultTextFieldString: textFieldString = {
     value: "",
@@ -129,9 +117,10 @@ function Form() {
     const fileList = e.target.files;
     let fileAttachments: Attachment[] = [];
     if (fileList && fileList.length > 0) {
-      fileAttachments = Array.from(fileList).map((file) => {
+      updateFileIndex((prev) => prev + 1);
+      fileAttachments = Array.from(fileList).map((file, index) => {
         return {
-          filename: file.name,
+          filename: `${file.name.split(".")[0]}-${fileIndex}.${file.name.split(".").slice(-1)[0]}`,
           fileSizeInKb: file.size / 1024,
           filepath: URL.createObjectURL(file),
           fileType: file.type,
@@ -219,10 +208,13 @@ function Form() {
         );
         return false;
       }
-      if (!attachment.fileType?.startsWith("image")) {
+      if (
+        !attachment.fileType?.startsWith("image") &&
+        !attachment.fileType?.endsWith("pdf")
+      ) {
         setAlerts(
           {
-            message: `Only img files allowed. Error in ${attachment.filename}`,
+            message: `Only img or pdf files allowed. Error in ${attachment.filename}`,
             severity: "error",
             show: true,
           },
@@ -230,10 +222,10 @@ function Form() {
         );
         return false;
       }
-      if (attachment.fileSizeInKb > 2000) {
+      if (attachment.fileSizeInKb > 3000) {
         setAlerts(
           {
-            message: `File size should be less than 2000 KB. Error in ${attachment.filename} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
+            message: `File size should be less than 3000 KB. Error in ${attachment.filename} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
             severity: "error",
             show: true,
           },
@@ -370,8 +362,7 @@ function Form() {
               type="file"
               title="browse"
               multiple
-              accept="image/png, image/jpg, image/jpeg"
-              capture="environment"
+              accept="image/png, image/jpg, image/jpeg, application/pdf"
             ></input>
           </Button>
         </Stack>
@@ -388,11 +379,19 @@ function Form() {
                         alignItems={"center"}
                       >
                         <a href={attachment.filepath} target="_blank">
-                          <img
-                            className="h-16 w-30"
-                            src={attachment.filepath}
-                            title={attachment.filename}
-                          ></img>
+                          {attachment.fileType == "application/pdf" ? (
+                            <img
+                              className="h-16 w-30"
+                              src={attachment.filepath}
+                              title={attachment.filename}
+                            ></img>
+                          ) : (
+                            <img
+                              className="h-16 w-30"
+                              src={attachment.filepath}
+                              title={attachment.filename}
+                            ></img>
+                          )}
                         </a>
                         <Chip
                           label={attachment.filename}
