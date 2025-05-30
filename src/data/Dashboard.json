@@ -1,9 +1,54 @@
 [
-  "FormId",
-  "CustomerName",
-  "FormStatus",
-  "AssignedTo",
-  "CreatedDate",
-  "LastUpdatedDate",
-  "Location"
+  {
+    "field": "id",
+    "headerName": "Id"
+  },
+  {
+    "field": "typeName",
+    "headerName": "TypeName"
+  },
+  {
+    "field": "statusName",
+    "headerName": "StatusName"
+  },
+  {
+    "field": "processName",
+    "headerName": "ProcessName"
+  },
+  {
+    "field": "customerName",
+    "headerName": "CustomerName"
+  },
+  {
+    "field": "customerAddress",
+    "headerName": "CustomerAddress"
+  },
+  {
+    "field": "phoneNumber",
+    "headerName": "PhoneNumber"
+  },
+  {
+    "field": "phoneNumber2",
+    "headerName": "PhoneNumber2"
+  },
+  {
+    "field": "locationName",
+    "headerName": "LocationName"
+  },
+  {
+    "field": "createdBy",
+    "headerName": "CreatedBy"
+  },
+  {
+    "field": "createdOn",
+    "headerName": "CreatedOn"
+  },
+  {
+    "field": "lastUpdatedBy",
+    "headerName": "LastUpdatedBy"
+  },
+  {
+    "field": "lastUpdatedOn",
+    "headerName": "LastUpdatedOn"
+  }
 ]

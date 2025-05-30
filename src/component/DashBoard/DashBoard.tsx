@@ -5,6 +5,8 @@ import httpClient from "../../helper/httpClient";
 import { useMainContext } from "../../context/MainContextProvider";
 import { severity } from "../../Types/ComponentProps/ButtonProps";
 import { BaseFilter } from "../../Types/Component/BaseFilter";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import columns from "../../data/Dashboard.json";
 
 function DashBoard() {
   //constants
@@ -17,30 +19,26 @@ function DashBoard() {
     isLoading,
   } = useMainContext();
   //usestate
-  let [form, updateForm] = useState<FormResponse>();
+  let [form, updateForm] = useState<FormResponse[]>();
   //useeffect
   useEffect(() => {
     getFormDetails();
   }, []);
   const getFormDetails = async () => {
     const filter: BaseFilter = {
-      OrderBy: "lastUpdatedBy",
+      OrderBy: "lastUpdatedOn",
       Query: "",
       SortBy: "desc",
     };
     const queryParams = new URLSearchParams();
-    for (const key in Object.keys(filter)) {
+    Object.keys(filter).forEach((key) => {
       queryParams.append(key, filter[key as keyof BaseFilter] as string);
-    }
+    });
 
     httpClient
-      .getAsync<FormResponse>(
-        `httpClient.GetForm?${queryParams.toString()}`,
-        undefined,
-        updateAlertProps,
-        undefined,
-        updateIsLoading,
-      )
+      .getAsync<
+        FormResponse[]
+      >(`${httpClient.GetForm}?${queryParams.toString()}`, undefined, updateAlertProps, undefined, updateIsLoading)
       .then((response) => {
         if (response) {
           updateForm(response);
@@ -64,12 +62,9 @@ function DashBoard() {
       updateAlertProps,
       timeout,
     );
+  let columnsHeadings: GridColDef<[FormResponse]>[] = columns;
   //render
-  return (
-    <>
-      <Table></Table>
-    </>
-  );
+  return <>{form && <DataGrid columns={columns} rows={form}></DataGrid>}</>;
 }
 
 export default DashBoard;

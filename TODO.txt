@@ -140,3 +140,4 @@ Attachment sending in api calls finished.
 
 4. Next is def dashboard 
 5 Also make a function that convert object to api call
+6. test all this shit

@@ -10,14 +10,19 @@ export interface FormDetails {
 }
 
 export interface FormResponse {
+  id: number;
   typeName: number;
+  statusName: number;
   processName: number;
   customerName: string;
-  customerAddress?: string;
-  customerPhone: string;
-  customerPhone2?: string;
-  location: string;
+  customerAddress: string;
+  phoneNumber: string;
+  phoneNumber2?: string;
+  locationName: string;
+  createdBy: string;
+  createdOn: string;
   lastUpdatedBy: string;
+  lastUpdatedOn: string;
 }
 
 export interface Process {
@@ -39,4 +44,10 @@ export interface Activity {
 export interface FormRequest {
   form: FormDetails;
   Attachments?: Attachment[];
+}
+
+export interface Filters {
+  target: string;
+  operator: "eq" | "ne" | "lt" | "gt" | "le" | "ge" | "in" | "ni" | "lk" | "bt";
+  value: string | number | boolean;
 }
