@@ -11,6 +11,7 @@ class httpClient {
 
   static GetForm = "form";
   static GetProcess = "process";
+  static GetAttachments = "attachment";
 
   public static async getAsync<T>(
     url: string,

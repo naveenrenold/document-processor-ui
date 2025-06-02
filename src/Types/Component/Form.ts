@@ -1,4 +1,5 @@
 export interface FormDetails {
+  id?: number;
   typeId: number;
   processId: number;
   customerName: string;
@@ -10,10 +11,11 @@ export interface FormDetails {
 }
 
 export interface FormResponse {
-  id: number;
-  typeName: number;
-  statusName: number;
-  processName: number;
+  id: string;
+  typeName: string;
+  statusName: string;
+  processName: string;
+  processId?: number;
   customerName: string;
   customerAddress: string;
   phoneNumber: string;
@@ -30,11 +32,22 @@ export interface Process {
   processName: string;
 }
 export interface Attachment {
-  filename?: string;
-  filepath?: string;
+  fileName?: string;
+  filePath?: string;
   fileInBytes?: ArrayBuffer;
   fileSizeInKb?: number;
   fileType?: string;
+}
+export interface AttachmentResponse {
+  attachmentId?: number;
+  id?: number;
+  fileName?: string;
+  filePath?: string;
+  fileSize?: number;
+  fileType?: string;
+  uploadedBy?: string;
+  uploadedOn?: string | Date;
+  fileContent?: string;
 }
 export interface Activity {
   activityTypeId: number;

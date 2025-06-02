@@ -13,9 +13,120 @@ import {
 } from "@mui/x-data-grid";
 import { useLoginContext } from "../../context/LoginContextProvider";
 import { set } from "date-fns";
+import { useNavigate } from "react-router";
 
 function DashBoard() {
   //constants
+  const DashBoardColumns: GridColDef<FormResponse>[] = [
+    {
+      field: "id",
+      headerName: "Id",
+      type: "string",
+      hideable: false,
+      renderCell: (params) => {
+        return (
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => {
+              navigateToForm(params.value);
+            }}
+          >
+            {params.value}
+          </Button>
+        );
+      },
+    },
+    {
+      field: "typeName",
+      headerName: "TypeName",
+      type: "string",
+    },
+    {
+      field: "statusName",
+      headerName: "StatusName",
+      type: "singleSelect",
+      valueOptions: [
+        "Draft",
+        "Submitted",
+        "Processed",
+        "Completed",
+        "Rejected",
+      ],
+    },
+    {
+      field: "processName",
+      headerName: "ProcessName",
+      type: "singleSelect",
+      valueOptions: [
+        "Process 1",
+        "Process 2",
+        "Process 3",
+        "Process 4",
+        "Process 5",
+        "Process 6",
+        "Process 7",
+      ],
+    },
+    {
+      field: "customerName",
+      headerName: "CustomerName",
+      type: "string",
+    },
+    {
+      field: "customerAddress",
+      headerName: "CustomerAddress",
+      type: "string",
+    },
+    {
+      field: "phoneNumber",
+      headerName: "PhoneNumber",
+      type: "string",
+    },
+    {
+      field: "phoneNumber2",
+      headerName: "PhoneNumber2",
+      type: "string",
+    },
+    {
+      field: "locationName",
+      headerName: "LocationName",
+      type: "string",
+    },
+    {
+      field: "createdBy",
+      headerName: "CreatedBy",
+      type: "string",
+      valueGetter: (params: string) => {
+        return params ? params.split("@")[0] : "User";
+      },
+    },
+    {
+      field: "createdOn",
+      headerName: "CreatedOn",
+      type: "date",
+      valueFormatter: (params: Date) => {
+        return params.toLocaleString();
+      },
+    },
+    {
+      field: "lastUpdatedBy",
+      headerName: "LastUpdatedBy",
+      type: "string",
+      valueGetter: (params: string) => {
+        return params ? params.split("@")[0] : "User";
+      },
+    },
+    {
+      field: "lastUpdatedOn",
+      headerName: "LastUpdatedOn",
+      type: "date",
+      valueFormatter: (params: Date) => {
+        return params.toLocaleString();
+      },
+    },
+  ];
+  //////////////////////////////////////////
   const {
     updateAlertProps,
     updateIsLoading,
@@ -26,6 +137,7 @@ function DashBoard() {
   } = useMainContext();
 
   const { user, role } = useLoginContext();
+  const navigate = useNavigate();
   //usestate
   let [form, updateForm] = useState<FormResponse[]>();
   let [rows, updateRows] = useState<FormResponse[]>();
@@ -97,6 +209,10 @@ function DashBoard() {
     }
     return userName;
   };
+
+  const navigateToForm = (formId: string) => {
+    navigate(`/form/${formId}`);
+  };
   // const onFilterChange = (
   //   model: GridFilterModel,
   //   details: GridCallbackDetails<"filter">,
@@ -125,6 +241,8 @@ function DashBoard() {
   // };
 
   //render
+  // columns
+
   return (
     <>
       <Stack
@@ -197,94 +315,3 @@ function DashBoard() {
 }
 
 export default DashBoard;
-
-export const DashBoardColumns: GridColDef<FormResponse>[] = [
-  {
-    field: "id",
-    headerName: "Id",
-    type: "string",
-    hideable: false,
-  },
-  {
-    field: "typeName",
-    headerName: "TypeName",
-    type: "string",
-  },
-  {
-    field: "statusName",
-    headerName: "StatusName",
-    type: "singleSelect",
-    valueOptions: ["Draft", "Submitted", "Processed", "Completed", "Rejected"],
-  },
-  {
-    field: "processName",
-    headerName: "ProcessName",
-    type: "singleSelect",
-    valueOptions: [
-      "Process 1",
-      "Process 2",
-      "Process 3",
-      "Process 4",
-      "Process 5",
-      "Process 6",
-      "Process 7",
-    ],
-  },
-  {
-    field: "customerName",
-    headerName: "CustomerName",
-    type: "string",
-  },
-  {
-    field: "customerAddress",
-    headerName: "CustomerAddress",
-    type: "string",
-  },
-  {
-    field: "phoneNumber",
-    headerName: "PhoneNumber",
-    type: "string",
-  },
-  {
-    field: "phoneNumber2",
-    headerName: "PhoneNumber2",
-    type: "string",
-  },
-  {
-    field: "locationName",
-    headerName: "LocationName",
-    type: "string",
-  },
-  {
-    field: "createdBy",
-    headerName: "CreatedBy",
-    type: "string",
-    valueGetter: (params: string) => {
-      return params ? params.split("@")[0] : "User";
-    },
-  },
-  {
-    field: "createdOn",
-    headerName: "CreatedOn",
-    type: "date",
-    valueFormatter: (params: Date) => {
-      return params.toLocaleString();
-    },
-  },
-  {
-    field: "lastUpdatedBy",
-    headerName: "LastUpdatedBy",
-    type: "string",
-    valueGetter: (params: string) => {
-      return params ? params.split("@")[0] : "User";
-    },
-  },
-  {
-    field: "lastUpdatedOn",
-    headerName: "LastUpdatedOn",
-    type: "date",
-    valueFormatter: (params: Date) => {
-      return params.toLocaleString();
-    },
-  },
-];

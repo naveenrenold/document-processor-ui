@@ -11,55 +11,27 @@ exec getLocalDate @LocalDateTime OUTPUT;
 Insert into Form(TypeId, StatusId, ProcessId, CustomerName, CustomerAddress,LocationId,CreatedBy,CreatedOn, LastUpdatedBy, LastUpdatedOn)
 values
 (@TypeId, @StatusId, @ProcessId, @CustomerName, @CustomerAddress, @LocationId, @UpdatedUser, @LocalDateTime, @UpdatedUser, @LocalDateTime);
+---
 
+DECLARE @FormId INT = 1;
+if(@Id IS NULL)
+begin
 
-select * from Form
+end
+else
+begin
+    UPDATE Form
+    SET TypeId = IFF(@TypeId is NULL, TypeId, @TypeId),
+        StatusId = IFF(@StatusId is NULL, StatusId, @StatusId),
+        ProcessId = IFF(@ProcessId is NULL, ProcessId, @ProcessId),
+        CustomerName = IFF(@CustomerName is NULL, CustomerName, @CustomerName),
+        CustomerAddress = IFF(@CustomerAddress is NULL, CustomerAddress, @CustomerAddress),
+        LocationId = IFF(@LocationId is NULL, LocationId, @LocationId),
+        phoneNumber = IFF(@PhoneNumber is NULL, phoneNumber, @PhoneNumber),
+        phoneNumber2 = IFF(@PhoneNumber2 is NULL, phoneNumber2, @PhoneNumber2),
+        LastUpdatedBy = IFF(@UpdatedUser is NULL, LastUpdatedBy, @UpdatedUser),
+        LastUpdatedOn = IFF(@LocalDateTime is NULL, LastUpdatedOn, @LocalDateTime)
+    WHERE Id = @FormId;
+end
 
-Insert into FormType values(1, 'Form1')
-
-Create table Location(LocationId int primary key identity (1,1), LocationName varchar(30) not null);
-
-Insert into Location values('Thoothukudi')
 select * from form
-
-alter table form add CONSTRAINT FK_Form_Location FOREIGN KEY (LocationId) REFERENCES Location(LocationId);
-
-alter table form alter column LastUpdatedBy varchar(100) not null
-
-StatusId int not null, ProcessId int not null, CustomerName varchar(100) not null, CustomerAddress varchar(100) not null, LocationId int not null;
-
-
-Select @@IDENTITY
-
-
-
-Alter table Activity Alter column CreatedOn DateTime not null;
-
-
-
-Select * from Form
-
-Insert into Location values('Nagercoil')
-
-
-Select * from attachment
-
-
-Insert into Attachment(Id, FileName, FilePath, FileType, UploadedBy, UploadedOn) values(
-@Id, @FileName, @FilePath, @FileType, @UploadedBy, @UploadedOn)
-)
-
-Insert into Attachment(Id, FileName, FilePath, FileType, UploadedBy, UploadedOn) values(
-@@Identity, @FileName, @FilePath, @FileType, @UploadedBy, @UploadedOn)
-
-Alter table Attachment drop column AttachmentId
-
-Select * from Attachment
-
-
-Alter table Form add phoneNumber varchar(15) not null;
-Alter table Form add phoneNumber2 varchar(15) not null;
-
-delete from Attachment
-delete from Form
-delete from Attachment

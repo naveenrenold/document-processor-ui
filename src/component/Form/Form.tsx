@@ -8,7 +8,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useImperativeHandle, useState } from "react";
-import { Attachment, FormRequest, Process } from "../../Types/Component/Form";
+import {
+  Attachment,
+  AttachmentResponse,
+  FormRequest,
+  FormResponse,
+  Process,
+} from "../../Types/Component/Form";
 import {
   textFieldString,
   updateTextField,
@@ -19,12 +25,19 @@ import { useLoginContext } from "../../context/LoginContextProvider";
 import style from "./Form.module.css";
 import httpClient from "../../helper/httpClient";
 import { validatePhoneNumber } from "../Admin/Admin";
-import { useLocation, useNavigate } from "react-router";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router";
 import { AlertProps } from "../../Types/ComponentProps/AlertProps";
 import { severity } from "../../Types/ComponentProps/ButtonProps";
 import { time } from "console";
 import TextBox from "../../custom-component/TextBox";
 import { isNumber } from "@mui/x-data-grid/internals";
+import { set } from "date-fns";
+import { get } from "http";
 
 function Form() {
   //constants
@@ -35,7 +48,10 @@ function Form() {
     error: false,
     helperText: "",
   };
-  const { user } = useLoginContext();
+  let params = useParams();
+  const { user, role } = useLoginContext();
+  const [formId, updateFormId] = useState<string>();
+  const [canEdit, updateCanEdit] = useState<boolean>(false);
   const {
     updateAlertProps,
     updateIsLoading,
@@ -58,7 +74,9 @@ function Form() {
     required: true,
   });
   const [currentProcess, updateCurrentProcess] = useState(0);
-  const [process, updateProcess] = useState<Process[]>([]);
+  const [process, updateProcess] = useState<Process[]>([
+    { processId: 0, processName: "" },
+  ]);
   const [attachments, updateAttachments] = useState<Attachment[]>([]);
   const [phoneNumber, updatePhoneNumber] = useState<textFieldString>({
     ...defaultTextFieldString,
@@ -75,58 +93,8 @@ function Form() {
 
   //useeffect
   useEffect(() => {
-    const formId = window.location.pathname.split("/form").pop();
-    if (formId && formId !== "" && isNumber(formId)) {
-      updateReadonly(true);
-      let queryParams = new URLSearchParams();
-      queryParams;
-
-      httpClient
-        .getAsync<FormRequest>(
-          httpClient.GetForm,
-          updateAlertProps,
-          undefined,
-          updateIsLoading,
-          false,
-        )
-        .then((response) => {
-          if (response) {
-            updatecustomerName({
-              value: response.form.customerName,
-              error: false,
-              helperText: "",
-            });
-            updateCustomerAddress({
-              value: response.form.customerAddress,
-              error: false,
-              helperText: "",
-            });
-            updateCurrentProcess(response.form.processId);
-            updatePhoneNumber({
-              value: response.form.phoneNumber,
-              error: false,
-              helperText: "",
-            });
-            updatePhoneNumber2({
-              value: response.form.phoneNumber2 ?? "",
-              error: false,
-              helperText: "",
-            });
-            if (response.Attachments && response.Attachments.length > 0) {
-              const fileAttachments = response.Attachments.map((attachment) => {
-                return {
-                  filename: attachment.filename,
-                  fileSizeInKb: attachment.fileSizeInKb,
-                  filepath: attachment.filepath,
-                  fileType: attachment.fileType,
-                };
-              });
-              updateAttachments(fileAttachments);
-            }
-          }
-        });
-    } else {
-      httpClient
+    const getProcess = async () => {
+      await httpClient
         .getAsync<
           Process[]
         >(httpClient.GetProcess, [], updateAlertProps, undefined, updateIsLoading, false)
@@ -134,10 +102,131 @@ function Form() {
           if (response && response.length > 0) {
             {
               updateProcess(response);
-              updateCurrentProcess(response[0].processId);
+              updateCurrentProcess((prev) =>
+                prev == 0 ? response[0].processId : prev,
+              );
             }
           }
         });
+    };
+    const getExistingForm = async (formId: string) => {
+      updateReadonly(true);
+      let queryParams = new URLSearchParams();
+      queryParams.append(
+        "query",
+        `${role === "Admin" ? `id eq ${formId}` : `CreatedBy eq ${user?.userPrincipalName} and id eq ${formId}`}`,
+      );
+      queryParams.append("createdBy", `${user?.userPrincipalName ?? ""}`);
+      queryParams.append("orderBy", "id");
+      queryParams.append("sortBy", "desc");
+
+      httpClient
+        .getAsync<
+          FormResponse[]
+        >(httpClient.GetForm + `?${queryParams.toString()}`, undefined, updateAlertProps, undefined, updateIsLoading, false)
+        .then((responseList) => {
+          let response =
+            responseList && responseList.length > 0 ? responseList[0] : null;
+          if (response) {
+            updateFormId(params.formId);
+            if (
+              response.createdBy !== user?.userPrincipalName &&
+              role !== "Admin"
+            ) {
+              setAlerts(
+                {
+                  message: `You are not authorized to view form ${formId}. Redirecting to home page`,
+                  severity: "error",
+                  show: true,
+                },
+                updateAlertProps,
+                2000,
+              );
+              setTimeout(() => {
+                navigate("/");
+              }, 2000);
+              return;
+            }
+            if (
+              role === "Admin" ||
+              (response.createdBy === user?.userPrincipalName &&
+                new Date(response.createdOn) >
+                  set(new Date(), {
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                    milliseconds: 0,
+                  }))
+            ) {
+              updateCanEdit(true);
+            }
+            updatecustomerName((prev) => ({
+              ...prev,
+              value: response.customerName ?? "",
+              error: false,
+              helperText: "",
+            }));
+            updateCustomerAddress((prev) => ({
+              ...prev,
+              value: response.customerAddress ?? "",
+              error: false,
+              helperText: "",
+            }));
+            updateCurrentProcess(response.processId ?? 0);
+            updatePhoneNumber((prev) => ({
+              ...prev,
+              value: response.phoneNumber ?? "",
+              error: false,
+              helperText: "",
+            }));
+            updatePhoneNumber2((prev) => ({
+              ...prev,
+              value: response.phoneNumber2 ?? "",
+              error: false,
+              helperText: "",
+            }));
+          }
+        });
+    };
+
+    const getAttachments = async (formId: string) => {
+      let queryParams = new URLSearchParams();
+      queryParams.append("query", `id eq ${formId}`);
+      queryParams.append("orderBy", "attachmentId");
+      httpClient
+        .getAsync<
+          AttachmentResponse[]
+        >(httpClient.GetAttachments + `?${queryParams.toString()}`, undefined, updateAlertProps, undefined, updateIsLoading, false)
+        .then(async (response) => {
+          if (response && response.length > 0) {
+            response = await Promise.all(
+              response.map(async (attachment) => {
+                const blob = await fetch(
+                  `data:${attachment.fileType};base64,${attachment.fileContent}`,
+                ).then(async (res) => await res.blob());
+                return {
+                  fileName: attachment.fileName,
+                  fileSizeInKb: attachment.fileSize
+                    ? attachment.fileSize / 1024
+                    : 0,
+                  filePath: URL.createObjectURL(blob),
+                  fileType: attachment.fileType,
+                };
+              }),
+            );
+            updateAttachments(response);
+          }
+        });
+    };
+
+    getProcess();
+    if (
+      params.formId &&
+      params.formId !== "" &&
+      !isNaN(Number(params.formId))
+    ) {
+      getExistingForm(params.formId);
+      getAttachments(params.formId);
     }
   }, []);
   //other api calls
@@ -158,11 +247,14 @@ function Form() {
         phoneNumber2: phoneNumber2.value ?? "",
       },
     };
+    if (formId && formId !== "" && !isNaN(Number(formId))) {
+      requestBody.form.id = Number(formId);
+    }
     formRequest.append("request", JSON.stringify(requestBody.form));
     for (const attachment of attachments) {
-      if (attachment.filepath) {
-        const file = await fetch(attachment.filepath).then((res) => res.blob());
-        formRequest.append("attachments", file, attachment.filename);
+      if (attachment.filePath) {
+        const file = await fetch(attachment.filePath).then((res) => res.blob());
+        formRequest.append("attachments", file, attachment.fileName);
       }
     }
     httpClient
@@ -202,9 +294,9 @@ function Form() {
       updateFileIndex((prev) => prev + 1);
       fileAttachments = Array.from(fileList).map((file, index) => {
         return {
-          filename: `${file.name.split(".")[0]}-${fileIndex}.${file.name.split(".").slice(-1)[0]}`,
+          fileName: `${file.name.split(".")[0]}-${fileIndex}.${file.name.split(".").slice(-1)[0]}`,
           fileSizeInKb: file.size / 1024,
-          filepath: URL.createObjectURL(file),
+          filePath: URL.createObjectURL(file),
           fileType: file.type,
         };
       });
@@ -215,17 +307,17 @@ function Form() {
         ...fileAttachments.filter((attachment) => {
           return !prev.some(
             (existingAttachment) =>
-              existingAttachment.filename === attachment.filename,
+              existingAttachment.fileName === attachment.fileName,
           );
         }),
       ]);
     }
   };
 
-  const deleteAttachment = (filepath: string) => {
+  const deleteAttachment = (filePath: string) => {
     updateAttachments((prev) => {
       return attachments.filter(
-        (attachment) => attachment.filepath != filepath,
+        (attachment) => attachment.filePath != filePath,
       );
     });
   };
@@ -237,7 +329,7 @@ function Form() {
     if (
       fileAttachments.some((fileAttachment) =>
         attachments.find(
-          (attachment) => attachment.filename === fileAttachment.filename,
+          (attachment) => attachment.fileName === fileAttachment.fileName,
         ),
       )
     ) {
@@ -249,12 +341,12 @@ function Form() {
       return false;
     }
     for (const attachment of fileAttachments) {
-      if (!attachment.filename) {
-        setAlert("FileName is required");
+      if (!attachment.fileName) {
+        setAlert("fileName is required");
         return false;
       }
       if (
-        !attachment.filepath ||
+        !attachment.filePath ||
         !attachment.fileSizeInKb ||
         attachment.fileSizeInKb < 0 ||
         !attachment.fileType
@@ -267,13 +359,13 @@ function Form() {
         !attachment.fileType?.endsWith("pdf")
       ) {
         setAlert(
-          `Only img or pdf files allowed. Error in ${attachment.filename}`,
+          `Only img or pdf files allowed. Error in ${attachment.fileName}`,
         );
         return false;
       }
       if (attachment.fileSizeInKb > 3000) {
         setAlert(
-          `File size should be less than 3000 KB. Error in ${attachment.filename} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
+          `File size should be less than 3000 KB. Error in ${attachment.fileName} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
         );
         return false;
       }
@@ -325,22 +417,6 @@ function Form() {
       return false;
     }
 
-    // if (!customerName.value || customerName.value.trim() === "") {
-    //   updatecustomerName({
-    //     value: customerName.value,
-    //     error: true,
-    //     helperText: "Customer Name is required",
-    //   });
-    //   return false;
-    // }
-    // if (!customerAddress.value || customerAddress.value.trim() === "") {
-    //   updateCustomerAddress({
-    //     value: customerAddress.value,
-    //     error: true,
-    //     helperText: "Customer Address is required",
-    //   });
-    //   return false;
-    // }
     if (currentProcess <= 0) {
       setAlert("Please select a process");
       return false;
@@ -353,29 +429,13 @@ function Form() {
       setAlert("Maximum 10 attachments allowed");
       return false;
     }
-    // if (!phoneNumber.value) {
-    //   updatePhoneNumber((lastValue) => ({
-    //     ...lastValue,
-    //     error: true,
-    //     helperText: "PhoneNumber is required",
-    //   }));
-    //   return false;
-    // }
-    // if (validatePhoneNumber(phoneNumber.value)) {
-    //   setAlert("Phone Number is not valid");
-    //   return false;
-    // }
-    // if (phoneNumber2.value && validatePhoneNumber(phoneNumber2.value)) {
-    //   setAlert("Phone Number2 is not valid");
-    //   return false;
-    // }
     return true;
   };
   //render
   return (
     <>
       <Container maxWidth="xs">
-        <Stack>
+        <Stack justifyContent={"space-between"} direction={"row"} marginTop={1}>
           <Typography
             variant="h5"
             fontWeight={800}
@@ -384,12 +444,18 @@ function Form() {
           >
             Form:
           </Typography>
+          {canEdit && (
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => {
+                updateReadonly((prev) => !prev);
+              }}
+            >
+              Edit
+            </Button>
+          )}
         </Stack>
-        {/* <Stack direction={"row-reverse"}>
-          <Typography className={style.textshadowsec} color="primary">
-            {user?.officeLocation ?? ""}
-          </Typography>
-        </Stack> */}
         <Stack>
           <TextBox
             {...{
@@ -398,18 +464,6 @@ function Form() {
               readonly: readonly,
             }}
           ></TextBox>
-          {/* <TextField
-            label="Name of the Candidate:"
-            value={customerName.value}
-            required={true}
-            error={customerName.error}
-            helperText={customerName.helperText}
-            variant="filled"
-            margin="normal"
-            onChange={(e) =>
-              updateTextField(updatecustomerName, e.target.value)
-            }
-          ></TextField> */}
         </Stack>
         <Stack>
           <TextBox
@@ -420,21 +474,6 @@ function Form() {
               multiline: true,
             }}
           ></TextBox>
-          {/* <TextField
-            label="Address"
-            multiline={true}
-            minRows={3}
-            maxRows={5}
-            value={customerAddress.value}
-            margin="normal"
-            variant="filled"
-            required
-            error={customerAddress.error}
-            helperText={customerAddress.helperText}
-            onChange={(e) =>
-              updateTextField(updateCustomerAddress, e.target.value)
-            }
-          ></TextField> */}
         </Stack>
         <Stack>
           <TextField
@@ -465,16 +504,6 @@ function Form() {
               readonly: readonly,
             }}
           ></TextBox>
-          {/* <TextField
-            margin="normal"
-            label="Phone Number"
-            required
-            value={phoneNumber.value}
-            error={phoneNumber.error}
-            helperText={phoneNumber.helperText}
-            variant="filled"
-            onChange={(e) => updateTextField(updatePhoneNumber, e.target.value)}
-          ></TextField> */}
           <TextBox
             {...{
               textFieldString: phoneNumber2,
@@ -482,17 +511,6 @@ function Form() {
               readonly: readonly,
             }}
           ></TextBox>
-          {/* <TextField
-            margin="normal"
-            label="Phone Number 2"
-            value={phoneNumber2.value}
-            error={phoneNumber2.error}
-            helperText={phoneNumber2.helperText}
-            variant="filled"
-            onChange={(e) =>
-              updateTextField(updatePhoneNumber2, e.target.value)
-            }
-          ></TextField> */}
         </Stack>
         <Stack direction={"row"} spacing={2} marginTop={2}>
           <Button variant="contained" component="label" disabled={readonly}>
@@ -519,30 +537,31 @@ function Form() {
                         key={index}
                         alignItems={"center"}
                       >
-                        <a href={attachment.filepath} target="_blank">
+                        <a href={attachment.filePath} target="_blank">
                           {attachment.fileType == "application/pdf" ? (
                             <img
                               className="h-16 w-30"
-                              src={attachment.filepath}
-                              title={attachment.filename}
+                              src={attachment.filePath}
+                              title={attachment.fileName}
                             ></img>
                           ) : (
                             <img
                               className="h-16 w-30"
-                              src={attachment.filepath}
-                              title={attachment.filename}
+                              src={attachment.filePath}
+                              title={attachment.fileName}
                             ></img>
                           )}
                         </a>
                         <Chip
-                          label={attachment.filename}
+                          label={attachment.fileName}
+                          disabled={readonly}
                           className=".overflow-ellipsis h-16 w-30"
                           sx={{ fontSize: "12px" }}
                           variant="outlined"
                           key={index}
                           component={"a"}
                           onDelete={() => {
-                            deleteAttachment(attachment.filepath ?? "");
+                            deleteAttachment(attachment.filePath ?? "");
                           }}
                         ></Chip>
                       </Stack>

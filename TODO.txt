@@ -157,3 +157,73 @@ hmm confused on what shit to implemetn
 well in api only one row need to go
 
 gj on the table !!!!!
+
+2/6/25
+1.  I need to add view form / complete form
+2. In future search form also
+3. So view form is simple just real from url if formId exists then readonly
+4.send api call to db and it should return both data and files
+5. files if removed and readded should be reflected in db
+
+power : 75
+complete feature :100
+work all day :50
+extras : 25
+
+
+things to do :
+read url
+check access
+2 modes readonly and not readonly
+
+lets finish readonly first
+
+check access and display if user has access and form exits
+you have to download attachments
+
+queryparams proper way to add?
+
+complete:
+update formId from api response
+use formid to display check box -> otp -> complete
+
+
+edit:
+tricky
+add edit button
+
+edit attchment : dialog for deleting old attachment
+
+attachment:
+process api in parallel - done
+new attachment api - done
+should download files and send -done
+is byte[] enough - done
+time to do it , test with insomnia -done
+
+api is working make the other changes too -??? done
+
+now for edit and save changes
+
+edit button added!
+wait edit save must save the same form lol
+
+before doing edit form think for some time
+
+before i proceed with update should i think of activity -> no cause its not fun  and in my way!
+atleast one attachment must be present
+
+edit looks good but needs some testing
+
+what about complete
+
+edit for is bad. delete can be different
+
+edit needs the following :
+1. in request from ui pass the attachmentIds alone
+2. in api delete those ids and fetch name. with these name delete them 
+3. from ui when submit button is clicked it should be similar
+4. in edit mode flow will show dialog when attachment is deleted and on ok it will be saved
+5. during api calls these attschment details is sent
+
+remmeber attachments are not updated just added and removed

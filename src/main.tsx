@@ -75,6 +75,7 @@ function Main() {
                     {role === "Admin" && (
                       <Route path="admin" element={<Admin />} />
                     )}
+                    <Route path="form/:formId" element={<Form />} />
                     <Route path="form" element={<Form />} />
                     <Route path="/" element={<DashBoard />} />
                   </Routes>
