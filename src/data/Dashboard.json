@@ -1,54 +1,67 @@
 [
   {
     "field": "id",
-    "headerName": "Id"
+    "headerName": "Id",
+    "type": "string"
   },
   {
     "field": "typeName",
-    "headerName": "TypeName"
+    "headerName": "TypeName",
+    "type": "string"
   },
   {
     "field": "statusName",
-    "headerName": "StatusName"
+    "headerName": "StatusName",
+    "type": "string"
   },
   {
     "field": "processName",
-    "headerName": "ProcessName"
+    "headerName": "ProcessName",
+    "type": "string"
   },
   {
     "field": "customerName",
-    "headerName": "CustomerName"
+    "headerName": "CustomerName",
+    "type": "string"
   },
   {
     "field": "customerAddress",
-    "headerName": "CustomerAddress"
+    "headerName": "CustomerAddress",
+    "type": "string"
   },
   {
     "field": "phoneNumber",
-    "headerName": "PhoneNumber"
+    "headerName": "PhoneNumber",
+    "type": "string"
   },
   {
     "field": "phoneNumber2",
-    "headerName": "PhoneNumber2"
+    "headerName": "PhoneNumber2",
+    "type": "string"
   },
   {
     "field": "locationName",
-    "headerName": "LocationName"
+    "headerName": "LocationName",
+    "type": "string"
   },
   {
     "field": "createdBy",
-    "headerName": "CreatedBy"
+    "headerName": "CreatedBy",
+    "type": "string"
   },
   {
     "field": "createdOn",
-    "headerName": "CreatedOn"
+    "headerName": "CreatedOn",
+    "type": "dateTime"
   },
   {
     "field": "lastUpdatedBy",
-    "headerName": "LastUpdatedBy"
+    "headerName": "LastUpdatedBy",
+    "type": "string"
   },
   {
     "field": "lastUpdatedOn",
-    "headerName": "LastUpdatedOn"
+    "headerName": "LastUpdatedOn",
+    "type": "string"
   }
 ]

@@ -19,11 +19,12 @@ import { useLoginContext } from "../../context/LoginContextProvider";
 import style from "./Form.module.css";
 import httpClient from "../../helper/httpClient";
 import { validatePhoneNumber } from "../Admin/Admin";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { AlertProps } from "../../Types/ComponentProps/AlertProps";
 import { severity } from "../../Types/ComponentProps/ButtonProps";
 import { time } from "console";
 import TextBox from "../../custom-component/TextBox";
+import { isNumber } from "@mui/x-data-grid/internals";
 
 function Form() {
   //constants
@@ -74,18 +75,70 @@ function Form() {
 
   //useeffect
   useEffect(() => {
-    httpClient
-      .getAsync<
-        Process[]
-      >(httpClient.GetProcess, [], updateAlertProps, undefined, updateIsLoading, false)
-      .then((response) => {
-        if (response && response.length > 0) {
-          {
-            updateProcess(response);
-            updateCurrentProcess(response[0].processId);
+    const formId = window.location.pathname.split("/form").pop();
+    if (formId && formId !== "" && isNumber(formId)) {
+      updateReadonly(true);
+      let queryParams = new URLSearchParams();
+      queryParams;
+
+      httpClient
+        .getAsync<FormRequest>(
+          httpClient.GetForm,
+          updateAlertProps,
+          undefined,
+          updateIsLoading,
+          false,
+        )
+        .then((response) => {
+          if (response) {
+            updatecustomerName({
+              value: response.form.customerName,
+              error: false,
+              helperText: "",
+            });
+            updateCustomerAddress({
+              value: response.form.customerAddress,
+              error: false,
+              helperText: "",
+            });
+            updateCurrentProcess(response.form.processId);
+            updatePhoneNumber({
+              value: response.form.phoneNumber,
+              error: false,
+              helperText: "",
+            });
+            updatePhoneNumber2({
+              value: response.form.phoneNumber2 ?? "",
+              error: false,
+              helperText: "",
+            });
+            if (response.Attachments && response.Attachments.length > 0) {
+              const fileAttachments = response.Attachments.map((attachment) => {
+                return {
+                  filename: attachment.filename,
+                  fileSizeInKb: attachment.fileSizeInKb,
+                  filepath: attachment.filepath,
+                  fileType: attachment.fileType,
+                };
+              });
+              updateAttachments(fileAttachments);
+            }
           }
-        }
-      });
+        });
+    } else {
+      httpClient
+        .getAsync<
+          Process[]
+        >(httpClient.GetProcess, [], updateAlertProps, undefined, updateIsLoading, false)
+        .then((response) => {
+          if (response && response.length > 0) {
+            {
+              updateProcess(response);
+              updateCurrentProcess(response[0].processId);
+            }
+          }
+        });
+    }
   }, []);
   //other api calls
   const postForm = async () => {

@@ -20,9 +20,9 @@ export interface FormResponse {
   phoneNumber2?: string;
   locationName: string;
   createdBy: string;
-  createdOn: string;
+  createdOn: string | Date;
   lastUpdatedBy: string;
-  lastUpdatedOn: string;
+  lastUpdatedOn: string | Date;
 }
 
 export interface Process {

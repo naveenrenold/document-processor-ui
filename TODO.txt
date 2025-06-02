@@ -141,3 +141,19 @@ Attachment sending in api calls finished.
 4. Next is def dashboard 
 5 Also make a function that convert object to api call
 6. test all this shit
+
+31/5/25
+1. hmm need to decide on form design
+2. but first on how to implement mutiple filters and default filter and save filters
+hmm confused on what shit to implemetn
+1. multiple sort - not important if default filter and good
+2. multiple filter - even low priority
+3. imagine many rows how table will function
+4. For now this is enough
+5. Need some auto filter in chips maybe -later
+6. Set form as enum?? - done
+7. single select column 
+
+well in api only one row need to go
+
+gj on the table !!!!!
