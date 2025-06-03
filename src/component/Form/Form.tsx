@@ -1,13 +1,15 @@
 import {
   Button,
+  Checkbox,
   Chip,
   Container,
+  Dialog,
   MenuItem,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useImperativeHandle, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   Attachment,
   AttachmentResponse,
@@ -17,34 +19,23 @@ import {
 } from "../../Types/Component/Form";
 import {
   textFieldString,
-  updateTextField,
   validateTextField,
 } from "../../Types/ComponentProps/TextFieldProps";
 import { useMainContext } from "../../context/MainContextProvider";
 import { useLoginContext } from "../../context/LoginContextProvider";
 import style from "./Form.module.css";
 import httpClient from "../../helper/httpClient";
-import { DialogType, validatePhoneNumber } from "../Admin/Admin";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router";
-import { AlertProps } from "../../Types/ComponentProps/AlertProps";
+import { useNavigate, useParams } from "react-router";
 import { severity } from "../../Types/ComponentProps/ButtonProps";
-import { time } from "console";
 import TextBox from "../../custom-component/TextBox";
-import { isNumber } from "@mui/x-data-grid/internals";
 import { set } from "date-fns";
-import { get } from "http";
 import { ConfirmationDialogProps } from "../../Types/ComponentProps/ConfirmationProps";
 import { ConfirmationDialog } from "../../custom-component/Dialog";
 
 function Form() {
   //constants
-  let [fileIndex, updateFileIndex] = useState<number>(1);
   //usestate
+  const [fileIndex, updateFileIndex] = useState<number>(1);
   const defaultTextFieldString: textFieldString = {
     value: "",
     error: false,
@@ -53,10 +44,14 @@ function Form() {
   let params = useParams();
   const { user, role } = useLoginContext();
   const [formId, updateFormId] = useState<string>();
-  const [canEdit, updateCanEdit] = useState<boolean>(false);
   const [currentDialog, updateCurrentDialog] = useState<FormDialogType>(
     FormDialogType.None,
   );
+  const [formMode, updateFormMode] = useState<FormMode>(FormMode.Create);
+  let [selectedFile, updateSelectedFile] = useState({
+    filePath: "",
+    fileName: "",
+  });
   const {
     updateAlertProps,
     updateIsLoading,
@@ -117,6 +112,7 @@ function Form() {
     };
     const getExistingForm = async (formId: string) => {
       updateReadonly(true);
+      updateFormMode(FormMode.View);
       let queryParams = new URLSearchParams();
       queryParams.append(
         "query",
@@ -153,6 +149,7 @@ function Form() {
               }, 2000);
               return;
             }
+            updateFormMode(FormMode.View);
             if (
               role === "Admin" ||
               (response.createdBy === user?.userPrincipalName &&
@@ -164,7 +161,7 @@ function Form() {
                     milliseconds: 0,
                   }))
             ) {
-              updateCanEdit(true);
+              updateFormMode(FormMode.Edit);
             }
             updatecustomerName((prev) => ({
               ...prev,
@@ -205,6 +202,7 @@ function Form() {
         >(httpClient.GetAttachments + `?${queryParams.toString()}`, undefined, updateAlertProps, undefined, updateIsLoading, false)
         .then(async (response) => {
           if (response && response.length > 0) {
+            updateFileIndex((prev) => prev + (response ? response.length : 0));
             response = await Promise.all(
               response.map(async (attachment) => {
                 const blob = await fetch(
@@ -258,7 +256,7 @@ function Form() {
       requestBody.form.id = Number(formId);
       requestBody.deleteAttachments = deleteAttachments;
     }
-    formRequest.append("request", JSON.stringify(requestBody.form));
+    formRequest.append("request", JSON.stringify(requestBody));
     for (const attachment of attachments) {
       if (attachment.filePath) {
         const file = await fetch(attachment.filePath).then((res) => res.blob());
@@ -294,22 +292,27 @@ function Form() {
     }
     return attachmentElements;
   };
-  const setDialog = (filePath?: string) => {
+  const setDialog = () => {
     switch (currentDialog) {
-      case FormDialogType.DeleteAttachment: {
-        if (formId && formId !== "" && !isNaN(Number(formId))) {
-          return deleteAttachmentDialog(filePath ?? "");
-        }
-      }
+      case FormDialogType.DeleteAttachment:
+        return deleteAttachmentDialog();
     }
   };
 
-  const deleteAttachmentDialog = (filePath: string) => {
+  const onDeleteAttachment = () => {
+    if (formId && formId !== "" && !isNaN(Number(formId))) {
+      updateCurrentDialog(FormDialogType.DeleteAttachment);
+    } else {
+      deleteAttachment();
+    }
+  };
+
+  const deleteAttachmentDialog = () => {
     const deleteAttachmentProps: ConfirmationDialogProps = {
       title: "Delete Attachment",
-      content: `Are you sure you want to delete attachment  ${filePath.split("/")[-1]}?`,
+      content: `Are you sure you want to delete attachment  ${selectedFile.fileName}?`,
       onButton1: () => {
-        deleteAttachment(filePath);
+        deleteAttachment();
         updateCurrentDialog(FormDialogType.None);
       },
       onButton2: () => {
@@ -350,19 +353,21 @@ function Form() {
     }
   };
 
-  const deleteAttachment = (filePath: string) => {
+  const deleteAttachment = () => {
     let attachmentIds = attachments
-      .filter((attachment) => attachment.filePath === filePath)
-      .map((attachment) => attachment.attachmentId);
+      .filter(
+        (attachment) =>
+          attachment.filePath === selectedFile.filePath &&
+          attachment.attachmentId &&
+          attachment.attachmentId > 0,
+      )
+      .map((attachment) => attachment.attachmentId!);
     if (attachmentIds && attachmentIds.length > 0) {
-      updateDeleteAttachments((prev) => [
-        ...prev,
-        ...attachmentIds.map((id) => id ?? 0),
-      ]);
+      updateDeleteAttachments((prev) => [...prev, attachmentIds[0]]);
     }
     updateAttachments((prev) => {
       return attachments.filter(
-        (attachment) => attachment.filePath != filePath,
+        (attachment) => attachment.filePath != selectedFile.filePath,
       );
     });
   };
@@ -479,8 +484,15 @@ function Form() {
   //render
   return (
     <>
-      <Container maxWidth="xs">
+      <Dialog
+        open={currentDialog != FormDialogType.None}
+        onClose={() => {
+          updateCurrentDialog(FormDialogType.None);
+        }}
+      >
         {setDialog()}
+      </Dialog>
+      <Container maxWidth="xs">
         <Stack justifyContent={"space-between"} direction={"row"} marginTop={1}>
           <Typography
             variant="h5"
@@ -490,7 +502,7 @@ function Form() {
           >
             Form:
           </Typography>
-          {canEdit && (
+          {formMode == FormMode.Edit && (
             <Button
               size="small"
               variant="contained"
@@ -607,7 +619,11 @@ function Form() {
                           key={index}
                           component={"a"}
                           onDelete={() => {
-                            deleteAttachment(attachment.filePath ?? "");
+                            updateSelectedFile({
+                              filePath: attachment.filePath ?? "",
+                              fileName: attachment.fileName ?? "",
+                            });
+                            onDeleteAttachment();
                           }}
                         ></Chip>
                       </Stack>
@@ -618,6 +634,9 @@ function Form() {
             </>
           );
         })}
+        <Stack>
+          <Checkbox></Checkbox>
+        </Stack>
         <Stack
           direction={"row"}
           spacing={2}
@@ -642,4 +661,12 @@ export default Form;
 export enum FormDialogType {
   "None",
   "DeleteAttachment",
+}
+
+export enum FormMode {
+  "Create" = 1,
+  "View" = 2,
+  "Edit" = 3,
+  "Edited" = 4,
+  "Submit" = 5,
 }

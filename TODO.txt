@@ -230,3 +230,7 @@ remmeber attachments are not updated just added and removed\
 
 add the dialogs
 repeating attachment uploads
+
+delete attachmentss
+
+delete dialog

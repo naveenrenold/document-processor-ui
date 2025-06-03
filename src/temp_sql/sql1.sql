@@ -34,4 +34,4 @@ begin
     WHERE Id = @FormId;
 end
 
-select * from attachment
+delete from form
