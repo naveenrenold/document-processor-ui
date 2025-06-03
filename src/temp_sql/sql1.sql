@@ -34,4 +34,4 @@ begin
     WHERE Id = @FormId;
 end
 
-delete from form
+select * from Form

@@ -2,6 +2,7 @@ export interface FormDetails {
   id?: number;
   typeId: number;
   processId: number;
+  statusId?: number;
   customerName: string;
   customerAddress?: string;
   phoneNumber: string;

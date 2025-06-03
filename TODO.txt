@@ -233,4 +233,31 @@ repeating attachment uploads
 
 delete attachmentss
 
-delete dialog
+delete dialog - done
+
+form mode and submit = 
+
+canedit
+readonly
+submitchecked
+edited?
+
+
+create -> view -> canedit(view with access) <-> edit
+view ->submit
+
+create - default 
+view - if formId valid
+canedit -> formid valid and access
+edit -> click on edit
+
+submit -> click on submit only from view
+view ->submit not possible will become canedit
+problem canedit and view are same
+
+checkbox disappear after edit button is clicked or edit happened
+then need state for edit happened separate value
+
+modes and dialog done
+
+cancel edits -done

@@ -158,10 +158,7 @@ function DashBoard() {
   const getFormDetails = async () => {
     const filter: BaseFilter = {
       OrderBy: "lastUpdatedOn",
-      Query:
-        role === "Admin"
-          ? "statusName ne Completed"
-          : `statusName ne Completed and createdBy eq ${user?.userPrincipalName}`,
+      Query: role === "Admin" ? "" : `createdBy eq ${user?.userPrincipalName}`,
       SortBy: "desc",
     };
     const queryParams = new URLSearchParams();
@@ -305,6 +302,17 @@ function DashBoard() {
             },
             sorting: {
               sortModel: [{ field: "lastUpdatedOn", sort: "desc" }],
+            },
+            filter: {
+              filterModel: {
+                items: [
+                  {
+                    field: "statusName",
+                    operator: "is",
+                    value: "Submitted",
+                  },
+                ],
+              },
             },
           }}
           showToolbar

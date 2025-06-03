@@ -31,11 +31,19 @@ import TextBox from "../../custom-component/TextBox";
 import { set } from "date-fns";
 import { ConfirmationDialogProps } from "../../Types/ComponentProps/ConfirmationProps";
 import { ConfirmationDialog } from "../../custom-component/Dialog";
+import { on } from "events";
 
 function Form() {
   //constants
   //usestate
   const [fileIndex, updateFileIndex] = useState<number>(1);
+  const [checked, updateChecked] = useState<boolean>(false);
+  const [existingForm, updateExistingForm] = useState<FormResponse | null>(
+    null,
+  );
+  const [existingAttachments, updateExistingAttachments] = useState<
+    AttachmentResponse[] | null
+  >(null);
   const defaultTextFieldString: textFieldString = {
     value: "",
     error: false,
@@ -111,7 +119,6 @@ function Form() {
         });
     };
     const getExistingForm = async (formId: string) => {
-      updateReadonly(true);
       updateFormMode(FormMode.View);
       let queryParams = new URLSearchParams();
       queryParams.append(
@@ -129,6 +136,7 @@ function Form() {
         .then((responseList) => {
           let response =
             responseList && responseList.length > 0 ? responseList[0] : null;
+          updateExistingForm(response);
           if (response) {
             updateFormId(params.formId);
             if (
@@ -161,7 +169,11 @@ function Form() {
                     milliseconds: 0,
                   }))
             ) {
-              updateFormMode(FormMode.Edit);
+              updateFormMode(FormMode.CanEdit);
+            }
+            if (response.statusName === "Completed") {
+              updateChecked(true);
+              updateFormMode(FormMode.Complete);
             }
             updatecustomerName((prev) => ({
               ...prev,
@@ -219,6 +231,7 @@ function Form() {
                 };
               }),
             );
+            updateExistingAttachments(response);
             updateAttachments(response);
           }
         });
@@ -254,6 +267,7 @@ function Form() {
     };
     if (formId && formId !== "" && !isNaN(Number(formId))) {
       requestBody.form.id = Number(formId);
+      requestBody.form.statusId = checked ? 2 : 4;
       requestBody.deleteAttachments = deleteAttachments;
     }
     formRequest.append("request", JSON.stringify(requestBody));
@@ -276,7 +290,7 @@ function Form() {
       .then((response) => {
         if (response) {
           setAlert(response, "success", 3000);
-          updateReadonly(true);
+          updateFormMode(FormMode.View);
           setTimeout(() => {
             navigate("/");
           }, 3000);
@@ -296,6 +310,10 @@ function Form() {
     switch (currentDialog) {
       case FormDialogType.DeleteAttachment:
         return deleteAttachmentDialog();
+      case FormDialogType.ConfirmCheckBox:
+        return confirmCheckBoxDialog();
+      default:
+        return <></>;
     }
   };
 
@@ -325,6 +343,38 @@ function Form() {
       </>
     );
   };
+
+  const confirmCheckBoxDialog = () => {
+    const confirmCheckBoxProps: ConfirmationDialogProps = {
+      title: "Confirmation",
+      content: `Are you sure you want to mark form as verified?`,
+      onButton1: () => {
+        updateChecked((prev) => !prev);
+        updateFormMode((prev) =>
+          prev != FormMode.Submit ? FormMode.Submit : FormMode.View,
+        );
+        updateCurrentDialog(FormDialogType.None);
+      },
+      onButton2: () => {
+        updateCurrentDialog(FormDialogType.None);
+      },
+    };
+    return (
+      <>
+        <ConfirmationDialog {...confirmCheckBoxProps}></ConfirmationDialog>
+      </>
+    );
+  };
+  const submitButton = () => {
+    switch (formMode) {
+      case FormMode.Submit:
+        return "Complete";
+      case FormMode.Edited:
+        return "Update";
+      default:
+        return "Submit";
+    }
+  };
   //helper funtions
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
@@ -351,6 +401,22 @@ function Form() {
         }),
       ]);
     }
+  };
+
+  const checkFormUpdated = (): boolean => {
+    if (
+      customerName.value !== existingForm?.customerName ||
+      customerAddress.value !== existingForm?.customerAddress ||
+      phoneNumber.value !== existingForm?.phoneNumber ||
+      phoneNumber2.value !== existingForm?.phoneNumber2 ||
+      currentProcess !== existingForm?.processId ||
+      (existingAttachments && existingAttachments.length) !==
+        attachments.length ||
+      deleteAttachments.length > 0
+    ) {
+      return true;
+    }
+    return false;
   };
 
   const deleteAttachment = () => {
@@ -481,6 +547,61 @@ function Form() {
     }
     return true;
   };
+
+  const readOnlyField = () => {
+    return [
+      FormMode.View,
+      FormMode.CanEdit,
+      FormMode.Submit,
+      FormMode.Complete,
+    ].includes(formMode);
+  };
+
+  const onEditClick = () => {
+    if (formMode == FormMode.Edited) {
+      resetToExistingForm();
+      updateFormMode((prev) =>
+        prev == FormMode.CanEdit ? FormMode.Edit : FormMode.CanEdit,
+      );
+    } else if (checkFormUpdated()) {
+      updateFormMode(FormMode.Edited);
+    } else {
+      updateFormMode((prev) =>
+        prev == FormMode.CanEdit ? FormMode.Edit : FormMode.CanEdit,
+      );
+    }
+  };
+
+  const resetToExistingForm = () => {
+    updatecustomerName((prev) => ({
+      ...prev,
+      value: existingForm?.customerName ?? "",
+    }));
+    updateCustomerAddress((prev) => ({
+      ...prev,
+      value: existingForm?.customerAddress ?? "",
+    }));
+    updatePhoneNumber((prev) => ({
+      ...prev,
+      value: existingForm?.phoneNumber ?? "",
+    }));
+    updatePhoneNumber2((prev) => ({
+      ...prev,
+      value: existingForm?.phoneNumber2 ?? "",
+    }));
+    updateCurrentProcess(existingForm?.processId ?? 0);
+    updateAttachments(
+      existingAttachments?.map((attachment) => {
+        return {
+          fileName: attachment.fileName ?? "",
+          filePath: attachment.filePath ?? "",
+          fileSizeInKb: attachment.fileSize ? attachment.fileSize / 1024 : 0,
+          fileType: attachment.fileType ?? "",
+        };
+      }) ?? [],
+    );
+    updateDeleteAttachments([]);
+  };
   //render
   return (
     <>
@@ -502,15 +623,15 @@ function Form() {
           >
             Form:
           </Typography>
-          {formMode == FormMode.Edit && (
-            <Button
-              size="small"
-              variant="contained"
-              onClick={() => {
-                updateReadonly((prev) => !prev);
-              }}
-            >
-              Edit
+          {[FormMode.CanEdit, FormMode.Edit, FormMode.Edited].includes(
+            formMode,
+          ) && (
+            <Button size="small" variant="contained" onClick={onEditClick}>
+              {[FormMode.Edit].includes(formMode)
+                ? "Save Edits"
+                : [FormMode.Edited].includes(formMode)
+                  ? "Reset"
+                  : "Edit"}
             </Button>
           )}
         </Stack>
@@ -519,7 +640,7 @@ function Form() {
             {...{
               textFieldString: customerName,
               updateTextFieldString: updatecustomerName,
-              readonly: readonly,
+              readonly: readOnlyField(),
             }}
           ></TextBox>
         </Stack>
@@ -528,7 +649,7 @@ function Form() {
             {...{
               textFieldString: customerAddress,
               updateTextFieldString: updateCustomerAddress,
-              readonly: readonly,
+              readonly: readOnlyField(),
               multiline: true,
             }}
           ></TextBox>
@@ -538,7 +659,7 @@ function Form() {
             select
             label="Process"
             required
-            disabled={readonly}
+            disabled={readOnlyField()}
             value={currentProcess}
             variant="filled"
             onChange={(e) => {
@@ -559,19 +680,23 @@ function Form() {
             {...{
               textFieldString: phoneNumber,
               updateTextFieldString: updatePhoneNumber,
-              readonly: readonly,
+              readonly: readOnlyField(),
             }}
           ></TextBox>
           <TextBox
             {...{
               textFieldString: phoneNumber2,
               updateTextFieldString: updatePhoneNumber2,
-              readonly: readonly,
+              readonly: readOnlyField(),
             }}
           ></TextBox>
         </Stack>
         <Stack direction={"row"} spacing={2} marginTop={2}>
-          <Button variant="contained" component="label" disabled={readonly}>
+          <Button
+            variant="contained"
+            component="label"
+            disabled={readOnlyField()}
+          >
             Browse
             <input
               hidden
@@ -612,7 +737,7 @@ function Form() {
                         </a>
                         <Chip
                           label={attachment.fileName}
-                          disabled={readonly}
+                          disabled={readOnlyField()}
                           className=".overflow-ellipsis h-16 w-30"
                           sx={{ fontSize: "12px" }}
                           variant="outlined"
@@ -634,8 +759,33 @@ function Form() {
             </>
           );
         })}
-        <Stack>
-          <Checkbox></Checkbox>
+        <Stack
+          direction={"row"}
+          spacing={2}
+          marginTop={2}
+          alignItems={"center"}
+        >
+          {[
+            FormMode.View,
+            FormMode.CanEdit,
+            FormMode.Submit,
+            FormMode.Complete,
+          ].includes(formMode) && (
+            <>
+              <Checkbox
+                checked={checked}
+                onChange={() => {
+                  updateCurrentDialog(FormDialogType.ConfirmCheckBox);
+                }}
+                disabled={[FormMode.Complete, FormMode.Submit].includes(
+                  formMode,
+                )}
+              ></Checkbox>
+              <Typography color="primary" fontSize={14}>
+                All documents are processed and returned to customer
+              </Typography>
+            </>
+          )}
         </Stack>
         <Stack
           direction={"row"}
@@ -644,13 +794,19 @@ function Form() {
           justifyContent={"center"}
         >
           {/* <Button variant="contained">Save</Button> */}
-          <Button
-            variant="contained"
-            onClick={postForm}
-            disabled={readonly || isLoading}
-          >
-            Submit
-          </Button>
+          {![FormMode.Complete].includes(formMode) && (
+            <Button
+              variant="contained"
+              onClick={postForm}
+              disabled={
+                formMode == FormMode.View ||
+                formMode == FormMode.Edit ||
+                isLoading
+              }
+            >
+              {submitButton()}
+            </Button>
+          )}
         </Stack>
       </Container>
     </>
@@ -661,12 +817,15 @@ export default Form;
 export enum FormDialogType {
   "None",
   "DeleteAttachment",
+  "ConfirmCheckBox",
 }
 
 export enum FormMode {
   "Create" = 1,
   "View" = 2,
+  "CanEdit" = 4,
   "Edit" = 3,
-  "Edited" = 4,
-  "Submit" = 5,
+  "Edited" = 5,
+  "Submit" = 6,
+  "Complete" = 7,
 }
