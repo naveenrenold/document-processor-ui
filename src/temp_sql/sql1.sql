@@ -34,4 +34,4 @@ begin
     WHERE Id = @FormId;
 end
 
-select * from form
+select * from attachment

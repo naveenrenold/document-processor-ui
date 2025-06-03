@@ -220,10 +220,13 @@ what about complete
 edit for is bad. delete can be different
 
 edit needs the following :
-1. in request from ui pass the attachmentIds alone
-2. in api delete those ids and fetch name. with these name delete them 
-3. from ui when submit button is clicked it should be similar
+1. in request from ui pass the attachmentIds alone - done
+2. in api delete those ids and fetch name. with these name delete them  -done
+3. from ui when submit button is clicked it should be similar - done
 4. in edit mode flow will show dialog when attachment is deleted and on ok it will be saved
 5. during api calls these attschment details is sent
 
-remmeber attachments are not updated just added and removed
+remmeber attachments are not updated just added and removed\
+
+add the dialogs
+repeating attachment uploads

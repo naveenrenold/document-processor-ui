@@ -32,6 +32,7 @@ export interface Process {
   processName: string;
 }
 export interface Attachment {
+  attachmentId?: number;
   fileName?: string;
   filePath?: string;
   fileInBytes?: ArrayBuffer;
@@ -57,6 +58,7 @@ export interface Activity {
 export interface FormRequest {
   form: FormDetails;
   Attachments?: Attachment[];
+  deleteAttachments?: number[];
 }
 
 export interface Filters {

@@ -24,7 +24,7 @@ import { useMainContext } from "../../context/MainContextProvider";
 import { useLoginContext } from "../../context/LoginContextProvider";
 import style from "./Form.module.css";
 import httpClient from "../../helper/httpClient";
-import { validatePhoneNumber } from "../Admin/Admin";
+import { DialogType, validatePhoneNumber } from "../Admin/Admin";
 import {
   useLocation,
   useNavigate,
@@ -38,6 +38,8 @@ import TextBox from "../../custom-component/TextBox";
 import { isNumber } from "@mui/x-data-grid/internals";
 import { set } from "date-fns";
 import { get } from "http";
+import { ConfirmationDialogProps } from "../../Types/ComponentProps/ConfirmationProps";
+import { ConfirmationDialog } from "../../custom-component/Dialog";
 
 function Form() {
   //constants
@@ -52,6 +54,9 @@ function Form() {
   const { user, role } = useLoginContext();
   const [formId, updateFormId] = useState<string>();
   const [canEdit, updateCanEdit] = useState<boolean>(false);
+  const [currentDialog, updateCurrentDialog] = useState<FormDialogType>(
+    FormDialogType.None,
+  );
   const {
     updateAlertProps,
     updateIsLoading,
@@ -78,6 +83,7 @@ function Form() {
     { processId: 0, processName: "" },
   ]);
   const [attachments, updateAttachments] = useState<Attachment[]>([]);
+  const [deleteAttachments, updateDeleteAttachments] = useState<number[]>([]);
   const [phoneNumber, updatePhoneNumber] = useState<textFieldString>({
     ...defaultTextFieldString,
     name: "Phone Number",
@@ -205,6 +211,7 @@ function Form() {
                   `data:${attachment.fileType};base64,${attachment.fileContent}`,
                 ).then(async (res) => await res.blob());
                 return {
+                  attachmentId: attachment.attachmentId,
                   fileName: attachment.fileName,
                   fileSizeInKb: attachment.fileSize
                     ? attachment.fileSize / 1024
@@ -249,6 +256,7 @@ function Form() {
     };
     if (formId && formId !== "" && !isNaN(Number(formId))) {
       requestBody.form.id = Number(formId);
+      requestBody.deleteAttachments = deleteAttachments;
     }
     formRequest.append("request", JSON.stringify(requestBody.form));
     for (const attachment of attachments) {
@@ -286,6 +294,34 @@ function Form() {
     }
     return attachmentElements;
   };
+  const setDialog = (filePath?: string) => {
+    switch (currentDialog) {
+      case FormDialogType.DeleteAttachment: {
+        if (formId && formId !== "" && !isNaN(Number(formId))) {
+          return deleteAttachmentDialog(filePath ?? "");
+        }
+      }
+    }
+  };
+
+  const deleteAttachmentDialog = (filePath: string) => {
+    const deleteAttachmentProps: ConfirmationDialogProps = {
+      title: "Delete Attachment",
+      content: `Are you sure you want to delete attachment  ${filePath.split("/")[-1]}?`,
+      onButton1: () => {
+        deleteAttachment(filePath);
+        updateCurrentDialog(FormDialogType.None);
+      },
+      onButton2: () => {
+        updateCurrentDialog(FormDialogType.None);
+      },
+    };
+    return (
+      <>
+        <ConfirmationDialog {...deleteAttachmentProps}></ConfirmationDialog>
+      </>
+    );
+  };
   //helper funtions
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
@@ -315,6 +351,15 @@ function Form() {
   };
 
   const deleteAttachment = (filePath: string) => {
+    let attachmentIds = attachments
+      .filter((attachment) => attachment.filePath === filePath)
+      .map((attachment) => attachment.attachmentId);
+    if (attachmentIds && attachmentIds.length > 0) {
+      updateDeleteAttachments((prev) => [
+        ...prev,
+        ...attachmentIds.map((id) => id ?? 0),
+      ]);
+    }
     updateAttachments((prev) => {
       return attachments.filter(
         (attachment) => attachment.filePath != filePath,
@@ -435,6 +480,7 @@ function Form() {
   return (
     <>
       <Container maxWidth="xs">
+        {setDialog()}
         <Stack justifyContent={"space-between"} direction={"row"} marginTop={1}>
           <Typography
             variant="h5"
@@ -592,3 +638,8 @@ function Form() {
   );
 }
 export default Form;
+
+export enum FormDialogType {
+  "None",
+  "DeleteAttachment",
+}
