@@ -6,5 +6,6 @@ interface ImportMetaEnv {
   readonly VITE_BaseURL: string;
   readonly VITE_Base: string;
   readonly VITE_ApiUrl: string;
+  readonly VITE_MaxFileSize: string;
   // more env variables...
 }

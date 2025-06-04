@@ -261,3 +261,8 @@ then need state for edit happened separate value
 modes and dialog done
 
 cancel edits -done
+
+4/6/25
+
+1.do api validations
+2. check file size

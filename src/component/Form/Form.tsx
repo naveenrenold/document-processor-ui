@@ -32,6 +32,7 @@ import { set } from "date-fns";
 import { ConfirmationDialogProps } from "../../Types/ComponentProps/ConfirmationProps";
 import { ConfirmationDialog } from "../../custom-component/Dialog";
 import { on } from "events";
+import { MaxFileSize } from "../../Constant";
 
 function Form() {
   //constants
@@ -68,7 +69,6 @@ function Form() {
     isMobile,
     isLoading,
   } = useMainContext();
-  let [readonly, updateReadonly] = useState<boolean>(false);
   const [customerName, updatecustomerName] = useState<textFieldString>({
     ...defaultTextFieldString,
     name: "Customer Name",
@@ -267,7 +267,7 @@ function Form() {
     };
     if (formId && formId !== "" && !isNaN(Number(formId))) {
       requestBody.form.id = Number(formId);
-      requestBody.form.statusId = checked ? 2 : 4;
+      requestBody.form.statusId = checked ? 4 : 2;
       requestBody.deleteAttachments = deleteAttachments;
     }
     formRequest.append("request", JSON.stringify(requestBody));
@@ -479,9 +479,9 @@ function Form() {
         );
         return false;
       }
-      if (attachment.fileSizeInKb > 3000) {
+      if (attachment.fileSizeInKb > MaxFileSize) {
         setAlert(
-          `File size should be less than 3000 KB. Error in ${attachment.fileName} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
+          `File size should be less than ${MaxFileSize} KB. Error in ${attachment.fileName} with size ${attachment.fileSizeInKb} Kbs Use a website like https://compressjpeg.com/`,
         );
         return false;
       }
