@@ -5,6 +5,11 @@
     "adminModule": false
   },
   {
+    "name": "Go to form",
+    "href": "/search",
+    "adminModule": false
+  },
+  {
     "name": "Submit form",
     "href": "/form",
     "adminModule": false

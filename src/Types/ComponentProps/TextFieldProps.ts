@@ -13,6 +13,12 @@ export interface textFieldString {
   required?: boolean;
 }
 
+export const defaultTextFieldString: textFieldString = {
+  value: "",
+  error: false,
+  helperText: "",
+};
+
 export const updateTextField = (
   updateTextField: React.Dispatch<React.SetStateAction<textFieldString>>,
   value: string,

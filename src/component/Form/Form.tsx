@@ -18,6 +18,7 @@ import {
   Process,
 } from "../../Types/Component/Form";
 import {
+  defaultTextFieldString,
   textFieldString,
   validateTextField,
 } from "../../Types/ComponentProps/TextFieldProps";
@@ -45,13 +46,8 @@ function Form() {
   const [existingAttachments, updateExistingAttachments] = useState<
     AttachmentResponse[] | null
   >(null);
-  const defaultTextFieldString: textFieldString = {
-    value: "",
-    error: false,
-    helperText: "",
-  };
+
   let params = useParams();
-  const { user, role } = useLoginContext();
   const [formId, updateFormId] = useState<string>();
   const [currentDialog, updateCurrentDialog] = useState<FormDialogType>(
     FormDialogType.None,
@@ -61,6 +57,7 @@ function Form() {
     filePath: "",
     fileName: "",
   });
+  const { user, role } = useLoginContext();
   const {
     updateAlertProps,
     updateIsLoading,

@@ -17,6 +17,7 @@ import { AccountInfo } from "@azure/msal-browser";
 import { Role } from "./Types/Component/Role";
 import { SnackBarProps } from "./Types/ComponentProps/SnackBarProps";
 import DashBoard from "./component/DashBoard/DashBoard";
+import { Search } from "./component/Search/Search";
 
 function Main() {
   useEffect(() => {
@@ -77,6 +78,7 @@ function Main() {
                     )}
                     <Route path="form/:formId" element={<Form />} />
                     <Route path="form" element={<Form />} />
+                    <Route path="search" element={<Search />} />
                     <Route path="/" element={<DashBoard />} />
                   </Routes>
                 )}

@@ -266,3 +266,8 @@ cancel edits -done
 
 1.do api validations
 2. check file size
+
+4/6/25
+1. check the query validations
+
+2. make submit diabled when formid zero or loading
