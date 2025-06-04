@@ -2,21 +2,25 @@
   {
     "name": "Dashboard",
     "href": "/",
-    "adminModule": false
+    "adminModule": false,
+    "customerModule": false
   },
   {
     "name": "Go to form",
     "href": "/search",
-    "adminModule": false
+    "adminModule": false,
+    "customerModule": true
   },
   {
     "name": "Submit form",
     "href": "/form",
-    "adminModule": false
+    "adminModule": false,
+    "customerModule": false
   },
   {
     "name": "Admin modules",
     "href": "/admin",
-    "adminModule": true
+    "adminModule": true,
+    "customerModule": false
   }
 ]

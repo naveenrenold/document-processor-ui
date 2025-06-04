@@ -18,6 +18,7 @@ import { Role } from "./Types/Component/Role";
 import { SnackBarProps } from "./Types/ComponentProps/SnackBarProps";
 import DashBoard from "./component/DashBoard/DashBoard";
 import { Search } from "./component/Search/Search";
+import Activity from "./component/Activity/Activity";
 
 function Main() {
   useEffect(() => {
@@ -38,7 +39,7 @@ function Main() {
   let [isLoading, updateIsLoading] = useState(false);
   let [user, updateUser] = useState<UserDetails | null>(null);
   let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
-  let [role, updateRole] = useState<Role>("Employee");
+  let [role, updateRole] = useState<Role>("Customer");
   const isMobile = useMediaQuery("(max-width:639px)");
 
   return (
@@ -71,7 +72,7 @@ function Main() {
             >
               <Header />
               <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
-                {accountInfo && (
+                {accountInfo ? (
                   <Routes>
                     {role === "Admin" && (
                       <Route path="admin" element={<Admin />} />
@@ -80,6 +81,11 @@ function Main() {
                     <Route path="form" element={<Form />} />
                     <Route path="search" element={<Search />} />
                     <Route path="/" element={<DashBoard />} />
+                    <Route path="activity" element={<Activity />} />
+                  </Routes>
+                ) : (
+                  <Routes>
+                    <Route path="*" element={<Search />} />
                   </Routes>
                 )}
               </Box>

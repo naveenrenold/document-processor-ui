@@ -114,7 +114,9 @@ function Header() {
   const headerHeadings =
     role === "Admin"
       ? headings
-      : headings.filter((heading) => heading.adminModule === false);
+      : role === "Customer"
+        ? headings.filter((heading) => heading.customerModule === true)
+        : headings.filter((heading) => heading.adminModule === false);
   // helper functions
   const signIn = () => {
     let request: PopupRequest = loginRequest;
