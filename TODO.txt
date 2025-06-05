@@ -282,3 +282,8 @@ make a table and display with datagrid
 2.Make the query updates
 3. Then add in header and main
 4. Then make a data grid and display it 
+
+5. limit phone number to not +91 ?
+
+
+activity -insert and update finished
