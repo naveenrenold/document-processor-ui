@@ -40,7 +40,7 @@ function Activity() {
               includeHeaders: true,
               includeOutliers: true,
             });
-          }, 500);
+          }, 1000);
         }
       });
   }, []);

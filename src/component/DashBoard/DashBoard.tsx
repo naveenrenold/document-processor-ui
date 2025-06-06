@@ -186,7 +186,7 @@ function DashBoard() {
               includeHeaders: true,
               includeOutliers: true,
             });
-          }, 500);
+          }, 1000);
         }
       });
   };

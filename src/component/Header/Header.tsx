@@ -60,7 +60,7 @@ function Header() {
     MSALAuth.myMSALObj
       .initialize()
       .then(() => {
-        //setAccount();
+        setAccount();
         console.log("Account set");
       })
       .catch((err) => {
@@ -70,13 +70,15 @@ function Header() {
       let accounts = MSALAuth.myMSALObj.getAllAccounts();
       if (!accounts || accounts.length == 0) {
         console.log("Signing in");
-        signIn();
+        //signIn();
         accounts = MSALAuth.myMSALObj.getAllAccounts();
         return;
       } else if (accounts.length > 1) {
         console.log("Warning, more than 1 active account");
         if (admins.includes(accounts[0].username)) {
           updateRole("Admin");
+        } else {
+          updateRole("Employee");
         }
         updateAccountInfo(accounts[0]);
         getUserDetails(accounts[0]);
@@ -84,6 +86,8 @@ function Header() {
         console.log("Default sign in", accounts[0]);
         if (admins.includes(accounts[0].username)) {
           updateRole("Admin");
+        } else {
+          updateRole("Employee");
         }
         updateAccountInfo(accounts[0]);
         getUserDetails(accounts[0]);
@@ -127,6 +131,8 @@ function Header() {
         updateAccountInfo(authResult.account);
         if (admins.includes(authResult.account.username)) {
           updateRole("Admin");
+        } else {
+          updateRole("Employee");
         }
         getUserDetails(authResult.account);
       })
@@ -146,7 +152,7 @@ function Header() {
       .then(() => {
         console.log("logoutsuccess");
         updateUser(null);
-        updateRole("Employee");
+        updateRole("Customer");
         updateAccountInfo(null);
       })
       .catch((err) => {

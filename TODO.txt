@@ -301,8 +301,17 @@ adding extra files need to check
 
 7/6/25
 1. check why search is not loading properly - done , due to http scopes
-2. Need to check add attachment when possible and file uploads
-3. Need to check phone when possible
-4. figure out customer login
+2. Need to check add attachment when possible and file uploads -done
+3. Need to check phone when possible 
+4. figure out customer login 
 5. otp auth
-6.
+
+
+6. Need to test for employee access
+7. For customer access we need otp 
+    will need to get phone no along with ids in search 
+    and need to save in context so that it can be read in form.tsx
+
+8 This demo leave customer authentication step customer can see any form nopw
+
+

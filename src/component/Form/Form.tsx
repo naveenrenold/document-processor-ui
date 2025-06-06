@@ -118,10 +118,15 @@ function Form() {
     const getExistingForm = async (formId: string) => {
       updateFormMode(FormMode.View);
       let queryParams = new URLSearchParams();
-      queryParams.append(
-        "query",
-        `${role === "Admin" ? `id eq ${formId}` : `CreatedBy eq ${user?.userPrincipalName} and id eq ${formId}`}`,
-      );
+      let query;
+      if (role === "Admin") {
+        query = `id eq ${formId}`;
+      } else if (user?.userPrincipalName) {
+        query = `CreatedBy eq ${user?.userPrincipalName} and id eq ${formId}`;
+      } else {
+        query = `id eq ${formId}`;
+      }
+      queryParams.append("query", query);
       queryParams.append("createdBy", `${user?.userPrincipalName ?? ""}`);
       queryParams.append("orderBy", "id");
       queryParams.append("sortBy", "desc");
@@ -134,9 +139,25 @@ function Form() {
           let response =
             responseList && responseList.length > 0 ? responseList[0] : null;
           updateExistingForm(response);
+          if (!response) {
+            setAlerts(
+              {
+                message: `You are not authorized to view form ${formId}. Redirecting to home page`,
+                severity: "error",
+                show: true,
+              },
+              updateAlertProps,
+              2000,
+            );
+            setTimeout(() => {
+              navigate("/");
+            }, 2000);
+            return;
+          }
           if (response) {
             updateFormId(params.formId);
             if (
+              user?.userPrincipalName &&
               response.createdBy !== user?.userPrincipalName &&
               role !== "Admin"
             ) {
@@ -203,7 +224,15 @@ function Form() {
 
     const getAttachments = async (formId: string) => {
       let queryParams = new URLSearchParams();
-      queryParams.append("query", `id eq ${formId}`);
+      let query;
+      if (role === "Admin") {
+        query = `id eq ${formId}`;
+      } else if (user?.userPrincipalName) {
+        query = `UploadedBy eq ${user?.userPrincipalName} and id eq ${formId}`;
+      } else {
+        query = `id eq ${formId}`;
+      }
+      queryParams.append("query", query);
       queryParams.append("orderBy", "attachmentId");
       httpClient
         .getAsync<
@@ -618,7 +647,8 @@ function Form() {
             color="primary"
             className={style.textshadowsec}
           >
-            Form:
+            Form: {formId ?? formId}{" "}
+            {FormMode.Complete === formMode && "(Completed)"}
           </Typography>
           {[FormMode.CanEdit, FormMode.Edit, FormMode.Edited].includes(
             formMode,
