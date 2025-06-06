@@ -522,7 +522,7 @@ function Admin() {
       }));
       return false;
     }
-    if (validateEmail(emailAlias.value)) {
+    if (validateEmail(emailAlias.value + domain)) {
       updateEmailAlias((lastValue) => ({
         ...lastValue,
         error: true,
@@ -530,7 +530,7 @@ function Admin() {
       }));
       return false;
     }
-    if (validatePhoneNumber(phoneNumber.value)) {
+    if (!validatePhoneNumber(phoneNumber.value)) {
       updatePhoneNumber((lastValue) => ({
         ...lastValue,
         error: true,

@@ -76,13 +76,15 @@ function Main() {
                 {accountInfo ? (
                   <Routes>
                     {role === "Admin" && (
-                      <Route path="admin" element={<Admin />} />
+                      <>
+                        <Route path="admin" element={<Admin />} />
+                        <Route path="activity" element={<Activity />} />
+                      </>
                     )}
                     <Route path="form/:formId" element={<Form />} />
                     <Route path="form" element={<Form />} />
                     <Route path="search" element={<Search />} />
                     <Route path="/" element={<DashBoard />} />
-                    <Route path="activity" element={<Activity />} />
                   </Routes>
                 ) : (
                   <Routes>
