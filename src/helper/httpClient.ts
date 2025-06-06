@@ -12,6 +12,7 @@ class httpClient {
   static GetForm = "form";
   static GetProcess = "process";
   static GetAttachments = "attachment";
+  static GetActivity = "activity";
 
   public static async getAsync<T>(
     url: string,
@@ -21,13 +22,16 @@ class httpClient {
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
     isGraph = false,
   ) {
-    let header = await this.getAuthHeader(scopes);
-    if (!header) {
-      return;
+    let header;
+    if (scopes.length !== 0) {
+      header = await this.getAuthHeader(scopes);
+      if (!header) {
+        return;
+      }
     }
     let response = axios.get<T>(
       `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
-      header,
+      header ?? {},
     );
     if (setIsLoading) {
       setIsLoading(true);

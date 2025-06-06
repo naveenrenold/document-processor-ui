@@ -60,7 +60,7 @@ function Header() {
     MSALAuth.myMSALObj
       .initialize()
       .then(() => {
-        setAccount();
+        //setAccount();
         console.log("Account set");
       })
       .catch((err) => {
@@ -131,6 +131,7 @@ function Header() {
         getUserDetails(authResult.account);
       })
       .catch((err) => {
+        //updateAccountInfo(null);
         console.log("Error at Sign in ", err);
       });
   };

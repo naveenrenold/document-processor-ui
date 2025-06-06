@@ -38,3 +38,27 @@ INSERT INTO activity (Id, ActivityTypeId, Comments, CreatedBy, CreatedOn, Field,
 VALUES (@Id, @ActivityTypeId, @Comments, @CreatedBy, @CreatedOn, @Field, @OldValue, @NewValue);
 
 
+Select * from activity 
+
+INSERT INTO activity (Id, ActivityTypeId, Comments, CreatedBy, CreatedOn, Field, OldValue, NewValue)
+VALUES (@Id, @ActivityTypeId, @Comments, @CreatedBy, @CreatedOn, @Field, @OldValue, @NewValue);
+
+--------------------
+
+With CTE AS
+(
+SELECT 
+A.ActivityId, A.Id, AT.ActivityTypeName, A.Comments, A.CreatedBy, A.CreatedOn, A.Field, A.OldValue, A.NewValue
+FROM [Activity] A
+inner join ActivityType AT on A.ActivityId = AT.ActivityTypeId )
+select count(1) OVER() AS 
+TotalRecords, {2}
+from CTE {0} {1}
+OFFSET @offset ROWS 
+FETCH NEXT @limit ROWS ONLY;
+
+select * from ActivityType
+
+Select * from Attachment
+
+delete from form

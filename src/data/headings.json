@@ -18,6 +18,12 @@
     "customerModule": false
   },
   {
+    "name": "Activity log",
+    "href": "/activity",
+    "adminModule": true,
+    "customerModule": false
+  },
+  {
     "name": "Admin modules",
     "href": "/admin",
     "adminModule": true,

@@ -27,10 +27,10 @@ export function Search() {
     isMobile,
     isLoading,
   } = useMainContext();
-  const { user, role } = useLoginContext();
+  //const { user, role } = useLoginContext();
   //state
-  let [currentFormId, setCurrentFormId] = useState(0);
-  let [formIds, setFormIds] = useState<number[]>([]);
+  let [currentFormId, setCurrentFormId] = useState<string | null>(null);
+  let [formIds, setFormIds] = useState<string[]>([]);
   //useeffect
   useEffect(() => {
     // Fetch form IDs from the server or any other source
@@ -42,13 +42,13 @@ export function Search() {
         params.append("sortBy", "desc");
         let response = await httpClient.getAsync<FormResponse[]>(
           `${httpClient.GetForm}?${params.toString()}`,
-          undefined,
+          [],
           updateAlertProps,
           undefined,
           updateIsLoading,
         );
         if (response) {
-          setFormIds(response.map((form) => parseInt(form.id)));
+          setFormIds(response.map((form) => form.id.toString()));
         } else {
           setAlert("Failed to fetch form IDs.");
         }
@@ -76,7 +76,7 @@ export function Search() {
     );
   };
   const validateSearch = (): boolean => {
-    if (!currentFormId || currentFormId <= 0) {
+    if (!currentFormId || currentFormId === "") {
       setAlert("Form ID is required.");
       return false;
     }
@@ -127,7 +127,7 @@ export function Search() {
             options={formIds}
             value={currentFormId}
             onChange={(event, newValue) => {
-              setCurrentFormId(newValue ?? 0);
+              setCurrentFormId(newValue);
             }}
             renderInput={(params) => <TextField {...params} label="FormId" />}
           />
@@ -136,7 +136,12 @@ export function Search() {
           <Button
             variant="contained"
             onClick={handleSearch}
-            disabled={isLoading || !currentFormId || currentFormId <= 0}
+            disabled={
+              isLoading ||
+              !currentFormId ||
+              currentFormId === "" ||
+              currentFormId === "0"
+            }
           >
             Search
           </Button>

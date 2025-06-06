@@ -41,6 +41,7 @@ function Main() {
   let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
   let [role, updateRole] = useState<Role>("Customer");
   const isMobile = useMediaQuery("(max-width:639px)");
+  console.log("component rendered");
 
   return (
     <>
@@ -85,7 +86,9 @@ function Main() {
                   </Routes>
                 ) : (
                   <Routes>
-                    <Route path="*" element={<Search />} />
+                    <Route path="/" element={<Search />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="form/:formId" element={<Form />} />
                   </Routes>
                 )}
               </Box>

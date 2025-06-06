@@ -10,6 +10,7 @@ import {
   GridCallbackDetails,
   GridColDef,
   GridFilterModel,
+  useGridApiRef,
 } from "@mui/x-data-grid";
 import { useLoginContext } from "../../context/LoginContextProvider";
 import { set } from "date-fns";
@@ -127,6 +128,7 @@ function DashBoard() {
     },
   ];
   //////////////////////////////////////////
+  let apiRef = useGridApiRef();
   const {
     updateAlertProps,
     updateIsLoading,
@@ -178,6 +180,13 @@ function DashBoard() {
           });
           updateForm(response);
           updateRows(response);
+          setTimeout(() => {
+            apiRef.current?.autosizeColumns({
+              expand: true,
+              includeHeaders: true,
+              includeOutliers: true,
+            });
+          }, 500);
         }
       });
   };
@@ -277,6 +286,12 @@ function DashBoard() {
           columns={columnsHeadings}
           rows={rows ?? []}
           autosizeOnMount
+          autosizeOptions={{
+            expand: true,
+            includeHeaders: true,
+            includeOutliers: true,
+          }}
+          apiRef={apiRef}
           pageSizeOptions={[10, 25, 50, 100]}
           pagination
           initialState={{

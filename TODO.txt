@@ -286,4 +286,23 @@ make a table and display with datagrid
 5. limit phone number to not +91 ?
 
 
-activity -insert and update finished
+activity -insert and update  and create finished
+attachment  - add and delete how
+added 2 attachments - attachment name separated by ,
+deleted 
+
+added add attachment and delete attachment , need to test
+
+activity log is admin only can show all
+test all
+
+delete and normal add is working fine
+adding extra files need to check
+
+7/6/25
+1. check why search is not loading properly - done , due to http scopes
+2. Need to check add attachment when possible and file uploads
+3. Need to check phone when possible
+4. figure out customer login
+5. otp auth
+6.

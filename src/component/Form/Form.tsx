@@ -129,7 +129,7 @@ function Form() {
       httpClient
         .getAsync<
           FormResponse[]
-        >(httpClient.GetForm + `?${queryParams.toString()}`, undefined, updateAlertProps, undefined, updateIsLoading, false)
+        >(httpClient.GetForm + `?${queryParams.toString()}`, [], updateAlertProps, undefined, updateIsLoading, false)
         .then((responseList) => {
           let response =
             responseList && responseList.length > 0 ? responseList[0] : null;
@@ -208,7 +208,7 @@ function Form() {
       httpClient
         .getAsync<
           AttachmentResponse[]
-        >(httpClient.GetAttachments + `?${queryParams.toString()}`, undefined, updateAlertProps, undefined, updateIsLoading, false)
+        >(httpClient.GetAttachments + `?${queryParams.toString()}`, [], updateAlertProps, undefined, updateIsLoading, false)
         .then(async (response) => {
           if (response && response.length > 0) {
             updateFileIndex((prev) => prev + (response ? response.length : 0));
@@ -278,7 +278,7 @@ function Form() {
       .postFormAsync<string>(
         httpClient.GetForm,
         formRequest,
-        undefined,
+        [],
         updateAlertProps,
         undefined,
         updateIsLoading,
