@@ -36,7 +36,7 @@ const msalConfig: msal.Configuration = {
   },
 };
 
-const loginRequest = {
+const graphApiScopes = {
   scopes: [
     "Directory.ReadWrite.All",
     "GroupMember.ReadWrite.All",
@@ -45,4 +45,12 @@ const loginRequest = {
   ],
 };
 
-export { msalConfig, loginRequest };
+const webApiScopes = {
+  scopes: [
+    "api://172d1695-b52e-45ae-88ae-acbbad8c34ee/Admin",
+    "api://172d1695-b52e-45ae-88ae-acbbad8c34ee/Employee",
+    "api://172d1695-b52e-45ae-88ae-acbbad8c34ee/Customer",
+  ],
+};
+
+export { msalConfig, graphApiScopes, webApiScopes };

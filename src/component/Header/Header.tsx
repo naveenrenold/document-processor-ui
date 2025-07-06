@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import { useLoginContext } from "../../context/LoginContextProvider";
-import { loginRequest } from "../../helper/authConfig";
+import { webApiScopes } from "../../helper/authConfig";
 import MSALAuth from "../../helper/MSALAuth";
 import {
   AccountInfo,
@@ -123,7 +123,7 @@ function Header() {
         : headings.filter((heading) => heading.adminModule === false);
   // helper functions
   const signIn = () => {
-    let request: PopupRequest = loginRequest;
+    let request: PopupRequest = webApiScopes;
     MSALAuth.myMSALObj
       .loginPopup(request)
       .then((authResult) => {

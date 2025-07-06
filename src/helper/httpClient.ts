@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getBearerToken } from "./MSALAuth";
-import { loginRequest } from "./authConfig";
+import { graphApiScopes, webApiScopes } from "./authConfig";
 import { UserDetails } from "../Types/Component/UserDetails";
 import { AlertProps } from "../Types/ComponentProps/AlertProps";
 import { severity } from "../Types/ComponentProps/ButtonProps";
@@ -16,13 +16,14 @@ class httpClient {
 
   public static async getAsync<T>(
     url: string,
-    scopes: string[] = loginRequest.scopes,
+    scopes: string[] = webApiScopes.scopes,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
     successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
     isGraph = false,
   ) {
     let header;
+    scopes = isGraph ? graphApiScopes.scopes : webApiScopes.scopes;
     if (scopes.length !== 0) {
       header = await this.getAuthHeader(scopes);
       if (!header) {
@@ -50,7 +51,7 @@ class httpClient {
   public static async postAsync<T>(
     url: string,
     request: any,
-    scopes: string[] = loginRequest.scopes,
+    scopes: string[] = webApiScopes.scopes,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
     successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
@@ -89,7 +90,7 @@ class httpClient {
   public static async postFormAsync<T>(
     url: string,
     request: any,
-    scopes: string[] = loginRequest.scopes,
+    scopes: string[] = webApiScopes.scopes,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
     successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
@@ -124,7 +125,7 @@ class httpClient {
 
   public static async deleteAsync<T>(
     url: string,
-    scopes: string[] = loginRequest.scopes,
+    scopes: string[] = webApiScopes.scopes,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
     successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
@@ -155,7 +156,7 @@ class httpClient {
   public static async patchAsync<T>(
     url: string,
     request: any,
-    scopes: string[] = loginRequest.scopes,
+    scopes: string[] = webApiScopes.scopes,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
     successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
@@ -208,6 +209,7 @@ class httpClient {
     scopes: string[],
   ): Promise<AxiosRequestConfig<any> | null> {
     let bearerToken = await getBearerToken(scopes);
+    console.log(`Bearer Token : ${bearerToken}`);
     if (!bearerToken) {
       return null;
     }
