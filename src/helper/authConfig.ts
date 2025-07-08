@@ -46,11 +46,7 @@ const graphApiScopes = {
 };
 
 const webApiScopes = {
-  scopes: [
-    "api://172d1695-b52e-45ae-88ae-acbbad8c34ee/Admin",
-    "api://172d1695-b52e-45ae-88ae-acbbad8c34ee/Employee",
-    "api://172d1695-b52e-45ae-88ae-acbbad8c34ee/Customer",
-  ],
+  scopes: ["api://172d1695-b52e-45ae-88ae-acbbad8c34ee/.default"],
 };
 
 export { msalConfig, graphApiScopes, webApiScopes };

@@ -209,7 +209,7 @@ class httpClient {
     scopes: string[],
   ): Promise<AxiosRequestConfig<any> | null> {
     let bearerToken = await getBearerToken(scopes);
-    console.log(`Bearer Token : ${bearerToken}`);
+    // console.log(`Bearer Token : ${bearerToken}`);
     if (!bearerToken) {
       return null;
     }
