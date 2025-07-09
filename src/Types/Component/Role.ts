@@ -1,1 +1,1 @@
-export type Role = "Admin" | "Employee" | "Customer";
+export type Role = "Admin" | "Employee" | "Customer" | undefined;

@@ -21,10 +21,10 @@ import { Search } from "./component/Search/Search";
 import Activity from "./component/Activity/Activity";
 
 function Main() {
-  useEffect(() => {
-    new MSALAuth();
-    MSALAuth.myMSALObj.initialize(); // initialise singleton authentication on program start
-  }, []);
+  // useEffect(() => {
+  //   new MSALAuth();
+  //   MSALAuth.myMSALObj.initialize(); // initialise singleton authentication on program start
+  // }, []);
 
   let [isDrawerOpen, updateIsDrawerOpen] = useState(false);
   let [alertProps, updateAlertProps] = useState<AlertProps>({
@@ -39,9 +39,46 @@ function Main() {
   let [isLoading, updateIsLoading] = useState(false);
   let [user, updateUser] = useState<UserDetails | null>(null);
   let [accountInfo, updateAccountInfo] = useState<AccountInfo | null>(null);
-  let [role, updateRole] = useState<Role>("Customer");
+  let [role, updateRole] = useState<Role>();
   const isMobile = useMediaQuery("(max-width:639px)");
   console.log("component rendered");
+
+  const protectedRoutes = () => {
+    if (!role) {
+      return <></>;
+    }
+    return (
+      <Routes>
+        {role === "Admin" ? (
+          <>
+            <Route path="admin" element={<Admin />} />
+            <Route path="activity" element={<Activity />} />
+          </>
+        ) : (
+          <></>
+        )}
+        {role === "Employee" || role === "Admin" ? (
+          <>
+            <Route path="form/:formId" element={<Form />} />
+            <Route path="form" element={<Form />} />
+            <Route path="search" element={<Search />} />
+            <Route path="/" element={<DashBoard />} />
+          </>
+        ) : (
+          <></>
+        )}
+        {role === "Customer" ? (
+          <>
+            <Route path="/" element={<Search />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="form/:formId" element={<Form />} />
+          </>
+        ) : (
+          <></>
+        )}
+      </Routes>
+    );
+  };
 
   return (
     <>
@@ -73,26 +110,7 @@ function Main() {
             >
               <Header />
               <Box sx={{ marginLeft: isDrawerOpen && !isMobile ? "240px" : 0 }}>
-                {accountInfo ? (
-                  <Routes>
-                    {role === "Admin" && (
-                      <>
-                        <Route path="admin" element={<Admin />} />
-                        <Route path="activity" element={<Activity />} />
-                      </>
-                    )}
-                    <Route path="form/:formId" element={<Form />} />
-                    <Route path="form" element={<Form />} />
-                    <Route path="search" element={<Search />} />
-                    <Route path="/" element={<DashBoard />} />
-                  </Routes>
-                ) : (
-                  <Routes>
-                    <Route path="/" element={<Search />} />
-                    <Route path="/search" element={<Search />} />
-                    <Route path="form/:formId" element={<Form />} />
-                  </Routes>
-                )}
+                {protectedRoutes()}
               </Box>
             </LoginContextProvider>
           </MainContextProvider>
