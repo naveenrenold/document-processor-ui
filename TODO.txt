@@ -316,4 +316,5 @@ adding extra files need to check
 
 9/6/25
 1.  Today i will make loading
-2. 
+2. Need to chaneg role to customer when needed.
+3. When role changed it should not affect other component
