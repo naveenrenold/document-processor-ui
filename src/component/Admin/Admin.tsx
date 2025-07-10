@@ -102,7 +102,7 @@ function Admin() {
       updateBlockedUsers,
     );
     httpClient.fetchUsers(
-      "/directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
+      "directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
       updateAlertProps,
       setIsLoading,
       updateDeletedUsers,

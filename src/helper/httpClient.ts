@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosHeaders, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getBearerToken } from "./MSALAuth";
 import { graphApiScopes, webApiScopes } from "./authConfig";
 import { UserDetails } from "../Types/Component/UserDetails";
@@ -14,52 +14,40 @@ class httpClient {
   static GetAttachments = "attachment";
   static GetActivity = "activity";
 
-  public static async getAsync<T>(
+  static getRequestMethod = <T>(requestMethod: requestMethodEnum) => {
+    if (requestMethod == "get") {
+      return axios.get<T>;
+    } else if (requestMethod === "post") {
+      return axios.post<T>;
+    } else if (requestMethod === "delete") {
+      return axios.delete<T>;
+    } else if (requestMethod === "patch") {
+      return axios.patch<T>;
+    } else {
+      return axios.get<T>;
+    }
+  };
+  public static async apiAsync<T>(
+    requestMethod: requestMethodEnum = "get",
     url: string,
-    scopes: string[] = webApiScopes.scopes,
+    request : any,
     setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
     successAlertMessage?: string,
     setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-    isGraph = false,
-  ) {
-    let header;
-    scopes = isGraph ? graphApiScopes.scopes : webApiScopes.scopes;
-    if (scopes.length !== 0) {
-      header = await this.getAuthHeader(scopes);
-      if (!header) {
-        return;
-      }
-    }
-    let response = axios.get<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
-      header ?? {},
-    );
-    if (setIsLoading) {
-      setIsLoading(true);
-    }
-    let result = await httpClient.handleHttpResponse<T>(
-      response,
-      setAlert,
-      successAlertMessage,
-    );
-    if (setIsLoading) {
-      setIsLoading(false);
-    }
-    return result;
-  }
-
-  public static async postAsync<T>(
-    url: string,
-    request: any,
     scopes: string[] = webApiScopes.scopes,
-    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-    successAlertMessage?: string,
-    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
     isGraph = false,
     formData = false,
   ) {
-    let header = await this.getAuthHeader(scopes);
+    let header : AxiosRequestConfig | null = null;    
+    let baseUrl = isGraph ? this.graphApiUrl : httpClient.apiUrl;
+    scopes = isGraph ? graphApiScopes.scopes : webApiScopes.scopes;
+    
+
+    if(scopes && scopes.length > 0)
+    {
+    header = await this.getAuthHeader(scopes);
     if (!header) {
+      console.log("Failed to acquire token with required scopes;");
       return;
     }
     if (formData) {
@@ -68,10 +56,11 @@ class httpClient {
         "Content-Type": "multipart/form-data",
       };
     }
-    let response = axios.post<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
-      request,
-      header,
+  }
+    let response = httpClient.getRequestMethod<T>(requestMethod)(
+      `${baseUrl}${url}`,
+      requestMethod in ["post", "patch"] ? request ?? {} : header ?? {},
+      header ?? undefined,
     );
     if (setIsLoading) {
       setIsLoading(true);
@@ -87,103 +76,120 @@ class httpClient {
     return result;
   }
 
-  public static async postFormAsync<T>(
-    url: string,
-    request: any,
-    scopes: string[] = webApiScopes.scopes,
-    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-    successAlertMessage?: string,
-    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-    isGraph = false,
-  ) {
-    let header = await this.getAuthHeader(scopes);
-    if (!header) {
-      return;
-    }
-    // header.headers = {
-    //   ...header.headers,
-    //   "Content-Type": "multipart/form-data",
-    // };
-    let response = axios.postForm<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
-      request,
-      header,
-    );
-    if (setIsLoading) {
-      setIsLoading(true);
-    }
-    let result = await httpClient.handleHttpResponse<T>(
-      response,
-      setAlert,
-      successAlertMessage,
-    );
-    if (setIsLoading) {
-      setIsLoading(false);
-    }
-    return result;
-  }
+  // public static async getAsync<T>(
+  //   url: string,
+  //   scopes: string[] = webApiScopes.scopes,
+  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+  //   successAlertMessage?: string,
+  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+  //   isGraph = false,
+  // ) {
+  //   return await this.apiAsync<T>(
+  //     "get",
+  //     url,      
+  //     scopes,
+  //     setAlert,
+  //     successAlertMessage,
+  //     setIsLoading,
+  //     isGraph,
+  //   );
+  // }
 
-  public static async deleteAsync<T>(
-    url: string,
-    scopes: string[] = webApiScopes.scopes,
-    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-    successAlertMessage?: string,
-    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-    isGraph = false,
-  ) {
-    let header = await this.getAuthHeader(scopes);
-    if (!header) {
-      return;
-    }
-    let response = axios.delete<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
-      header,
-    );
-    if (setIsLoading) {
-      setIsLoading(true);
-    }
-    let result = await httpClient.handleHttpResponse<T>(
-      response,
-      setAlert,
-      successAlertMessage,
-    );
-    if (setIsLoading) {
-      setIsLoading(false);
-    }
-    return result;
-  }
+  // public static async postAsync<T>(
+  //   url: string,
+  //   request: any,
+  //   scopes: string[] = webApiScopes.scopes,
+  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+  //   successAlertMessage?: string,
+  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+  //   isGraph = false,
+  //   formData = false,
+  // ) {
+  //   return await this.apiAsync<T>(
+  //     "post",
+  //     url,
+  //     scopes,
+  //     setAlert,
+  //     successAlertMessage,
+  //     setIsLoading,
+  //     isGraph,
+  //   );
+  // }
 
-  public static async patchAsync<T>(
-    url: string,
-    request: any,
-    scopes: string[] = webApiScopes.scopes,
-    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-    successAlertMessage?: string,
-    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-    isGraph = false,
-  ) {
-    let header = await this.getAuthHeader(scopes);
-    if (!header) {
-      return;
-    }
-    let response = axios.patch<T>(
-      `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
-      request,
-      header,
-    );
-    if (setIsLoading) {
-      setIsLoading(true);
-    }
-    let result = await httpClient.handleHttpResponse<T>(
-      response,
-      setAlert,
-      successAlertMessage,
-    );
-    if (setIsLoading) {
-      setIsLoading(false);
-    }
-    return result;
-  }
+  // // public static async postFormAsync<T>(
+  // //   url: string,
+  // //   request: any,
+  // //   scopes: string[] = webApiScopes.scopes,
+  // //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+  // //   successAlertMessage?: string,
+  // //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+  // //   isGraph = false,
+  // // ) {
+  // //   let header = await this.getAuthHeader(scopes);
+  // //   if (!header) {
+  // //     return;
+  // //   }
+  // //   // header.headers = {
+  // //   //   ...header.headers,
+  // //   //   "Content-Type": "multipart/form-data",
+  // //   // };
+  // //   let response = axios.postForm<T>(
+  // //     `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
+  // //     request,
+  // //     header,
+  // //   );
+  // //   if (setIsLoading) {
+  // //     setIsLoading(true);
+  // //   }
+  // //   let result = await httpClient.handleHttpResponse<T>(
+  // //     response,
+  // //     setAlert,
+  // //     successAlertMessage,
+  // //   );
+  // //   if (setIsLoading) {
+  // //     setIsLoading(false);
+  // //   }
+  // //   return result;
+  // // }
+
+  // public static async deleteAsync<T>(
+  //   url: string,
+  //   scopes: string[] = webApiScopes.scopes,
+  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+  //   successAlertMessage?: string,
+  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+  //   isGraph = false,
+  // ) {
+  //   return await this.apiAsync<T>(
+  //     "delete",
+  //     url,
+  //     scopes,
+  //     setAlert,
+  //     successAlertMessage,
+  //     setIsLoading,
+  //     isGraph,
+  //   );
+  // }
+
+  // public static async patchAsync<T>(
+  //   url: string,
+  //   request: any,
+  //   scopes: string[] = webApiScopes.scopes,
+  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+  //   successAlertMessage?: string,
+  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+  //   isGraph = false,
+  // ) {
+  //   return await this.apiAsync<T>(
+  //     "patch",
+  //     url,
+  //     scopes,
+  //     setAlert,
+  //     successAlertMessage,
+  //     setIsLoading,
+  //     isGraph,
+  //   );
+  // }
 
   public static async handleHttpResponse<T>(
     result: Promise<AxiosResponse<any, any>>,
@@ -298,3 +304,5 @@ export interface axiosTypes<T> {
 export default httpClient;
 
 export const queryParams = () => {};
+
+export type requestMethodEnum = "get" | "post" | "delete" | "patch";

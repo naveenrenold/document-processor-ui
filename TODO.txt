@@ -318,3 +318,6 @@ adding extra files need to check
 1.  Today i will make loading
 2. Need to chaneg role to customer when needed.
 3. When role changed it should not affect other component
+
+10/6/25
+1. change all api to use .api

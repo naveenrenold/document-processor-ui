@@ -28,9 +28,9 @@ function Activity() {
 
   useEffect(() => {
     httpClient
-      .getAsync<
+      .apiAsync<
         ActivityResponse[]
-      >(httpClient.GetActivity, undefined, updateAlertProps, undefined, updateIsLoading, false)
+      >('get',httpClient.GetActivity, undefined, updateAlertProps, undefined, updateIsLoading, false)
       .then((response) => {
         if (response && response.length > 0) {
           setActivity(response);
