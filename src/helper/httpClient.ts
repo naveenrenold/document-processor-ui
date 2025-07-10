@@ -4,6 +4,7 @@ import { graphApiScopes, webApiScopes } from "./authConfig";
 import { UserDetails } from "../Types/Component/UserDetails";
 import { AlertProps } from "../Types/ComponentProps/AlertProps";
 import { severity } from "../Types/ComponentProps/ButtonProps";
+import { console } from "inspector";
 
 class httpClient {
   static apiUrl = import.meta.env.VITE_ApiUrl;
@@ -209,7 +210,7 @@ class httpClient {
     scopes: string[],
   ): Promise<AxiosRequestConfig<any> | null> {
     let bearerToken = await getBearerToken(scopes);
-    // console.log(`Bearer Token : ${bearerToken}`);
+    console.log(`Bearer Token : ${bearerToken}`);
     if (!bearerToken) {
       return null;
     }

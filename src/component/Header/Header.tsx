@@ -137,6 +137,7 @@ function Header() {
         getUserDetails(authResult.account);
       })
       .catch((err) => {
+        updateRole("Customer");
         //updateAccountInfo(null);
         console.log("Error at Sign in ", err);
       });
@@ -151,6 +152,7 @@ function Header() {
       .logoutPopup(request)
       .then(() => {
         console.log("logoutsuccess");
+        navigate("search");
         updateUser(null);
         updateRole("Customer");
         updateAccountInfo(null);
