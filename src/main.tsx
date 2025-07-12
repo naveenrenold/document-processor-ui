@@ -19,6 +19,7 @@ import { SnackBarProps } from "./Types/ComponentProps/SnackBarProps";
 import DashBoard from "./component/DashBoard/DashBoard";
 import { Search } from "./component/Search/Search";
 import Activity from "./component/Activity/Activity";
+import httpClient from "./helper/httpClient";
 
 function Main() {
   // useEffect(() => {
@@ -42,6 +43,7 @@ function Main() {
   let [role, updateRole] = useState<Role>();
   const isMobile = useMediaQuery("(max-width:639px)");
   console.log("component rendered");
+  httpClient.initializeContext(updateIsLoading, updateAlertProps);
 
   const protectedRoutes = () => {
     if (!role) {

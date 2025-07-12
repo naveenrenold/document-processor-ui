@@ -100,9 +100,10 @@ function Header() {
       .getAsync<UserDetails>(
         `users/${accountInfo.localAccountId}`,
         undefined,
-        undefined,
-        undefined,
-        undefined,
+        {
+          setAlert: false,
+          setIsLoading: false,
+        },
         true,
       )
       .then((response) => {

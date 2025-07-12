@@ -321,3 +321,37 @@ adding extra files need to check
 
 10/6/25
 1. change all api to use .api
+
+12/7/25
+1. change from sending functions to sending isloading boolean
+2. Can standard get and post
+3. keep in mind about template but finish the things first
+4. separate method and keep optional fields optional
+
+
+axios - custom headers option
+
+baseurl and scopes logic?
+
+right now need to make it work httpclient everywhere , it looks good
+
+
+1.pass axios headers properly
+
+axios header format wrong!! -  working fine now great
+
+
+1. final thing is column resize
+
+additional things : make the text box readonly
+check reload on low network
+
+
+1. api auth -done
+2. state loading - done but need to check
+3. column resize done
+
+2 time event happens first is state update which is now accounted for
+next is time for the data grid to fetch the states!!
+this autosize on mount or the other thing dont account for
+timeout can vary

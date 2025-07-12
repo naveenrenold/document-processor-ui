@@ -101,9 +101,7 @@ function Form() {
   useEffect(() => {
     const getProcess = async () => {
       await httpClient
-        .getAsync<
-          Process[]
-        >(httpClient.GetProcess, [], updateAlertProps, undefined, updateIsLoading, false)
+        .getAsync<Process[]>(httpClient.GetProcess)
         .then((response) => {
           if (response && response.length > 0) {
             {
@@ -134,7 +132,7 @@ function Form() {
       httpClient
         .getAsync<
           FormResponse[]
-        >(httpClient.GetForm + `?${queryParams.toString()}`, [], updateAlertProps, undefined, updateIsLoading, false)
+        >(httpClient.GetForm + `?${queryParams.toString()}`)
         .then((responseList) => {
           let response =
             responseList && responseList.length > 0 ? responseList[0] : null;
@@ -237,7 +235,7 @@ function Form() {
       httpClient
         .getAsync<
           AttachmentResponse[]
-        >(httpClient.GetAttachments + `?${queryParams.toString()}`, [], updateAlertProps, undefined, updateIsLoading, false)
+        >(httpClient.GetAttachments + `?${queryParams.toString()}`)
         .then(async (response) => {
           if (response && response.length > 0) {
             updateFileIndex((prev) => prev + (response ? response.length : 0));
@@ -304,14 +302,13 @@ function Form() {
       }
     }
     httpClient
-      .postFormAsync<string>(
+      .postAsync<string>(
         httpClient.GetForm,
         formRequest,
-        [],
-        updateAlertProps,
         undefined,
-        updateIsLoading,
+        undefined,
         false,
+        true,
       )
       .then((response) => {
         if (response) {

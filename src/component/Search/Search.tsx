@@ -42,10 +42,6 @@ export function Search() {
         params.append("sortBy", "desc");
         let response = await httpClient.getAsync<FormResponse[]>(
           `${httpClient.GetForm}?${params.toString()}`,
-          [],
-          updateAlertProps,
-          undefined,
-          updateIsLoading,
         );
         if (response) {
           setFormIds(response.map((form) => form.id.toString()));

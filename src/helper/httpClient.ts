@@ -1,236 +1,245 @@
-import axios, { AxiosError, AxiosHeaders, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  RawAxiosRequestHeaders,
+} from "axios";
 import { getBearerToken } from "./MSALAuth";
 import { graphApiScopes, webApiScopes } from "./authConfig";
 import { UserDetails } from "../Types/Component/UserDetails";
 import { AlertProps } from "../Types/ComponentProps/AlertProps";
 import { severity } from "../Types/ComponentProps/ButtonProps";
-import { console } from "inspector";
-
+import { useMainContext } from "../context/MainContextProvider";
 class httpClient {
+  //base Urls
   static apiUrl = import.meta.env.VITE_ApiUrl;
   static graphApiUrl = "https://graph.microsoft.com/v1.0/";
 
+  // api endpoints
   static GetForm = "form";
   static GetProcess = "process";
   static GetAttachments = "attachment";
   static GetActivity = "activity";
 
-  static getRequestMethod = <T>(requestMethod: requestMethodEnum) => {
-    if (requestMethod == "get") {
-      return axios.get<T>;
-    } else if (requestMethod === "post") {
-      return axios.post<T>;
+  // api defaults
+  static defaultHeaders: RawAxiosRequestHeaders = {
+    ConsistencyLevel: "eventual",
+  };
+  static defaultScope: string[] = [];
+
+  //misc
+  static setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  static setAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>;
+
+  static initializeContext(
+    updateIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+    updateAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>,
+  ) {
+    httpClient.setIsLoading = updateIsLoading;
+    httpClient.setAlertProps = updateAlertProps;
+  }
+  static sendHttpRequest = <T>(
+    requestMethod: requestMethodEnum,
+    url: string,
+    headerConfig: AxiosRequestConfig<any>,
+    request: any,
+  ) => {
+    if (requestMethod === "post") {
+      return axios.post<T>(url, request, headerConfig);
     } else if (requestMethod === "delete") {
-      return axios.delete<T>;
+      return axios.delete<T>(url, headerConfig);
     } else if (requestMethod === "patch") {
-      return axios.patch<T>;
+      return axios.patch<T>(url, request, headerConfig);
     } else {
-      return axios.get<T>;
+      return axios.get<T>(url, headerConfig);
     }
   };
   public static async apiAsync<T>(
     requestMethod: requestMethodEnum = "get",
     url: string,
-    request : any,
-    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-    successAlertMessage?: string,
-    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-    scopes: string[] = webApiScopes.scopes,
+    request?: any,
+
+    apiDefaults?: apiDefaults,
+    loadingAlertProps: LoadingAlertProps = {
+      setAlert: true,
+      successAlertMessage: undefined,
+      setIsLoading: true,
+    },
+    //custom logic
     isGraph = false,
     formData = false,
   ) {
-    let header : AxiosRequestConfig | null = null;    
-    let baseUrl = isGraph ? this.graphApiUrl : httpClient.apiUrl;
-    scopes = isGraph ? graphApiScopes.scopes : webApiScopes.scopes;
-    
+    let baseUrl =
+      (apiDefaults?.baseUrl ?? isGraph)
+        ? httpClient.graphApiUrl
+        : httpClient.apiUrl;
+    let scopes =
+      (apiDefaults?.scopes ?? isGraph)
+        ? graphApiScopes.scopes
+        : webApiScopes.scopes;
 
-    if(scopes && scopes.length > 0)
-    {
-    header = await this.getAuthHeader(scopes);
-    if (!header) {
-      console.log("Failed to acquire token with required scopes;");
-      return;
-    }
-    if (formData) {
-      header.headers = {
-        ...header.headers,
-        "Content-Type": "multipart/form-data",
-      };
-    }
-  }
-    let response = httpClient.getRequestMethod<T>(requestMethod)(
-      `${baseUrl}${url}`,
-      requestMethod in ["post", "patch"] ? request ?? {} : header ?? {},
-      header ?? undefined,
+    let axiosHeaders = await this.setAxiosHeaders(
+      apiDefaults?.config?.headers,
+      scopes,
+      formData,
     );
-    if (setIsLoading) {
-      setIsLoading(true);
+    let headerConfig: AxiosRequestConfig = {
+      headers: {
+        ...axiosHeaders,
+      },
+      baseURL: baseUrl,
+    };
+
+    let response = httpClient.sendHttpRequest<T>(
+      requestMethod,
+      url,
+      headerConfig,
+      request,
+    );
+    if (loadingAlertProps?.setIsLoading) {
+      httpClient.setIsLoading(true);
     }
     let result = await httpClient.handleHttpResponse<T>(
       response,
-      setAlert,
-      successAlertMessage,
+      loadingAlertProps?.setAlert,
+      loadingAlertProps?.successAlertMessage,
     );
-    if (setIsLoading) {
-      setIsLoading(false);
+    if (loadingAlertProps?.setIsLoading) {
+      httpClient.setIsLoading(false);
     }
     return result;
   }
 
-  // public static async getAsync<T>(
-  //   url: string,
-  //   scopes: string[] = webApiScopes.scopes,
-  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-  //   successAlertMessage?: string,
-  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-  //   isGraph = false,
-  // ) {
-  //   return await this.apiAsync<T>(
-  //     "get",
-  //     url,      
-  //     scopes,
-  //     setAlert,
-  //     successAlertMessage,
-  //     setIsLoading,
-  //     isGraph,
-  //   );
-  // }
+  public static async getAsync<T>(
+    url: string,
+    apiDefaults?: apiDefaults,
+    loadingAlertProps: LoadingAlertProps = {
+      setAlert: true,
+      successAlertMessage: undefined,
+      setIsLoading: true,
+    },
 
-  // public static async postAsync<T>(
-  //   url: string,
-  //   request: any,
-  //   scopes: string[] = webApiScopes.scopes,
-  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-  //   successAlertMessage?: string,
-  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-  //   isGraph = false,
-  //   formData = false,
-  // ) {
-  //   return await this.apiAsync<T>(
-  //     "post",
-  //     url,
-  //     scopes,
-  //     setAlert,
-  //     successAlertMessage,
-  //     setIsLoading,
-  //     isGraph,
-  //   );
-  // }
+    //custom logic
+    isGraph = false,
+  ) {
+    return await this.apiAsync<T>(
+      "get",
+      url,
+      undefined,
+      apiDefaults,
+      loadingAlertProps,
+      isGraph,
+    );
+  }
 
-  // // public static async postFormAsync<T>(
-  // //   url: string,
-  // //   request: any,
-  // //   scopes: string[] = webApiScopes.scopes,
-  // //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-  // //   successAlertMessage?: string,
-  // //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-  // //   isGraph = false,
-  // // ) {
-  // //   let header = await this.getAuthHeader(scopes);
-  // //   if (!header) {
-  // //     return;
-  // //   }
-  // //   // header.headers = {
-  // //   //   ...header.headers,
-  // //   //   "Content-Type": "multipart/form-data",
-  // //   // };
-  // //   let response = axios.postForm<T>(
-  // //     `${isGraph ? this.graphApiUrl : httpClient.apiUrl}${url}`,
-  // //     request,
-  // //     header,
-  // //   );
-  // //   if (setIsLoading) {
-  // //     setIsLoading(true);
-  // //   }
-  // //   let result = await httpClient.handleHttpResponse<T>(
-  // //     response,
-  // //     setAlert,
-  // //     successAlertMessage,
-  // //   );
-  // //   if (setIsLoading) {
-  // //     setIsLoading(false);
-  // //   }
-  // //   return result;
-  // // }
+  public static async postAsync<T>(
+    url: string,
+    request?: any,
 
-  // public static async deleteAsync<T>(
-  //   url: string,
-  //   scopes: string[] = webApiScopes.scopes,
-  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-  //   successAlertMessage?: string,
-  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-  //   isGraph = false,
-  // ) {
-  //   return await this.apiAsync<T>(
-  //     "delete",
-  //     url,
-  //     scopes,
-  //     setAlert,
-  //     successAlertMessage,
-  //     setIsLoading,
-  //     isGraph,
-  //   );
-  // }
+    apiDefaults?: apiDefaults,
+    loadingAlertProps: LoadingAlertProps = {
+      setAlert: true,
+      successAlertMessage: undefined,
+      setIsLoading: true,
+    },
 
-  // public static async patchAsync<T>(
-  //   url: string,
-  //   request: any,
-  //   scopes: string[] = webApiScopes.scopes,
-  //   setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-  //   successAlertMessage?: string,
-  //   setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-  //   isGraph = false,
-  // ) {
-  //   return await this.apiAsync<T>(
-  //     "patch",
-  //     url,
-  //     scopes,
-  //     setAlert,
-  //     successAlertMessage,
-  //     setIsLoading,
-  //     isGraph,
-  //   );
-  // }
+    //custom logic
+    isGraph = false,
+    formData = false,
+  ) {
+    return await this.apiAsync<T>(
+      "post",
+      url,
+      request,
+      apiDefaults,
+      loadingAlertProps,
+      isGraph,
+      formData,
+    );
+  }
+
+  public static async deleteAsync<T>(
+    url: string,
+
+    apiDefaults?: apiDefaults,
+    loadingAlertProps: LoadingAlertProps = {
+      setAlert: true,
+      successAlertMessage: undefined,
+      setIsLoading: true,
+    },
+
+    //custom logic
+    isGraph = false,
+  ) {
+    return await this.apiAsync<T>(
+      "delete",
+      url,
+      undefined,
+      apiDefaults,
+      loadingAlertProps,
+      isGraph,
+    );
+  }
+
+  public static async patchAsync<T>(
+    url: string,
+    request?: any,
+
+    apiDefaults?: apiDefaults,
+    loadingAlertProps: LoadingAlertProps = {
+      setAlert: true,
+      successAlertMessage: undefined,
+      setIsLoading: true,
+    },
+
+    //custom logic
+    isGraph = false,
+    formData = false,
+  ) {
+    return await this.apiAsync<T>(
+      "patch",
+      url,
+      request,
+      apiDefaults,
+      loadingAlertProps,
+      isGraph,
+      formData,
+    );
+  }
 
   public static async handleHttpResponse<T>(
     result: Promise<AxiosResponse<any, any>>,
-    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
+    setAlert = false,
     successAlertMessage?: string,
   ): Promise<T | undefined> {
     let response: T | undefined = await result
       .then((response) => {
         if (successAlertMessage) {
-          this.setAlerts(successAlertMessage, setAlert, "success");
+          this.setAlerts(successAlertMessage, "success");
         }
         return response.data.value || (response.data as T) || true;
       })
       .catch((err: AxiosError<T>) => {
         let response = err.response?.data;
-        this.setAlerts(response, setAlert);
+        this.setAlerts(response);
         return;
       });
     return response;
   }
 
-  static async getAuthHeader(
-    scopes: string[],
-  ): Promise<AxiosRequestConfig<any> | null> {
-    let bearerToken = await getBearerToken(scopes);
-    console.log(`Bearer Token : ${bearerToken}`);
-    if (!bearerToken) {
-      return null;
+  static async getBearerToken(scopes: string[] | null): Promise<string | null> {
+    let bearerToken;
+    if (scopes && scopes.length > 0) {
+      bearerToken = await getBearerToken(scopes);
+      if (!bearerToken) {
+        console.log("Failed to acquire token with required scopes;");
+      }
     }
-    return {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-        ConsistencyLevel: "eventual",
-      },
-    };
+    //console.log(`Bearer Token : ${bearerToken}`);
+    return bearerToken ?? null;
   }
   static async fetchUsers(
     url: string,
-    updateAlertProps: React.Dispatch<React.SetStateAction<AlertProps>>,
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
     updateState: React.Dispatch<React.SetStateAction<UserDetails[]>>,
     filterFn: (value: UserDetails) => boolean = (value) =>
       value.officeLocation !== null,
@@ -238,9 +247,7 @@ class httpClient {
     const response = await httpClient.getAsync<UserDetails[]>(
       url,
       undefined,
-      updateAlertProps,
-      undefined,
-      setIsLoading,
+      { setAlert: true, setIsLoading: true },
       true,
     );
     if (response && response.length > 0) {
@@ -251,59 +258,65 @@ class httpClient {
     return [];
   }
 
-  static async setAlerts<T>(
-    result?: T,
-    setAlert?: React.Dispatch<React.SetStateAction<AlertProps>>,
-    severity: severity = "error",
-  ) {
-    let response: any = result;
-    if (setAlert) {
-      let alertMessage = response?.error?.message || response?.message;
-      if (!alertMessage) {
-        console.log(response ? response.toString() : "Error occured");
-        return;
-      }
-      let alert: AlertProps = {
-        message: alertMessage || "Error occured",
-        severity: severity,
-        show: true,
-      };
-      setAlert(alert);
-      alert = {
-        message: "",
-        severity: "info",
-        show: false,
-      };
-      setTimeout(() => {
-        setAlert(alert);
-      }, 5000);
-    } else {
-      console.log(
-        response?.error?.message ||
-          response?.message ||
-          (response ? response.toString() : "Error occured"),
-      );
+  static async setAlerts(response?: any, severity: severity = "error") {
+    let alertMessage = response?.error?.message || response?.message;
+    if (!alertMessage) {
+      console.log(response ? response.toString() : "Error occured");
+      return;
     }
+    let alert: AlertProps = {
+      message: alertMessage,
+      severity: severity,
+      show: true,
+    };
+    httpClient.setAlerts(alert);
+    alert = {
+      message: "",
+      severity: "info",
+      show: false,
+    };
+    setTimeout(() => {
+      httpClient.setAlerts(alert);
+    }, 5000);
+  }
+  static async setAxiosHeaders(
+    headers: RawAxiosRequestHeaders | null = {},
+    scopes: string[] | null = httpClient.defaultScope,
+    formData = false,
+  ) {
+    headers = {
+      ...httpClient.defaultHeaders,
+      ...(headers ?? {}),
+      Authorization: (await this.getBearerToken(scopes)) ?? undefined,
+      "Content-Type": formData ? "multipart/form-data" : undefined,
+    };
+    // let bearerToken = await this.getBearerToken(scopes);
+    // if(bearerToken)
+    // {
+
+    // }
+    return headers;
   }
 }
 
-export interface IHttpClient {
-  getAsync: (url: string) => any;
-  postAsync: (url: string, request: any) => Promise<any>;
-}
-
-export interface message {
-  message: string[];
-}
-
+export default httpClient;
 export interface axiosTypes<T> {
   value: T;
   message: string;
-  error: message;
+  error: {
+    message: string[];
+  };
 }
-
-export default httpClient;
-
-export const queryParams = () => {};
-
 export type requestMethodEnum = "get" | "post" | "delete" | "patch";
+
+export type LoadingAlertProps = {
+  setAlert?: boolean;
+  successAlertMessage?: string;
+  setIsLoading?: boolean;
+};
+
+export type apiDefaults = {
+  config?: AxiosRequestConfig;
+  baseUrl?: string;
+  scopes?: string[];
+};

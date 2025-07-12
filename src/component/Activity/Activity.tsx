@@ -8,6 +8,7 @@ import { GridColDef } from "@mui/x-data-grid/models/colDef";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router";
 import { useGridApiRef } from "@mui/x-data-grid";
+import ReactDOM from "react-dom";
 
 function Activity() {
   //constants
@@ -28,22 +29,32 @@ function Activity() {
 
   useEffect(() => {
     httpClient
-      .apiAsync<
+      .getAsync<
         ActivityResponse[]
-      >('get',httpClient.GetActivity, undefined, updateAlertProps, undefined, updateIsLoading, false)
+      >(httpClient.GetActivity, undefined, undefined)
       .then((response) => {
         if (response && response.length > 0) {
-          setActivity(response);
           setTimeout(() => {
-            apiRef.current?.autosizeColumns({
-              expand: true,
-              includeHeaders: true,
-              includeOutliers: true,
+            ReactDOM.flushSync(() => {
+              setActivity(response);
+              apiRef.current?.autosizeColumns({
+                expand: true,
+                includeHeaders: true,
+              });
             });
           }, 1000);
         }
       });
   }, []);
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     apiRef.current?.autosizeColumns({
+  //       expand: true,
+  //       includeHeaders: true,
+  //     });
+  //   }, 1000);
+  // }, [activity]);
   //api calls
   //helper function
   const navigateToForm = (formId: string) => {
@@ -137,7 +148,6 @@ function Activity() {
         autosizeOptions={{
           expand: true,
           includeHeaders: true,
-          includeOutliers: true,
         }}
         pageSizeOptions={[10, 25, 50, 100]}
         pagination

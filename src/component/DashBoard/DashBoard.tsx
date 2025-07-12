@@ -15,6 +15,7 @@ import {
 import { useLoginContext } from "../../context/LoginContextProvider";
 import { set } from "date-fns";
 import { useNavigate } from "react-router";
+import ReactDOM from "react-dom";
 
 function DashBoard() {
   //constants
@@ -142,7 +143,7 @@ function DashBoard() {
   const navigate = useNavigate();
   //usestate
   let [form, updateForm] = useState<FormResponse[]>();
-  let [rows, updateRows] = useState<FormResponse[]>();
+  //let [rows, updateRows] = useState<FormResponse[]>();
   // let [gridFilter, updateGridFilter] = useState<GridFilterModel>({
   //   items: [
   //     {
@@ -157,6 +158,14 @@ function DashBoard() {
   useEffect(() => {
     getFormDetails();
   }, []);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     apiRef.current?.autosizeColumns({
+  //       expand: true,
+  //       includeHeaders: true,
+  //     });
+  //   }, 1000);
+  // }, [form]);
   const getFormDetails = async () => {
     const filter: BaseFilter = {
       OrderBy: "lastUpdatedOn",
@@ -171,20 +180,21 @@ function DashBoard() {
     httpClient
       .getAsync<
         FormResponse[]
-      >(`${httpClient.GetForm}?${queryParams.toString()}`, undefined, updateAlertProps, undefined, updateIsLoading)
+      >(`${httpClient.GetForm}?${queryParams.toString()}`)
       .then((response) => {
         if (response) {
           response.map((item) => {
             item.createdOn = new Date(item.createdOn);
             item.lastUpdatedOn = new Date(item.lastUpdatedOn);
           });
-          updateForm(response);
-          updateRows(response);
+
           setTimeout(() => {
-            apiRef.current?.autosizeColumns({
-              expand: true,
-              includeHeaders: true,
-              includeOutliers: true,
+            ReactDOM.flushSync(() => {
+              updateForm(response);
+              apiRef.current?.autosizeColumns({
+                expand: true,
+                includeHeaders: true,
+              });
             });
           }, 1000);
         }
@@ -266,30 +276,17 @@ function DashBoard() {
           spacing={1}
           alignItems={"center"}
           marginRight={1}
-        >
-          {/* <Button size="small" variant="outlined">
-            <Typography sx={isMobile ? { fontSize: "14px" } : {}}>
-              {"Save Filters"}
-            </Typography>
-          </Button> 
-          <Button size="small" variant="outlined">
-            <Typography sx={isMobile ? { fontSize: "14px" } : {}}>
-              {"Reset Filters"}
-            </Typography>
-          </Button> */}
-        </Stack>
+        ></Stack>
       </Stack>
       {form && (
         <DataGrid
           density="compact"
           sx={isMobile ? { fontSize: "12px" } : {}}
           columns={columnsHeadings}
-          rows={rows ?? []}
-          autosizeOnMount
+          rows={form ?? []}
           autosizeOptions={{
             expand: true,
             includeHeaders: true,
-            includeOutliers: true,
           }}
           apiRef={apiRef}
           pageSizeOptions={[10, 25, 50, 100]}

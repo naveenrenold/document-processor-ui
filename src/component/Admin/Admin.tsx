@@ -91,20 +91,14 @@ function Admin() {
   useEffect(() => {
     httpClient.fetchUsers(
       "users?$filter=userType eq 'Guest' and accountEnabled eq true",
-      updateAlertProps,
-      setIsLoading,
       updateUsers,
     );
     httpClient.fetchUsers(
       "users?$filter=userType eq 'Guest' and accountEnabled eq false",
-      updateAlertProps,
-      setIsLoading,
       updateBlockedUsers,
     );
     httpClient.fetchUsers(
       "directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
-      updateAlertProps,
-      setIsLoading,
       updateDeletedUsers,
     );
   }, []);
@@ -300,15 +294,7 @@ function Admin() {
       userType: "Guest",
     };
     httpClient
-      .postAsync<any>(
-        "users",
-        addUserrequest,
-        undefined,
-        updateAlertProps,
-        undefined,
-        setIsLoading,
-        true,
-      )
+      .postAsync<any>("users", addUserrequest, undefined, undefined, true)
       .then((result) => {
         if (result) {
           let user: UserDetails = {
@@ -333,9 +319,9 @@ function Admin() {
       .deleteAsync<any>(
         `users/${user.userPrincipalName}`,
         undefined,
-        updateAlertProps,
-        "User deleted",
-        setIsLoading,
+        {
+          successAlertMessage: "User deleted",
+        },
         true,
       )
       .then((result) => {
@@ -365,9 +351,7 @@ function Admin() {
         `users/${user.userPrincipalName}/authentication/methods/28c10230-6103-485e-b985-444c60001490/resetPassword`,
         resetPasswordRequest,
         undefined,
-        updateAlertProps,
-        "Password reset successfully",
-        setIsLoading,
+        { successAlertMessage: "Password reset successfully" },
         true,
       )
       .then((result) => {
@@ -391,9 +375,7 @@ function Admin() {
         `users/${user.userPrincipalName}`,
         blockUserRequest,
         undefined,
-        updateAlertProps,
-        "User blocked",
-        setIsLoading,
+        { successAlertMessage: "User blocked" },
         true,
       )
       .then((result) => {
@@ -419,9 +401,9 @@ function Admin() {
         `users/${user.userPrincipalName}`,
         unblockUserRequest,
         undefined,
-        updateAlertProps,
-        "User Unblocked",
-        setIsLoading,
+        {
+          successAlertMessage: "User Unblocked",
+        },
         true,
       )
       .then((result) => {
@@ -445,9 +427,7 @@ function Admin() {
         `/directory/deletedItems/${user.id}/restore`,
         restoreUserRequest,
         undefined,
-        updateAlertProps,
-        "User restored",
-        setIsLoading,
+        { successAlertMessage: "Password reset successfully" },
         true,
       )
       .then((result) => {
