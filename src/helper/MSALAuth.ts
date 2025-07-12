@@ -9,15 +9,20 @@ export default class MSALAuth {
     }
   }
 }
-export const getBearerToken = (scopes: string[]): Promise<string | null> => {
-  const token = MSALAuth.myMSALObj
+export const getBearerToken = async (
+  scopes: string[],
+): Promise<string | null> => {
+  if (!MSALAuth?.myMSALObj || !MSALAuth.myMSALObj.getActiveAccount()) {
+    return null;
+  }
+  const token = await MSALAuth.myMSALObj
     .acquireTokenSilent({ scopes })
     .then((tokenResponse) => {
       return tokenResponse?.accessToken ?? null;
     })
-    .catch((err) => {
+    .catch(async (err) => {
       console.log("Failed to acquire silent token with error: " + err);
-      const newToken = MSALAuth.myMSALObj
+      const newToken = await MSALAuth.myMSALObj
         .acquireTokenPopup({ scopes })
         .then((tokenResponse) => {
           return tokenResponse?.accessToken ?? null;

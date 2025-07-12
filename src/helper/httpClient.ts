@@ -20,6 +20,7 @@ class httpClient {
   static GetProcess = "process";
   static GetAttachments = "attachment";
   static GetActivity = "activity";
+  static GetLocation = "location";
 
   // api defaults
   static defaultHeaders: RawAxiosRequestHeaders = {
@@ -232,7 +233,7 @@ class httpClient {
     if (scopes && scopes.length > 0) {
       bearerToken = await getBearerToken(scopes);
       if (!bearerToken) {
-        console.log("Failed to acquire token with required scopes;");
+        return null;
       }
     }
     //console.log(`Bearer Token : ${bearerToken}`);
@@ -284,10 +285,11 @@ class httpClient {
     scopes: string[] | null = httpClient.defaultScope,
     formData = false,
   ) {
+    let bearerToken = await this.getBearerToken(scopes);
     headers = {
       ...httpClient.defaultHeaders,
       ...(headers ?? {}),
-      Authorization: (await this.getBearerToken(scopes)) ?? undefined,
+      Authorization: bearerToken ? `Bearer ${bearerToken}` : undefined,
       "Content-Type": formData ? "multipart/form-data" : undefined,
     };
     // let bearerToken = await this.getBearerToken(scopes);

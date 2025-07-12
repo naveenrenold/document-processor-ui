@@ -50,6 +50,7 @@ function Admin() {
   const [users, updateUsers] = useState<UserDetails[]>([]);
   const [blockedUsers, updateBlockedUsers] = useState<UserDetails[]>([]);
   const [deletedUsers, updateDeletedUsers] = useState<UserDetails[]>([]);
+  const [locationList, updateLocationList] = useState<Location[]>([]);
   const defaultTextField: textFieldString = {
     value: "",
     error: false,
@@ -101,6 +102,11 @@ function Admin() {
       "directory/deletedItems/microsoft.graph.user?$filter=userType eq 'Guest'&$orderby=deletedDateTime desc&$count=true",
       updateDeletedUsers,
     );
+    httpClient
+      .getAsync<Location[]>(httpClient.GetLocation, undefined)
+      .then((response) => {
+        updateLocationList(response ?? []);
+      });
   }, []);
 
   //render functions
@@ -705,7 +711,7 @@ function Admin() {
                   }
                   autoHighlight={true}
                   freeSolo={false}
-                  options={["Nagercoil", "Tutucorin"]}
+                  options={locationList.map((a) => a.locationName)}
                   renderInput={(params) => (
                     <TextField
                       required={true}
@@ -853,4 +859,9 @@ export const validatePhoneNumber = (phoneNumber: string): boolean => {
 
 export const validateEmail = (email: string): boolean => {
   return email.search(emailRegex) != -1;
+};
+
+export type Location = {
+  locationId: number;
+  locationName: string;
 };

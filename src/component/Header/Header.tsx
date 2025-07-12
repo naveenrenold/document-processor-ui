@@ -71,7 +71,7 @@ function Header() {
       if (!accounts || accounts.length == 0) {
         console.log("Signing in");
         //signIn();
-        accounts = MSALAuth.myMSALObj.getAllAccounts();
+        updateRole("Customer");
         return;
       } else if (accounts.length > 1) {
         console.log("Warning, more than 1 active account");
@@ -159,6 +159,7 @@ function Header() {
         updateAccountInfo(null);
       })
       .catch((err) => {
+        updateRole("Customer");
         console.log("Error at Sign out ", err);
       });
   };

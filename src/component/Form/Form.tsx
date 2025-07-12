@@ -155,9 +155,10 @@ function Form() {
           if (response) {
             updateFormId(params.formId);
             if (
-              user?.userPrincipalName &&
+              !user?.userPrincipalName &&
               response.createdBy !== user?.userPrincipalName &&
-              role !== "Admin"
+              role !== "Admin" &&
+              false
             ) {
               setAlerts(
                 {
@@ -801,9 +802,11 @@ function Form() {
                 onChange={() => {
                   updateCurrentDialog(FormDialogType.ConfirmCheckBox);
                 }}
-                disabled={[FormMode.Complete, FormMode.Submit].includes(
-                  formMode,
-                )}
+                disabled={[
+                  FormMode.Complete,
+                  FormMode.Submit,
+                  FormMode.View,
+                ].includes(formMode)}
               ></Checkbox>
               <Typography color="primary" fontSize={14}>
                 All documents are processed and returned to customer

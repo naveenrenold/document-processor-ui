@@ -355,3 +355,30 @@ check reload on low network
 next is time for the data grid to fetch the states!!
 this autosize on mount or the other thing dont account for
 timeout can vary
+
+
+Next steps:
+1. First make the add user change - leave it
+2. Then check phone number auth - its fine leave it
+3. Check validators in api - We have form and attachment validators -done
+4. Try to see if logging is possible - maybe 
+5. add location -done
+
+
+
+
+remove authentication from certain things - done
+
+dont rush - other roles testing is not done
+
+pass no bearer token if values empty
+
+form functionalities must be rechecked :(
+
+
+    To do tomorrow:
+    1.  Check loading and alerts
+    2. check for visibility logic , especially for employees
+    3. test as customer and employee
+
+
