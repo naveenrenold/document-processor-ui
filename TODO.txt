@@ -377,8 +377,25 @@ form functionalities must be rechecked :(
 
 
     To do tomorrow:
-    1.  Check loading and alerts
+    1.  Check loading and alerts 
     2. check for visibility logic , especially for employees
     3. test as customer and employee
 
 
+13/7/25
+1. Already fail - column didnt resize with timeout 1 and flushsync - done
+2.check loading- seems to be working fine -done
+3. check alerts - for post its working - done
+
+for get error currently console logging is happening
+need to add params to display error 
+
+lets not give ui alert for get fails only things that require user interaction
+
+To do - testing with different role
+
+clicking submit form doesnt refresh page!
+
+customer looks fine
+
+i think better to rethink cutomer login until implemented login

@@ -154,11 +154,15 @@ function Form() {
           }
           if (response) {
             updateFormId(params.formId);
+            console.log(
+              "Customer access value:" +
+                import.meta.env.VITE_EnableCustomerAccess,
+            );
             if (
               !user?.userPrincipalName &&
               response.createdBy !== user?.userPrincipalName &&
               role !== "Admin" &&
-              false
+              import.meta.env.VITE_EnableCustomerAccess === "false"
             ) {
               setAlerts(
                 {
@@ -735,11 +739,11 @@ function Form() {
         </Stack>
         {attachmentForRender().map((attachmentGroup, i) => {
           return (
-            <>
+            <div key={i}>
               <Stack direction={"row"} spacing={2} marginTop={2}>
                 {attachmentGroup.map((attachment, index) => {
                   return (
-                    <>
+                    <div key={index}>
                       <Stack
                         direction={"column"}
                         key={index}
@@ -777,11 +781,11 @@ function Form() {
                           }}
                         ></Chip>
                       </Stack>
-                    </>
+                    </div>
                   );
                 })}
               </Stack>
-            </>
+            </div>
           );
         })}
         <Stack

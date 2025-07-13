@@ -187,16 +187,15 @@ function DashBoard() {
             item.createdOn = new Date(item.createdOn);
             item.lastUpdatedOn = new Date(item.lastUpdatedOn);
           });
-
-          setTimeout(() => {
-            ReactDOM.flushSync(() => {
-              updateForm(response);
+          ReactDOM.flushSync(() => {
+            updateForm(response);
+            setTimeout(() => {
               apiRef.current?.autosizeColumns({
                 expand: true,
                 includeHeaders: true,
               });
-            });
-          }, 1000);
+            }, 1000);
+          });
         }
       });
   };
@@ -278,7 +277,7 @@ function DashBoard() {
           marginRight={1}
         ></Stack>
       </Stack>
-      {form && (
+      {form && form.length > 0 && (
         <DataGrid
           density="compact"
           sx={isMobile ? { fontSize: "12px" } : {}}

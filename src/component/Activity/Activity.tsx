@@ -34,15 +34,15 @@ function Activity() {
       >(httpClient.GetActivity, undefined, undefined)
       .then((response) => {
         if (response && response.length > 0) {
-          setTimeout(() => {
-            ReactDOM.flushSync(() => {
-              setActivity(response);
+          ReactDOM.flushSync(() => {
+            setActivity(response);
+            setTimeout(() => {
               apiRef.current?.autosizeColumns({
                 expand: true,
                 includeHeaders: true,
               });
-            });
-          }, 1000);
+            }, 1000);
+          });
         }
       });
   }, []);

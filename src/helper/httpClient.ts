@@ -262,7 +262,7 @@ class httpClient {
   static async setAlerts(response?: any, severity: severity = "error") {
     let alertMessage = response?.error?.message || response?.message;
     if (!alertMessage) {
-      console.log(response ? response.toString() : "Error occured");
+      console.log("Error occured with response : " + response.toString());
       return;
     }
     let alert: AlertProps = {
@@ -270,14 +270,14 @@ class httpClient {
       severity: severity,
       show: true,
     };
-    httpClient.setAlerts(alert);
+    httpClient.setAlertProps(alert);
     alert = {
       message: "",
       severity: "info",
       show: false,
     };
     setTimeout(() => {
-      httpClient.setAlerts(alert);
+      httpClient.setAlertProps(alert);
     }, 5000);
   }
   static async setAxiosHeaders(
