@@ -836,6 +836,13 @@ function Admin() {
             </Table>
           </Box>
         </TabPanel>
+        <TabPanel value={5}>
+          <Box>
+            <Stack>
+              <Typography variant="h6">Audit Logs(in development):</Typography>
+            </Stack>
+          </Box>
+        </TabPanel>
       </TabContext>
     </>
   );

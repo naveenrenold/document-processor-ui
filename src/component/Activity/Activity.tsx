@@ -42,11 +42,20 @@ function Activity() {
                 includeHeaders: true,
               });
             }, 1000);
+            resizeColumns();
           });
         }
       });
   }, []);
 
+  const resizeColumns = () => {
+    setTimeout(() => {
+      apiRef.current?.autosizeColumns({
+        expand: true,
+        includeHeaders: true,
+      });
+    }, 5000);
+  };
   // useEffect(() => {
   //   setTimeout(() => {
   //     apiRef.current?.autosizeColumns({
@@ -145,6 +154,7 @@ function Activity() {
         sx={isMobile ? { fontSize: "12px" } : {}}
         columns={columnsHeadings}
         rows={activity ?? []}
+        onResize={resizeColumns}
         autosizeOptions={{
           expand: true,
           includeHeaders: true,

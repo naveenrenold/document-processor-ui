@@ -195,9 +195,18 @@ function DashBoard() {
                 includeHeaders: true,
               });
             }, 1000);
+            resizeColumns();
           });
         }
       });
+  };
+  const resizeColumns = () => {
+    setTimeout(() => {
+      apiRef.current?.autosizeColumns({
+        expand: true,
+        includeHeaders: true,
+      });
+    }, 5000);
   };
   //other api calls
   //render functions
@@ -287,6 +296,7 @@ function DashBoard() {
             expand: true,
             includeHeaders: true,
           }}
+          onResize={resizeColumns}
           apiRef={apiRef}
           pageSizeOptions={[10, 25, 50, 100]}
           pagination

@@ -399,3 +399,12 @@ clicking submit form doesnt refresh page!
 customer looks fine
 
 i think better to rethink cutomer login until implemented login
+
+
+deploy now or integrate final component???
+
+let check graph api activity - graph api
+
+still dash board not refreshing properly :( set two timeouts? - done
+
+resize issue fixed 

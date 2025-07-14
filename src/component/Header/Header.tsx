@@ -249,6 +249,21 @@ function Header() {
             <></>
           )}
         </List>
+        <Stack
+          direction={"column-reverse"}
+          height={"100%"}
+          alignItems={"center"}
+        >
+          <Typography color="primary">
+            <a
+              href="https://www.linkedin.com/in/naveen-renold-7a9a6815b/"
+              target="_blank"
+              rel="noopener"
+            >
+              With ♥ by Naveen
+            </a>
+          </Typography>
+        </Stack>
       </Drawer>
       <AppBar
         position="sticky"

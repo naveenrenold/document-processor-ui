@@ -42,6 +42,7 @@ const graphApiScopes = {
     "GroupMember.ReadWrite.All",
     "User.ReadWrite.All",
     "UserAuthenticationMethod.ReadWrite.All",
+    "AuditLog.Read.All",
   ],
 };
 
