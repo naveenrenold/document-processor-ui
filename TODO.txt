@@ -408,3 +408,26 @@ let check graph api activity - graph api
 still dash board not refreshing properly :( set two timeouts? - done
 
 resize issue fixed 
+
+
+14/7/25
+deployment:
+1. build api
+2. delete api files except the server redirect file
+3. copy new api files
+4. appsettings care
+
+1. build ui
+2. delete ui files except the server redirect file
+3. copy new ui files
+4. env.prod care
+
+--------
+after deployment api not working
+
+check iis if plesk server loads
+
+going to troubleshoot deployment when server starts loading.
+
+------------
+Attachment still downloaded even if not authorised
